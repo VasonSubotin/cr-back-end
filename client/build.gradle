@@ -15,22 +15,11 @@ repositories {
     mavenCentral()
 }
 
-//task fullJar(type: Jar) {
-//    manifest {
-//        attributes 'Implementation-Title': 'Gradle Jar Full',
-//                'Implementation-Version': version,
-//                //'Class-Path': project.name + '-full-' + version + '.jar',
-//                'Main-Class': 'com.sm.client.ApplicationStarter'
-//    }
-//    baseName = project.name + '-full'
-//    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-//    with jar
-//}
-//configurations {
-//    compile.exclude group:'ch.qos.logback'
-//}
+
 dependencies {
     compile project(':smart-car')
+    compile project(':model')
+
     compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'
@@ -38,8 +27,11 @@ dependencies {
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 
+    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 
-    //compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.3.0.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.3.0.RELEASE'
+
+ //   compile group: 'javax.servlet', name: 'servlet-api', version: '2.5'
 
 //    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.26'
 //    compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.11.2'
