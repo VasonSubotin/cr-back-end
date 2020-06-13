@@ -2,14 +2,21 @@ package com.sm.client.mvc;
 
 
 import com.sm.client.services.UserDetailsServiceImpl;
+import com.sm.model.PolicyType;
+import com.sm.model.SmResource;
 import com.sm.model.SmUser;
+import org.apache.commons.codec.digest.Md5Crypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import sun.security.provider.MD5;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -34,5 +41,21 @@ public class UserDataController {
         smUser.setPassHash(userDetails.getPassword().getBytes());
         smUser.setPermissions(userDetails.getAuthorities().stream().map(a -> a.getAuthority()).collect(Collectors.toList()));
         return smUser;
+    }
+
+
+    @RequestMapping(value = "/getUserResources", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<SmResource> getUserResources(HttpServletRequest request) throws Exception {
+        return Arrays.asList(generateMock(PolicyType.ECO), generateMock(PolicyType.ECO_PRICE), generateMock(PolicyType.SIMPLE), generateMock(PolicyType.PRICE), generateMock(PolicyType.PRICE));
+    }
+
+    private SmResource generateMock(PolicyType policyType) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        SmResource resource1 = new SmResource();
+        resource1.setAccountId(username);
+        resource1.setPolicyType(policyType);
+        resource1.setResourceId(UUID.randomUUID().toString().toUpperCase());
+        return resource1;
     }
 }

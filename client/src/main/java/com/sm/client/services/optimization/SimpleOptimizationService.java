@@ -1,6 +1,6 @@
 package com.sm.client.services.optimization;
 
-import com.sm.client.model.PolicyType;
+import com.sm.model.PolicyType;
 import com.sm.client.model.eco.GridData;
 import com.sm.client.model.smartcar.SchedulerData;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.sm.client.mvc;
 
-import com.sm.client.model.PolicyType;
+import com.sm.model.PolicyType;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.model.to.EventInterval;

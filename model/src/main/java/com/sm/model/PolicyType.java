@@ -1,4 +1,4 @@
-package com.sm.client.model;
+package com.sm.model;
 
 public enum PolicyType {
     ECO("This policy has priority to minimize CO2 impact"),

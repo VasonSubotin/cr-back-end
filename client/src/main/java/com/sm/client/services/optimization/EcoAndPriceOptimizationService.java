@@ -1,6 +1,6 @@
 package com.sm.client.services.optimization;
 
-import com.sm.client.model.PolicyType;
+import com.sm.model.PolicyType;
 import com.sm.client.model.eco.GridData;
 import com.sm.client.services.EcoService;
 import com.sm.client.utils.StringDateUtil;
