@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.sm.client.services.UserDetailsServiceImpl;
 import com.sm.client.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,8 +22,8 @@ import io.jsonwebtoken.ExpiredJwtException;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-
-    private boolean disableAuth=false;
+    @Value("${auth.disabled:false}")
+    private boolean disableAuth = false;
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
@@ -33,6 +34,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        if (disableAuth) {
+            chain.doFilter(request, response);
+        }
         final String requestTokenHeader = request.getHeader("Authorization");
         String username = null;
         String jwtToken = null;
