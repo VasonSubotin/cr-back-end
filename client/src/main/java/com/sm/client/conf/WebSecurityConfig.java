@@ -56,7 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         httpSecurity.csrf().disable().cors().configurationSource(corsConfigurationSource()).and()
                 // we don't authenticate these urls
-                .authorizeRequests().antMatchers("/authrized", "/signup", "/authenticate", "/login").permitAll().
+                .authorizeRequests().antMatchers("/authrized", "/signup", "/authenticate", "/login","/googleLogin","/googleToken", "/getCalendarEvent").permitAll().
                         // all other requests need to be authenticated
                         anyRequest().authenticated().and().
                          // using stateless session - FE should send tokens all the time

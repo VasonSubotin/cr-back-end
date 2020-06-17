@@ -8,10 +8,11 @@ import com.sm.model.SmUser;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import sun.security.provider.MD5;
+
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -39,7 +40,7 @@ public class UserDataController {
         smUser.setAuthType(SmUser.AuthType.LOCAL);
         smUser.setLogin(userDetails.getUsername());
         smUser.setPassHash(userDetails.getPassword().getBytes());
-        smUser.setPermissions(userDetails.getAuthorities().stream().map(a -> a.getAuthority()).collect(Collectors.toList()));
+        smUser.setPermissions(userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
         return smUser;
     }
 

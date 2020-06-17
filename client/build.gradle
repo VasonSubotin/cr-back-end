@@ -31,7 +31,14 @@ dependencies {
 
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.3.0.RELEASE'
 
- //   compile group: 'javax.servlet', name: 'servlet-api', version: '2.5'
+    compile 'com.google.api-client:google-api-client:1.30.9'
+
+    compile 'com.google.apis:google-api-services-calendar:v3-rev305-1.23.0'
+
+
+    compile group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version: '0.20.0'
+
+    //   compile group: 'javax.servlet', name: 'servlet-api', version: '2.5'
 
 //    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.26'
 //    compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.11.2'
