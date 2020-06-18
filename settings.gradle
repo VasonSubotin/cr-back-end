@@ -2,4 +2,5 @@ rootProject.name = 'smCarClient'
 include 'smart-car'
 include 'client'
 include 'model'
+include 'dao'
 

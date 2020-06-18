@@ -35,12 +35,12 @@ public class UserDataController {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         SmUser smUser = new SmUser();
         smUser.setUserName("Mr " + username);
-        smUser.setUserId(username + "-" + username);
+        smUser.setUserId(1);
         smUser.setAuthLink("https://www.google.com/login");
         smUser.setAuthType(SmUser.AuthType.LOCAL);
         smUser.setLogin(userDetails.getUsername());
         smUser.setPassHash(userDetails.getPassword().getBytes());
-        smUser.setPermissions(userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
+       // smUser.setPermissions(userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
         return smUser;
     }
 

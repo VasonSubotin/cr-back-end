@@ -1,22 +1,40 @@
 package com.sm.model;
 
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 
+@Entity
+@Table(name = "Accounts")
 public class SmUser implements Serializable {
-    private String userId;
-    private String login; // string whih wil be used as login
-    private String userName;  //- full userName will be shown in gui after login
-    private AuthType authType; //  - type of authrization (google, local, etc )
-    private byte[] passHash;// - hash of password will be used for local auth only
-    private String authLink;  //- linke for remote authrization (if type of authrization is google)
-    private List<String> permissions; // some permissions
+    @Id
+    @Column(name = "ID_USER")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long userId;
 
-    public String getUserId() {
+    @Column(name = "V_LOGIN")
+    private String login; // string whih wil be used as login
+
+    @Column(name = "V_USERNAME")
+    private String userName;  //- full userName will be shown in gui after login
+
+    @Column(name = "V_AUTH_TYPE")
+    private AuthType authType; //  - type of authrization (google, local, etc )
+
+    @Column(name = "BL_PASSWORD")
+    private byte[] passHash;// - hash of password will be used for local auth only
+
+    @Column(name = "V_AUTH_LINK")
+    private String authLink;  //- linke for remote authrization (if type of authrization is google)
+
+    //private List<String> permissions; // some permissions
+
+    public long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 
@@ -60,13 +78,13 @@ public class SmUser implements Serializable {
         this.authLink = authLink;
     }
 
-    public List<String> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(List<String> permissions) {
-        this.permissions = permissions;
-    }
+//    public List<String> getPermissions() {
+//        return permissions;
+//    }
+//
+//    public void setPermissions(List<String> permissions) {
+//        this.permissions = permissions;
+//    }
 
     public static enum AuthType {
         GOOGLE("Google authrization"),

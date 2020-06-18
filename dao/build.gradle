@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group 'com.sm.clientSm'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':model')
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile 'org.springframework.boot:spring-boot-starter-web:2.2.2.RELEASE'
+    compile group: 'org.springframework', name: 'spring-jdbc', version: '2.0.6'
+    compile group: 'org.hibernate', name: 'hibernate-core', version: '5.4.17.Final'
+
+    compile group: 'org.springframework', name: 'spring-tx', version: '5.2.7.RELEASE'
+    compile group: 'org.springframework', name: 'spring-jdbc', version: '5.2.7.RELEASE'
+
+    compile group: 'org.springframework', name: 'spring-orm', version: '5.2.7.RELEASE'
+
+    compile 'org.xerial:sqlite-jdbc:3.25.2'
+}
