@@ -20,12 +20,15 @@ create table ResourceTypes(
 drop table if exists Resources;
 create table Resources(
 	ID_RESOURCE numeric(10) Primary key,
-	EXTERNAL_RESOURCE_ID varchar(32),
+	V_EXTERNAL_RESOURCE_ID varchar(32),
 	V_VENDOR varchar(64),
 	V_MODEL varchar(64),
+	POLICY_ID numeric(2),
+	ACCOUNT_ID numeric(10),
 	RESOURCE_TYPE_ID varchar(64),
-	N_CURRENT_RATING numeric(6),
-	N_BATTERY_SIZE numeric(6),
+	V_GROUP_ID varchar(64),
+	N_POWER numeric(6),
+	N_CAPACITY numeric(6),
 	DT_UPDATED datetime,
 	DT_CREATED datetime,
 	B_DELETED numeric(1),
@@ -51,21 +54,6 @@ create table TimeOfUsages(
 	B_DELETED numeric(1),
 	FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT )
 );
-
-
-drop table if exists AccountResources;
-create table AccountResources(
-	ID_ACCOUNT_RESOURCE numeric(10) Primary key,
-	RESOURCE_ID numeric(10),
-	DEFAULT_POLICY_ID numeric(10),
-	ACCOUNT_ID numeric(10),
-	DT_CREATED datetime,
-	B_DELETED numeric(1),
-	FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT),
-	FOREIGN KEY (RESOURCE_ID)  REFERENCES Resources (ID_RESOURCE),
-	FOREIGN KEY (DEFAULT_POLICY_ID)  REFERENCES Policies (ID_POLICY)
-);
-
 
 
 drop table if exists UserSessions;
@@ -106,17 +94,19 @@ create table Sessions(
 	ID_SESSION numeric(10) Primary key,
 	ACCOUNT_ID numeric(10),
 	LOCATION_ID numeric(10),
+	N_LATITUDE numeric(10),
+	N_LONGITUTE numeric(10),
 	RESOURCE_ID numeric(10),
 	DT_UPDATE datetime,
 	DT_START datetime,
 	DT_STOP datetime,
 	N_DURATION numeric(6),
-	N_CHARGE numeric(10),
+	N_ENERGY numeric(10),
 	F_CARBON_IMPACT numeric(6,3),
 	F_CARBON_SAVINGS numeric(6,3),
 	F_FINANCE_SAVINGS numeric(6,3),
 	V_STATUS varchar(8),
-    SESSION_TYPE_ID numeric(10),
+    SESSION_TYPE_ID numeric(2),
     B_CLOSED numeric(1),
     FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT),
     FOREIGN KEY (RESOURCE_ID)  REFERENCES Resources (ID_RESOURCE),
@@ -142,7 +132,11 @@ create table Events(
 	IEVENT_TYPE_ID numeric(10),
 	N_LATITUDE numeric(10),
 	N_LONGITUTE numeric(10),
-	N_CHARGE numeric(10),
+	N_CURRENT numeric(6),
+	N_ENERGY numeric(10),
+	N_POWER numeric(6),
+	F_EXT_TEMPERATURE numeric(3,2),
+	F_INT_TEMPERATURE numeric(3,2),
 	F_CARBON_IMPACT numeric(6,3),
 	F_FINANCE_SAVINGS numeric(6,3),
 	DT_CREATED datetime,
@@ -164,6 +158,9 @@ create table Schedulers(
 	POLICY_ID numeric(10),
 	DT_START datetime,
 	DT_STOP datetime,
+    F_CARBON_IMPACT numeric(6,3),
+	F_CARBON_SAVINGS numeric(6,3),
+	F_FINANCE_SAVINGS numeric(6,3),
 	BB_DATA blob,
 	DT_CREATED datetime,
     FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT),
