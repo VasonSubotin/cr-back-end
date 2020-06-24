@@ -1,4 +1,4 @@
-package com.sm.client.mvc;
+package com.sm.client.mvc.auth;
 
 
 import java.util.Objects;
@@ -7,6 +7,7 @@ import com.sm.client.model.AuthRequest;
 import com.sm.client.model.AuthResponse;
 import com.sm.client.services.UserDetailsServiceImpl;
 import com.sm.client.utils.JwtTokenUtil;
+import com.sm.model.SmAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,10 +42,10 @@ public class AuthrizationController {
     private PasswordEncoder passwordEncoder;
 
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authenticationRequest) throws Exception {
-        authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody SmAccount authenticationRequest) throws Exception {
+        authenticate(authenticationRequest.getLogin(), authenticationRequest.getPassword());
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getLogin());
 
         final String token = jwtTokenUtil.generateToken(userDetails);
         return ResponseEntity.ok(new AuthResponse(token));
@@ -62,8 +63,8 @@ public class AuthrizationController {
 
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
-    public ResponseEntity<?> signup(@RequestBody AuthRequest authenticationRequest) throws Exception {
-        userDetailsService.registerUser(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+    public ResponseEntity<?> signup(@RequestBody SmAccount authenticationRequest) throws Exception {
+        userDetailsService.registerUser(authenticationRequest);
         return new ResponseEntity(HttpStatus.OK);
     }
 

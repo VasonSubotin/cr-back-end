@@ -1,5 +1,7 @@
 package com.sm.client.services;
 
+import com.sm.dao.AccountsDao;
+import com.sm.model.SmAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -7,8 +9,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -16,23 +20,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private Map<String, CustomUserDetails> userCache = new HashMap<>();
 
-    @PostConstruct
-    public void init() {
-        //some test users
-        userCache.put("test1", new CustomUserDetails("test1", passwordEncoder.encode("12345"), Arrays.asList(new Permision("test-role"))));
-        userCache.put("test2", new CustomUserDetails("test2", passwordEncoder.encode("12345"), Arrays.asList(new Permision("test-role"))));
-        userCache.put("test3", new CustomUserDetails("test3", passwordEncoder.encode("12345"), Arrays.asList(new Permision("test-role"))));
-        userCache.put("test4", new CustomUserDetails("test4", passwordEncoder.encode("12345"), Arrays.asList(new Permision("test-role"))));
-    }
+    @Autowired
+    private AccountsDao accountsDao;
+
 
     public UserDetails loadUserByUsername(String username) {
-        return userCache.get(username);
+        SmAccount smAccount = accountsDao.getAccountByLogin(username);
+        return new CustomUserDetails(username, smAccount.getPassword(), Arrays.asList(new Permision("test-role")));
     }
 
-    public void registerUser(String username, String password) {
-        userCache.put(username, new CustomUserDetails(username, passwordEncoder.encode(password), Arrays.asList(new Permision("test-role"))));
+    public void registerUser(SmAccount smAccount) {
+        smAccount.setDtCreated(new Date());
+        smAccount.setDeleted(false);
+        //encrypting pass
+        smAccount.setPassword(passwordEncoder.encode(smAccount.getPassword()));
+        accountsDao.saveAccount(smAccount);
     }
 
     public static class CustomUserDetails implements UserDetails {

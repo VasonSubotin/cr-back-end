@@ -1,7 +1,8 @@
 drop table if exists  Accounts;
 create table Accounts(
-	ID_ACCOUNT numeric(10) Primary key,
+	ID_ACCOUNT INTEGER Primary key AUTOINCREMENT,
 	V_LOGIN varchar(32),
+	V_PASSWORD varchar(256),
 	DT_CREATED datetime,
 	V_EMAIL varchar(128),
 	V_FIRST_NAME varchar(64),
@@ -12,14 +13,14 @@ create table Accounts(
 
 drop table if exists ResourceTypes;
 create table ResourceTypes(
-	ID_RESOURCE_TYPE numeric(3) Primary key,
+	ID_RESOURCE_TYPE INTEGER Primary key AUTOINCREMENT,
 	V_NAME varchar(32),
 	V_DESCRIPTION varchar(64)
 );
 
 drop table if exists Resources;
 create table Resources(
-	ID_RESOURCE numeric(10) Primary key,
+	ID_RESOURCE INTEGER Primary key AUTOINCREMENT,
 	V_EXTERNAL_RESOURCE_ID varchar(32),
 	V_VENDOR varchar(64),
 	V_MODEL varchar(64),
@@ -37,7 +38,7 @@ create table Resources(
 
 drop table if exists Policies;
 create table Policies(
-	ID_POLICY numeric(3) Primary key,
+	ID_POLICY INTEGER Primary key AUTOINCREMENT,
 	V_NAME varchar(32),
 	V_DESCRIPTION varchar(64),
 	DT_CREATED datetime,
@@ -46,8 +47,8 @@ create table Policies(
 
 drop table if exists TimeOfUsages;
 create table TimeOfUsages(
-	ID_TOU numeric(3) Primary key,
-	ACCOUNT_ID numeric(10),
+	ID_TOU INTEGER Primary key AUTOINCREMENT,
+	ACCOUNT_ID INTEGER,
 	N_START numeric(10),
 	N_STOP numeric(10),
 	DT_CREATED datetime,
@@ -58,8 +59,8 @@ create table TimeOfUsages(
 
 drop table if exists UserSessions;
 create table UserSessions(
-	ID_USER_SESSION numeric(10) Primary key,
-	ACCOUNT_ID numeric(10),
+	ID_USER_SESSION INTEGER Primary key AUTOINCREMENT,
+	ACCOUNT_ID INTEGER,
 	V_TOKEN varchar(512),
 	V_REFRESH_TOKEN varchar(512),
 	DT_CREATED datetime,
@@ -70,11 +71,12 @@ create table UserSessions(
 
 drop table if exists Locations;
 create table Locations(
-	ID_LOCATION numeric(10) Primary key,
+	ID_LOCATION INTEGER Primary key AUTOINCREMENT,
+	ACCOUNT_ID INTEGER,
 	V_NAME varchar(32),
 	V_DESCRIPTION varchar(128),
 	N_LATITUDE numeric(10),
-	N_LONGITUTE numeric(10),
+	N_LONGITUDE numeric(10),
 	V_TIME_ZONE varchar(8),
 	DT_CREATED datetime,
 	B_TOU_ENABLED numeric(1),
@@ -84,19 +86,19 @@ create table Locations(
 
 drop table if exists SessionTypes;
 create table SessionTypes(
-	ID_SESSION_TYPE numeric(2) Primary key,
+	ID_SESSION_TYPE INTEGER Primary key AUTOINCREMENT,
 	V_NAME varchar(32),
 	V_DESCRIPTION varchar(64)
 );
 
 drop table if exists Sessions;
 create table Sessions(
-	ID_SESSION numeric(10) Primary key,
-	ACCOUNT_ID numeric(10),
-	LOCATION_ID numeric(10),
+	ID_SESSION INTEGER Primary key AUTOINCREMENT,
+	ACCOUNT_ID INTEGER,
+	LOCATION_ID INTEGER,
 	N_LATITUDE numeric(10),
 	N_LONGITUTE numeric(10),
-	RESOURCE_ID numeric(10),
+	RESOURCE_ID INTEGER,
 	DT_UPDATE datetime,
 	DT_START datetime,
 	DT_STOP datetime,
@@ -106,7 +108,7 @@ create table Sessions(
 	F_CARBON_SAVINGS numeric(6,3),
 	F_FINANCE_SAVINGS numeric(6,3),
 	V_STATUS varchar(8),
-    SESSION_TYPE_ID numeric(2),
+    SESSION_TYPE_ID INTEGER,
     B_CLOSED numeric(1),
     FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT),
     FOREIGN KEY (RESOURCE_ID)  REFERENCES Resources (ID_RESOURCE),
@@ -117,19 +119,19 @@ create table Sessions(
 
 drop table if exists EventTypes;
 create table EventTypes(
-	ID_EVENT_TYPE numeric(2) Primary key,
+	ID_EVENT_TYPE INTEGER Primary key AUTOINCREMENT,
 	V_NAME varchar(32),
 	V_DESCRIPTION varchar(64)
 );
 
 drop table if exists Events;
 create table Events(
-	ID_EVENT numeric(10) Primary key,
-	ACCOUNT_ID numeric(10),
-	LOCATION_ID numeric(10),
-	RESOURCE_ID numeric(10),
-	SESSION_ID numeric(10),
-	IEVENT_TYPE_ID numeric(10),
+	ID_EVENT INTEGER Primary key AUTOINCREMENT,
+	ACCOUNT_ID INTEGER,
+	LOCATION_ID INTEGER,
+	RESOURCE_ID INTEGER,
+	SESSION_ID INTEGER,
+	IEVENT_TYPE_ID INTEGER,
 	N_LATITUDE numeric(10),
 	N_LONGITUTE numeric(10),
 	N_CURRENT numeric(6),
@@ -150,12 +152,12 @@ create table Events(
 
 drop table if exists Schedulers;
 create table Schedulers(
-	ID_SCHEDULER numeric(10) Primary key,
-	ACCOUNT_ID numeric(10),
-	LOCATION_ID numeric(10),
-	RESOURCE_ID numeric(10),
-	SESSION_ID numeric(10),
-	POLICY_ID numeric(10),
+	ID_SCHEDULER INTEGER  Primary key AUTOINCREMENT,
+	ACCOUNT_ID INTEGER,
+	LOCATION_ID INTEGER,
+	RESOURCE_ID INTEGER,
+	SESSION_ID INTEGER,
+	POLICY_ID INTEGER,
 	DT_START datetime,
 	DT_STOP datetime,
     F_CARBON_IMPACT numeric(6,3),

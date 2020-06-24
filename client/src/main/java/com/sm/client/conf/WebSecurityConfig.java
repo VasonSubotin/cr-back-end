@@ -1,6 +1,6 @@
 package com.sm.client.conf;
 
-import com.sm.client.mvc.JwtAuthenticationEntryPoint;
+import com.sm.client.mvc.auth.JwtAuthenticationEntryPoint;
 import com.sm.client.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -56,7 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         httpSecurity.csrf().disable().cors().configurationSource(corsConfigurationSource()).and()
                 // we don't authenticate these urls
-                .authorizeRequests().antMatchers("/authrized", "/signup", "/authenticate", "/login","/googleLogin","/googleToken", "/getCalendarEvent").permitAll().
+                .authorizeRequests().antMatchers("/authrized", "/signup", "/authenticate", "/login","/googleLogin","/googleToken", "/getCalendarEvent", "/resourceList").permitAll().
                         // all other requests need to be authenticated
                         anyRequest().authenticated().and().
                          // using stateless session - FE should send tokens all the time

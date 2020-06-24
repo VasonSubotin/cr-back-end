@@ -19,6 +19,7 @@ repositories {
 dependencies {
     compile project(':smart-car')
     compile project(':model')
+    compile project(':dao')
 
     compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
     compile 'org.springframework.boot:spring-boot-starter-web'
