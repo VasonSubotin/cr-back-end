@@ -99,7 +99,7 @@ create table Sessions(
 	N_LATITUDE numeric(10),
 	N_LONGITUTE numeric(10),
 	RESOURCE_ID INTEGER,
-	DT_UPDATE datetime,
+	DT_UPDATED datetime,
 	DT_START datetime,
 	DT_STOP datetime,
 	N_DURATION numeric(6),

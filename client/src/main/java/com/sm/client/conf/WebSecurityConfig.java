@@ -55,11 +55,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity.csrf().disable().cors().configurationSource(corsConfigurationSource()).and()
-                // we don't authenticate these urls
-                .authorizeRequests().antMatchers("/authrized", "/signup", "/authenticate", "/login","/googleLogin","/googleToken", "/getCalendarEvent", "/resourceList").permitAll().
-                        // all other requests need to be authenticated
+                // we don't authenticate these urls ,"/webjars/springfox-swagger-ui/*"
+                .authorizeRequests().antMatchers(
+                // for swagger
+                "/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**",
+                // ou custom paths
+                "/authrized", "/signup", "/authenticate", "/login", "/googleLogin", "/googleToken", "/getCalendarEvent", "/resourceList").permitAll().
+                // all other requests need to be authenticated
                         anyRequest().authenticated().and().
-                         // using stateless session - FE should send tokens all the time
+                // using stateless session - FE should send tokens all the time
                         exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
@@ -70,7 +79,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST"));
         configuration.setAllowCredentials(true);
         configuration.addAllowedOrigin("*");
         configuration.addAllowedHeader("*");

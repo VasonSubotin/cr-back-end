@@ -5,14 +5,14 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+
 import java.util.List;
 
 @Component
-@Scope("prototype")
+@Transactional(readOnly = true)
 public class LocationDaoImpl implements LocationDao {
 
     @Autowired
@@ -39,6 +39,7 @@ public class LocationDaoImpl implements LocationDao {
         return sessionFactory.getCurrentSession().get(SmLocation.class, id);
     }
 
+    @Transactional(readOnly = false)
     @Override
     public SmLocation saveLocation(SmLocation smLocation, Long accountId) {
         smLocation.setIdLocation((Long) sessionFactory.getCurrentSession().save(smLocation));
@@ -46,7 +47,7 @@ public class LocationDaoImpl implements LocationDao {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = false)
     public SmLocation deleteLocationById(Long id, Long accountId) {
 
         Query query = sessionFactory.getCurrentSession().createQuery("update SmLocation set deleted = 1 where idLocation = :id and accountId=:accountId");
