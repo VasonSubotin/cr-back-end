@@ -2,10 +2,7 @@ package com.sm.client.mvc;
 
 import com.sm.client.services.SecurityService;
 import com.sm.dao.CommonDao;
-import com.sm.model.SmPolicy;
-import com.sm.model.SmResourceType;
-import com.sm.model.SmSessionType;
-import com.sm.model.SmTimeOfUsage;
+import com.sm.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -40,5 +37,11 @@ public class CommonController {
     @RequestMapping(value = "/sessionTypeList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<SmSessionType> getSessionType(HttpServletRequest request) throws Exception {
         return commonDao.getAllSessionTypes();
+    }
+
+
+    @RequestMapping(value = "/eventTypesList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<SmEventType> getEventTypes(HttpServletRequest request) throws Exception {
+        return commonDao.getAllEventTypes();
     }
 }

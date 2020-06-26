@@ -1,6 +1,7 @@
 package com.sm.dao;
 
 
+import com.sm.model.SmEventType;
 import com.sm.model.SmPolicy;
 import com.sm.model.SmResourceType;
 import com.sm.model.SmSessionType;
@@ -51,5 +52,12 @@ public class CommonDaoImpl implements CommonDao {
         return session.createQuery(hql).getResultList();
     }
 
+
+    @Override
+    public List<SmEventType> getAllEventTypes() {
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmEventType";
+        return session.createQuery(hql).getResultList();
+    }
 
 }
