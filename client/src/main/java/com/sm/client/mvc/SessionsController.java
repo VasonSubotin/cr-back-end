@@ -3,7 +3,6 @@ package com.sm.client.mvc;
 import com.sm.client.services.SecurityService;
 
 import com.sm.dao.SessionsDao;
-import com.sm.model.SmLocation;
 import com.sm.model.SmSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;

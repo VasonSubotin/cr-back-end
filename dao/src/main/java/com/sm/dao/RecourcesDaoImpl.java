@@ -20,7 +20,7 @@ public class RecourcesDaoImpl implements ResourcesDao {
     @Override
     public List<SmResource> getAllResourceByAccountId(Long accountId) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmResource where (deleted=0 or deleted is null) and and accountId=:accountId";
+        String hql = "FROM SmResource where (deleted=0 or deleted is null) and accountId=:accountId";
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         return query.getResultList();

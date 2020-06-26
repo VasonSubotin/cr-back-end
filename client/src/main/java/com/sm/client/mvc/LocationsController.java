@@ -35,12 +35,12 @@ public class LocationsController {
         return locationDao.saveLocation(smLocation, securityService.getAccount().getIdAccount());
     }
 
-    @RequestMapping(value = "/locationsList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/locations", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<SmLocation> getUserResources(HttpServletRequest request, @RequestParam(value = "accountId", required = false) Long accountId) throws Exception {
         return locationDao.getAllLocations();
     }
 
-    @RequestMapping(value = "/locationsPersonalList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/locationsPersonal", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<SmLocation> getUserResources(HttpServletRequest request) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 

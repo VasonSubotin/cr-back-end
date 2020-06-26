@@ -37,7 +37,7 @@ public class ResourcesController {
         return resourcesDao.saveResource(smResource, securityService.getAccount().getIdAccount());
     }
 
-    @RequestMapping(value = "/resourcesList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/resources", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<SmResource> getUserResources(HttpServletRequest request) throws Exception {
         return resourcesDao.getAllResourceByAccountId(securityService.getAccount().getIdAccount());
     }
