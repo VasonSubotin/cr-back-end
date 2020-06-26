@@ -30,7 +30,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return new CustomUserDetails(username, smAccount.getPassword(), Arrays.asList(new Permision("test-role")));
     }
 
-    public void registerUser(SmAccount smAccount) {
+    public void registerUser(SmAccount smAccount) throws Exception {
+        SmAccount exists = accountsDao.getAccountByLogin(smAccount.getLogin());
+        if (exists != null) {
+            throw new Exception("User " + smAccount.getLogin() + " already exists!");
+        }
         smAccount.setDtCreated(new Date());
         smAccount.setDeleted(false);
         //encrypting pass

@@ -1,4 +1,4 @@
-package com.sm.client.mvc.auth;
+package com.sm.client.services;
 
 import java.io.IOException;
 import java.io.Serializable;

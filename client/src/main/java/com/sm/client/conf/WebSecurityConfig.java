@@ -1,6 +1,6 @@
 package com.sm.client.conf;
 
-import com.sm.client.mvc.auth.JwtAuthenticationEntryPoint;
+import com.sm.client.services.JwtAuthenticationEntryPoint;
 import com.sm.client.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
