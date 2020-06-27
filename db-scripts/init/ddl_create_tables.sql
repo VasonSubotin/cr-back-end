@@ -63,8 +63,10 @@ create table UserSessions(
 	ACCOUNT_ID INTEGER,
 	V_TOKEN varchar(512),
 	V_REFRESH_TOKEN varchar(512),
+    V_SESSION_TYPE varchar(32),
+    N_TTL numeric(10),
 	DT_CREATED datetime,
-	B_DELETED numeric(1),
+	B_CLOSED numeric(1),
 	FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT)
 );
 

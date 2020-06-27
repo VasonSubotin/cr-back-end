@@ -1,16 +1,23 @@
-package com.sm.client.mvc;
+package com.sm.client.mvc.auth;
 
-import com.google.gson.Gson;
 import com.sm.client.model.smartcar.UserData;
 import com.sm.client.model.smartcar.VehicleData;
+import com.sm.client.services.SecurityService;
+import com.sm.dao.conf.Constants;
+import com.sm.model.ServiceResult;
+import com.sm.model.SmException;
+import com.sm.model.SmUserSession;
 import com.smartcar.sdk.AuthClient;
 import com.smartcar.sdk.SmartcarException;
 import com.smartcar.sdk.Vehicle;
 import com.smartcar.sdk.data.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,12 +31,12 @@ import java.util.List;
 
 
 @RestController
-public class SmartCarController {
-    private static final Logger logger = LoggerFactory.getLogger(SmartCarController.class);
+public class SmartCarAuthController {
+    private static final Logger logger = LoggerFactory.getLogger(SmartCarAuthController.class);
 
     private AuthClient client;
-    private String code;
-    private String access;
+    // private String code;
+    // private String access;
 
     @Value("${smartcar.clientId:70789610-4ebe-41b8-b913-c870ef6228ce}")
     private String clientId;
@@ -46,20 +53,12 @@ public class SmartCarController {
     @Value("${smartcar.testMode:false}")
     private boolean testMode = false;
 
+    @Autowired
+    private SecurityService securityService;
+
+
     @PostConstruct
     public void init() {
-//        String clientId = System.getenv("CLIENT_ID");
-//        clientId = clientId == null ? "70789610-4ebe-41b8-b913-c870ef6228ce" : clientId;
-//
-//        String clientSecret = System.getenv("CLIENT_SECRET");
-//        clientSecret = clientSecret == null ? "66448ff0-666c-491d-b755-3ab906f42f19" : clientSecret;
-
-//        String redirectUri = System.getenv("REDIRECT_URI");
-//        redirectUri = redirectUri == null ? "http://localhost:8080/authrized" : redirectUri;
-
-        //  String[] scope = {"required:read_vehicle_info", "read_odometer"};
-
-
         this.client = new AuthClient(
                 clientId,
                 clientSecret,
@@ -67,48 +66,53 @@ public class SmartCarController {
                 permissions,
                 testMode
         );
-
-
     }
 
 
-    @RequestMapping(value = "/login", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/smartCarLogin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public String login(HttpServletRequest request,
                         HttpServletResponse response) {
 
         logger.info("----------------------call /login -------------------");
         String link = client.authUrlBuilder().setApprovalPrompt(true).build();
-        //String link = client.getAuthUrl();
         response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
         response.setHeader("Location", link);
-        //String code = request.queryMap("code").value();
-        //  System.out.println(code);
         return "ok";
     }
-
-//
-//    @RequestMapping("/login")
-//    public String login(HttpServletRequest request, HttpServletResponse response) {
-//
-//        System.out.println("----------------------------------------------------------------");
-//        String link = client.getAuthUrl();
-//        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-//        response.setHeader("Location", link);
-//        //String code = request.queryMap("code").value();
-//        //  System.out.println(code);
-//        return "sasas";
-//    }
 
 
     @RequestMapping("/authrized")
     public String authrized(@RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) throws SmartcarException {
-        this.code = code;
+        // this.code = code;
+        // Auth auth = client.exchangeCode(code);
+        return code;
+    }
+
+    @RequestMapping(value = "/smartCarSession", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> startSession(@RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) throws SmartcarException {
+
         Auth auth = client.exchangeCode(code);
-        return auth.getAccessToken();
+        try {
+            securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(),3600000);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (SmException ex) {
+            HttpStatus status = HttpStatus.valueOf(ex.getCode());
+            return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/authrized"), status);
+        }
     }
 
     @RequestMapping(value = "/getData", produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserData getData(HttpServletRequest request, @RequestParam("access") String access, HttpServletResponse responser) throws SmartcarException {
+    public UserData getData(HttpServletRequest request, HttpServletResponse response, @RequestParam(value = "access", required = false) String access, HttpServletResponse responser) throws SmartcarException, SmException {
+        if (access == null) {
+            //looking into table
+            SmUserSession userSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
+            //if expired or closed
+            if (userSession == null || userSession.getClosed()) {
+                login(request, response);
+                return null;
+            }
+            access = userSession.getToken();
+        }
         UserData userData = new UserData();
         List<VehicleData> vehiclesList = new ArrayList<>();
         userData.setVehiclesList(vehiclesList);
@@ -184,55 +188,6 @@ public class SmartCarController {
         }
 
         return userData;
-    }
-
-    @RequestMapping("/getInfo")
-    public String getInfo(HttpServletRequest request, HttpServletResponse responseR) throws SmartcarException {
-        StringBuilder sb = new StringBuilder();
-
-        SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(access);
-        // the list of vehicle ids
-        String[] vehicleIds = vehicleIdResponse.getData().getVehicleIds();
-        sb.append("===vehicleIds=").append(vehicleIdResponse.getData()).append(":").append(vehicleIdResponse.getData().getVehicleIds().length);
-        // instantiate the first vehicle in the vehicle id list
-        Vehicle vehicle = new Vehicle(vehicleIds[0], access);
-        sb.append("===v=").append(vehicle.info());
-
-        // Make a request to Smartcar API
-        VehicleInfo info = vehicle.info();
-
-
-// Fetch the vehicle's odometer
-        SmartcarResponse<VehicleOdometer> odometer = vehicle.odometer();
-        System.out.println(odometer.getData().getDistance());
-
-        sb.append("[").append(odometer.getData().getDistance()).append(odometer.getUnitSystem()).append("]").append(new Gson().toJson(vehicle));
-        return sb.toString();
-    }
-
-
-    @RequestMapping("/getOdometr2")
-    public String getOdometr2(HttpServletRequest request, HttpServletResponse responseR) throws SmartcarException {
-        StringBuilder sb = new StringBuilder();
-
-        SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(access);
-        // the list of vehicle ids
-        String[] vehicleIds = vehicleIdResponse.getData().getVehicleIds();
-        sb.append("===vehicleIds=").append(vehicleIdResponse.getData()).append(":").append(vehicleIdResponse.getData().getVehicleIds().length);
-        // instantiate the first vehicle in the vehicle id list
-        Vehicle vehicle = new Vehicle(vehicleIds[0], access);
-        sb.append("===v=").append(vehicle.info());
-
-        // Make a request to Smartcar API
-        VehicleInfo info = vehicle.info();
-
-
-// Fetch the vehicle's odometer
-        SmartcarResponse<VehicleOdometer> odometer = vehicle.odometer();
-        System.out.println(odometer.getData().getDistance());
-
-        sb.append("[").append(new Gson().toJson(odometer)).append("]").append(new Gson().toJson(vehicle));
-        return sb.toString();
     }
 
 

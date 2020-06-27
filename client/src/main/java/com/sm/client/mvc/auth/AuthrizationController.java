@@ -7,7 +7,9 @@ import com.sm.client.model.AuthRequest;
 import com.sm.client.model.AuthResponse;
 import com.sm.client.services.UserDetailsServiceImpl;
 import com.sm.client.utils.JwtTokenUtil;
+import com.sm.model.ServiceResult;
 import com.sm.model.SmAccount;
+import com.sm.model.SmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +39,6 @@ public class AuthrizationController {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -64,8 +65,13 @@ public class AuthrizationController {
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public ResponseEntity<?> signup(@RequestBody SmAccount authenticationRequest) throws Exception {
-        userDetailsService.registerUser(authenticationRequest);
-        return new ResponseEntity(HttpStatus.OK);
+        try {
+            userDetailsService.registerUser(authenticationRequest);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (SmException ex) {
+            HttpStatus status = HttpStatus.valueOf(ex.getCode());
+            return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/signup"), status);
+        }
     }
 
 }

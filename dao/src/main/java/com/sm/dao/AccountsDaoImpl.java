@@ -13,7 +13,7 @@ import java.util.List;
 
 @Transactional(readOnly = true)
 @Component
-public class AccountsDaoImpl implements AccountsDao{
+public class AccountsDaoImpl implements AccountsDao {
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -31,7 +31,8 @@ public class AccountsDaoImpl implements AccountsDao{
         String hql = "FROM SmAccount where (deleted=0 or deleted is null) and login=:login";
         Query query = session.createQuery(hql);
         query.setParameter("login", login);
-        return (SmAccount) query.getSingleResult();
+        List ret = query.getResultList();
+        return ret.isEmpty() ? null : (SmAccount) ret.get(0);
     }
 
     @Override

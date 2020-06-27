@@ -2,6 +2,8 @@ package com.sm.client.services;
 
 import com.sm.dao.AccountsDao;
 import com.sm.model.SmAccount;
+import com.sm.model.SmException;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,10 +32,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return new CustomUserDetails(username, smAccount.getPassword(), Arrays.asList(new Permision("test-role")));
     }
 
-    public void registerUser(SmAccount smAccount) throws Exception {
+    public void registerUser(SmAccount smAccount) throws SmException {
         SmAccount exists = accountsDao.getAccountByLogin(smAccount.getLogin());
         if (exists != null) {
-            throw new Exception("User " + smAccount.getLogin() + " already exists!");
+            throw new SmException("User " + smAccount.getLogin() + " already exists!", HttpStatus.SC_CONFLICT);
         }
         smAccount.setDtCreated(new Date());
         smAccount.setDeleted(false);
