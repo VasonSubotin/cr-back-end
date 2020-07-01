@@ -1,6 +1,7 @@
 package com.sm.client.mvc;
 
 import com.sm.client.services.SecurityService;
+import com.sm.client.services.UserDetailsServiceImpl;
 import com.sm.dao.AccountsDao;
 import com.sm.dao.CommonDao;
 import com.sm.model.SmAccount;
@@ -10,10 +11,14 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 
 @RestController
 public class AccountController {
+
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     private SecurityService securityService;
@@ -23,7 +28,18 @@ public class AccountController {
 
     @RequestMapping(value = "/accountInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SmAccount getSelfUser(HttpServletRequest request) throws Exception {
-        return securityService.getAccount();
+        SmAccount smAccount = securityService.getAccount();
+        SmAccount ret = new SmAccount();
+        ret.setEmail(smAccount.getEmail());
+        ret.setFirstName(smAccount.getFirstName());
+        ret.setLastName(smAccount.getLastName());
+        // ret.setPassword(smAccount.getPassword());
+        ret.setLogin(smAccount.getLogin());
+        ret.setIdAccount(smAccount.getIdAccount());
+        ret.setLifeTimeCharge(smAccount.getLifeTimeCharge());
+        ret.setDtCreated(smAccount.getDtCreated());
+
+        return ret;
     }
 
     @RequestMapping(value = "/accountInfo", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -33,13 +49,8 @@ public class AccountController {
 
     @RequestMapping(value = "/accountInfo", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public SmAccount saveAccount(HttpServletRequest request, @RequestBody SmAccount smAccount) throws Exception {
-        //updating account
-        SmAccount current = securityService.getAccount();
-        current.setEmail(smAccount.getEmail());
-        current.setFirstName(smAccount.getFirstName());
-        current.setLastName(smAccount.getLastName());
-        current.setPassword(smAccount.getPassword());
-        return accountsDao.saveAccount(current);
+        smAccount.setLogin(securityService.getAccount().getLogin());
+        return userDetailsService.updateUser(smAccount);
     }
 
     @RequestMapping(value = "/accounts", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

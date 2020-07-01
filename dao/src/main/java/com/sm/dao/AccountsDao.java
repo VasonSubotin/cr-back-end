@@ -14,6 +14,9 @@ public interface AccountsDao {
 
     SmAccount saveAccount(SmAccount smAccount);
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = false)
+    SmAccount updateAccount(SmAccount smAccount);
+
     @Transactional
     SmAccount deleteAccountById(Long id);
 }

@@ -47,6 +47,13 @@ public class AccountsDaoImpl implements AccountsDao {
         return smAccount;
     }
 
+    @Transactional(readOnly = false)
+    @Override
+    public SmAccount updateAccount(SmAccount smAccount) {
+        sessionFactory.getCurrentSession().update(smAccount);
+        return smAccount;
+    }
+
     @Override
     @Transactional(readOnly = false)
     public SmAccount deleteAccountById(Long id) {

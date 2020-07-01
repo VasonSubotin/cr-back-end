@@ -44,6 +44,38 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         accountsDao.saveAccount(smAccount);
     }
 
+    public SmAccount updateUser(SmAccount smAccount) throws SmException {
+        SmAccount exists = accountsDao.getAccountByLogin(smAccount.getLogin());
+        if (exists == null) {
+            throw new SmException("User " + smAccount.getLogin() + " does not exist!", HttpStatus.SC_NOT_FOUND);
+        }
+        smAccount.setDtCreated(new Date());
+        smAccount.setDeleted(false);
+
+//        if (smAccount.getLogin() != null || !smAccount.getLogin().isEmpty()) {
+//            exists.setLogin(smAccount.getLogin());
+//        }
+
+        if (smAccount.getEmail() != null && !smAccount.getEmail().isEmpty()) {
+            exists.setEmail(smAccount.getEmail());
+        }
+
+        if (smAccount.getFirstName() != null && !smAccount.getFirstName().isEmpty()) {
+            exists.setFirstName(smAccount.getFirstName());
+        }
+
+        if (smAccount.getLastName() != null && !smAccount.getLastName().isEmpty()) {
+            exists.setLastName(smAccount.getLastName());
+        }
+
+        //encrypting pass
+        if (smAccount.getPassword() != null && !smAccount.getPassword().isEmpty()) {
+            exists.setPassword(passwordEncoder.encode(smAccount.getPassword()));
+        }
+        //return accountsDao.saveAccount(exists);
+        return accountsDao.updateAccount(exists);
+    }
+
     public static class CustomUserDetails implements UserDetails {
         private String user;
         private String password;
