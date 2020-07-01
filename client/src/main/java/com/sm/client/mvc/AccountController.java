@@ -7,10 +7,12 @@ import com.sm.dao.CommonDao;
 import com.sm.model.SmAccount;
 import com.sm.model.SmResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
 
@@ -59,7 +61,8 @@ public class AccountController {
     }
 
     @RequestMapping(value = "/accounts/{account_id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SmAccount getUserAccount(HttpServletRequest request, @PathVariable("account_id") long accountId) throws Exception {
+    public SmAccount getUserAccount(HttpServletRequest request, HttpServletResponse response, @PathVariable("account_id") long accountId) throws Exception {
+
         return accountsDao.getAccountById(accountId);
     }
 }

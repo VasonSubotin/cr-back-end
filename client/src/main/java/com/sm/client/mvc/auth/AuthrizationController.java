@@ -67,7 +67,7 @@ public class AuthrizationController {
     public ResponseEntity<?> signup(@RequestBody SmAccount authenticationRequest) throws Exception {
         try {
             userDetailsService.registerUser(authenticationRequest);
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity(HttpStatus.CREATED);
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());
             return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/signup"), status);

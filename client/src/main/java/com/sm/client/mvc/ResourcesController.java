@@ -6,11 +6,14 @@ import com.sm.dao.ResourcesDao;
 import com.sm.model.SmAccount;
 import com.sm.model.SmResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -23,17 +26,19 @@ public class ResourcesController {
     private ResourcesDao resourcesDao;
 
     @RequestMapping(value = "/resources/{resource_id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SmResource getUserResourcesById(HttpServletRequest request, @PathVariable("resource_id") int resourceId) throws Exception {
+    public SmResource getUserResourcesById(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") int resourceId) throws Exception {
+        response.setStatus(HttpStatus.CREATED.value());
         return resourcesDao.getResourceByIdAndAccountId(new Long(resourceId), securityService.getAccount().getIdAccount());
     }
 
     @RequestMapping(value = "/resources/{resource_id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public void deleteUserResourcesById(HttpServletRequest request, @PathVariable("resource_id") int resourceId) throws Exception {
+    public void deleteUserResourcesById(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") int resourceId) throws Exception {
+        response.setStatus(HttpStatus.NO_CONTENT.value());
         resourcesDao.deleteResourceByIdAndAccountId(new Long(resourceId), securityService.getAccount().getIdAccount());
     }
 
     @RequestMapping(value = "/resources", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SmResource saveResource(HttpServletRequest request, @RequestBody SmResource smResource) throws Exception {
+    public SmResource saveResource(HttpServletRequest request, HttpServletResponse response, @RequestBody SmResource smResource) throws Exception {
         return resourcesDao.saveResource(smResource, securityService.getAccount().getIdAccount());
     }
 
