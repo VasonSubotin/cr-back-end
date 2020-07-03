@@ -65,7 +65,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 "/swagger-ui.html",
                 "/webjars/**",
                 // ou custom paths
-                "/authrized", "/signup", "/authenticate", "/smartCarLogin", "/googleLogin", "/googleToken", "/getCalendarEvent", "/resourceList").permitAll().
+                "/authrized", "/signup", "/authenticate", "/smartCarLogin", "/googleAuthenticate","/googleSessionAuth","/googleLogin", "/googleToken", "/getCalendarEvent", "/resourceList").permitAll().
                 // all other requests need to be authenticated
                         anyRequest().authenticated().and().
                 // using stateless session - FE should send tokens all the time

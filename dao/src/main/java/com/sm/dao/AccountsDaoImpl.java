@@ -35,6 +35,17 @@ public class AccountsDaoImpl implements AccountsDao {
         return ret.isEmpty() ? null : (SmAccount) ret.get(0);
     }
 
+    public SmAccount getAccountByLoginByAuthorizationType(String login, String authorizationType) {
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmAccount where (deleted=0 or deleted is null) and login=:login and accountType:accountType";
+        Query query = session.createQuery(hql);
+        query.setParameter("login", login);
+        query.setParameter("accountType", authorizationType);
+        List ret = query.getResultList();
+        return ret.isEmpty() ? null : (SmAccount) ret.get(0);
+    }
+
+
     @Override
     public SmAccount getAccountById(Long id) {
         return sessionFactory.getCurrentSession().get(SmAccount.class, id);

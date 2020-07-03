@@ -7,6 +7,7 @@ create table Accounts(
 	V_EMAIL varchar(128),
 	V_FIRST_NAME varchar(64),
 	V_LAST_NAME varchar(64),
+	V_ACCOUNT_TYPE varchar(32),
 	N_LIFE_TIME_CHARGE numeric(10),
 	B_DELETED numeric(1)
 );

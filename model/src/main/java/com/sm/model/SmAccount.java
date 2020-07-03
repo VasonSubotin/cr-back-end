@@ -27,7 +27,6 @@ public class SmAccount {
     @Column(name = "V_PASSWORD")
     private String password;
 
-
     @Column(name = "V_EMAIL")
     private String email;
 
@@ -36,6 +35,9 @@ public class SmAccount {
 
     @Column(name = "V_LAST_NAME")
     private String lastName;
+
+    @Column(name = "V_ACCOUNT_TYPE")
+    private String accountType;
 
     @Column(name = "N_LIFE_TIME_CHARGE")
     private long lifeTimeCharge;
@@ -116,5 +118,13 @@ public class SmAccount {
 
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public String getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
     }
 }

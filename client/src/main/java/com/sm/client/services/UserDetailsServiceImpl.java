@@ -1,6 +1,7 @@
 package com.sm.client.services;
 
 import com.sm.dao.AccountsDao;
+import com.sm.dao.conf.Constants;
 import com.sm.model.SmAccount;
 import com.sm.model.SmException;
 import org.apache.http.HttpStatus;
@@ -29,6 +30,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     public UserDetails loadUserByUsername(String username) {
         SmAccount smAccount = accountsDao.getAccountByLogin(username);
+        return new CustomUserDetails(username, smAccount.getPassword(), Arrays.asList(new Permision("test-role")));
+    }
+
+    public UserDetails check3dPartyAuthrization(String username, String authrizationType) {
+        SmAccount smAccount = accountsDao.getAccountByLogin(username);
+        if (smAccount == null) {
+            //need to add new 3d party client
+            smAccount = new SmAccount();
+            smAccount.setLogin(username);
+            smAccount.setDtCreated(new Date());
+            smAccount.setPassword("***********");
+            accountsDao.saveAccount(smAccount);
+        }
+
         return new CustomUserDetails(username, smAccount.getPassword(), Arrays.asList(new Permision("test-role")));
     }
 
