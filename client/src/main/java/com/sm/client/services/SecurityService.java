@@ -5,7 +5,7 @@ import com.sm.model.SmException;
 import com.sm.model.SmUserSession;
 
 public interface SecurityService {
-    SmAccount getAccount() throws Exception;
+    SmAccount getAccount() throws SmException;
 
     SmUserSession getActiveSession(String sessionType) throws SmException;
 

@@ -1,14 +1,12 @@
 package com.sm.client.mvc.auth;
 
 import com.google.api.client.auth.oauth2.*;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.Calendar;
 import com.sm.client.model.AuthResponse;
+import com.sm.client.services.GoogleService;
 import com.sm.client.services.SecurityService;
 import com.sm.client.services.UserDetailsServiceImpl;
 import com.sm.client.utils.JwtTokenUtil;
@@ -42,49 +40,15 @@ public class GoogleAuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(GoogleAuthController.class);
 
-
-    @Value("${google.clientId:513874746428-663v507o7i96n3p5vnm2l1e2tf2ldm09.apps.googleusercontent.com}")
-    private String clientId;
-
-    @Value("${google.clientSecret:80-cBgW-v5EDVFVBEIzsXtew}")
-    private String clientSecret;
-
-    @Value("${google.redirectUrl:http://localhost:8080/googleToken}")
-    private String urlRedirect;
-
-    private AuthorizationCodeFlow authorizationCodeFlow;
-
-    private GoogleIdTokenVerifier googleIdTokenVerifier;
-
     @Autowired
-    private SecurityService securityService;
-
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
-
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-
-    @PostConstruct
-    public void init() {
-        this.authorizationCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
-                new NetHttpTransport(), JacksonFactory.getDefaultInstance(),
-                clientId, clientSecret,
-                Arrays.asList("https://www.googleapis.com/auth/calendar", "openid", "https://www.googleapis.com/auth/userinfo.email")).setAccessType("offline").build();
-
-        this.googleIdTokenVerifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
-                // Specify the CLIENT_ID of the app that accesses the backend:
-                .setAudience(Collections.singletonList(clientId))
-                .build();
+    private GoogleService googleService;
 
 
-    }
-
-    @RequestMapping(value = "/googleAuthenticate", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String googleAuthenticate(HttpServletRequest request,
-                                     HttpServletResponse response) throws Exception {
-        logger.info("----------------------call/googleAuthenticate -------------------");
-        return redirectToGoogle(response);
+    @RequestMapping(value = "/googleReLogin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String googleReLogin(HttpServletRequest request,
+                              HttpServletResponse response) throws Exception {
+        logger.info("----------------------call/googleLogin -------------------");
+        return googleService.redirectToGoogle(response);
     }
 
 
@@ -92,25 +56,7 @@ public class GoogleAuthController {
     public String googleLogin(HttpServletRequest request,
                               HttpServletResponse response) throws Exception {
         logger.info("----------------------call/googleLogin -------------------");
-        return redirectToGoogle(response);
-    }
-
-    private String redirectToGoogle(HttpServletResponse response) {
-        AuthorizationCodeRequestUrl url = authorizationCodeFlow.newAuthorizationUrl();
-        url.setRedirectUri(urlRedirect);
-        String link = url.build();
-        //String link = client.getAuthUrl();
-        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-        response.setHeader("Location", link);
-        return link;
-    }
-
-    private TokenResponse getToken(String code) throws IOException {
-        // request
-        AuthorizationCodeTokenRequest authorizationCodeTokenRequest = authorizationCodeFlow.newTokenRequest(code);
-        authorizationCodeTokenRequest.setRedirectUri("http://localhost:8080/googleToken");
-
-        return authorizationCodeTokenRequest.execute();
+        return googleService.redirectToGoogle(response);
     }
 
     @RequestMapping(value = "/googleToken", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -122,48 +68,28 @@ public class GoogleAuthController {
     @RequestMapping(value = "/googleAuthenticate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> googleSessionAuth(HttpServletRequest request, HttpServletResponse response, String code) throws IOException, GeneralSecurityException {
         try {
-            TokenResponse tokenResponse = getToken(code);
-
-            String idToken = ((GoogleTokenResponse) tokenResponse).getIdToken();
-            GoogleIdToken googleIdToken = googleIdTokenVerifier.verify(idToken);
-            String login = googleIdToken.getPayload().getEmail();
-
-            final UserDetails userDetails = userDetailsService.check3dPartyAuthrization(login, Constants.GOOGLE_AUTH_TYPE);
-            final String token = jwtTokenUtil.generateToken(userDetails);
-
-            //creating google session
-            securityService.saveCurrentSession(Constants.GOOGLE_AUTH_TYPE, tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(), tokenResponse.getExpiresInSeconds() * 1000L);
-            return ResponseEntity.ok(new AuthResponse(token));
-
+            return ResponseEntity.ok(new AuthResponse(googleService.googleSessionAuth(code)));
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());
-            return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/authrized"), status);
+            return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/googleAuthenticate"), status);
         }
     }
 
     @RequestMapping(value = "/googleSession", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> get(HttpServletRequest request, HttpServletResponse response, String code) throws IOException, GeneralSecurityException {
         try {
-            TokenResponse tokenResponse = getToken(code);
-            securityService.saveCurrentSession(Constants.GOOGLE_AUTH_TYPE, tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(), tokenResponse.getExpiresInSeconds() * 1000L);
+            googleService.stratSession(code);
             return new ResponseEntity(HttpStatus.OK);
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());
-            return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/authrized"), status);
+            return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/googleSession"), status);
         }
     }
 
     @RequestMapping(value = "/getCalendarEvent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getCalendarEvent(HttpServletRequest request,
-                                   HttpServletResponse response, String code) throws Exception {
-        logger.info("----------------------call/googleToken -------------------");
-        Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
-        SmUserSession smUserSession = securityService.getActiveSession(Constants.GOOGLE_AUTH_TYPE);
-        credential.setAccessToken(smUserSession.getToken());
-        Calendar service = new Calendar.Builder(authorizationCodeFlow.getTransport(), authorizationCodeFlow.getJsonFactory(), credential).build();
-
-
-        return service.events().list("primary").setMaxResults(10).execute().toString();
+    public String getCalendarEvent(HttpServletRequest request, HttpServletResponse response, String code) throws Exception {
+        logger.info("----------------------call/getCalendarEvent -------------------");
+        return googleService.getCalendar().events().list("primary").setMaxResults(10).execute().toString();
     }
 
 

@@ -93,7 +93,7 @@ public class SmartCarAuthController {
 
         Auth auth = client.exchangeCode(code);
         try {
-            securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(),3600000);
+            securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
             return new ResponseEntity(HttpStatus.OK);
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());

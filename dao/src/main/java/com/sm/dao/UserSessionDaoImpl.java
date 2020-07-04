@@ -18,22 +18,32 @@ public class UserSessionDaoImpl implements UserSessionDao {
     private SessionFactory sessionFactory;
 
     @Override
+    public List<SmUserSession> getAllSessions() {
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmUserSession order by dtCreated";
+        Query query = session.createQuery(hql);
+        return query.getResultList();
+    }
+
+
+    @Override
     public List<SmUserSession> getActiveSessions(Long accountId) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmUserSession where (closed=0 or closed is null) and accountId=:accountId";
+        String hql = "FROM SmUserSession where (closed=0 or closed is null) and accountId=:accountId order by dtCreated";
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         return query.getResultList();
     }
 
     @Override
-    public List<SmUserSession> getActiveSessionsByType(Long accountId, String userSessionType) {
+    public SmUserSession getLastSessionsByType(Long accountId, String userSessionType) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmUserSession where (closed=0 or closed is null) and accountId=:accountId and sessionType=:userSessionType";
+        String hql = "FROM SmUserSession where accountId=:accountId and sessionType=:userSessionType order by dtCreated limit 1";
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         query.setParameter("userSessionType", userSessionType);
-        return query.getResultList();
+        List<SmUserSession> lst = query.getResultList();
+        return lst.isEmpty() ? null : lst.iterator().next();
     }
 
     @Override
