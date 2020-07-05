@@ -11,11 +11,14 @@ import com.sm.model.SmException;
 import com.sm.model.SmUserSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -33,7 +36,7 @@ public class GoogleService {
     @Value("${google.redirectUrl:http://localhost:8080/googleToken}")
     private String urlRedirect;
 
-    //private AuthorizationCodeFlow authorizationRefreshCodeFlow;
+    private AuthorizationCodeFlow authorizationRefreshCodeFlow;
     private AuthorizationCodeFlow authorizationCodeFlow;
     private GoogleIdTokenVerifier googleIdTokenVerifier;
 
@@ -49,17 +52,17 @@ public class GoogleService {
 
     @PostConstruct
     public void init() {
-//        this.authorizationRefreshCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
-//                new NetHttpTransport(), JacksonFactory.getDefaultInstance(),
-//                clientId, clientSecret,
-//                Arrays.asList("https://www.googleapis.com/auth/calendar",
-//                        "openid", "https://www.googleapis.com/auth/userinfo.email")).setApprovalPrompt("force").setAccessType("offline").build();
+        this.authorizationRefreshCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
+                new NetHttpTransport(), JacksonFactory.getDefaultInstance(),
+                clientId, clientSecret,
+                Arrays.asList("https://www.googleapis.com/auth/calendar",
+                        "openid", "https://www.googleapis.com/auth/userinfo.email")).setApprovalPrompt("force").setAccessType("offline").build();
 
         this.authorizationCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
                 new NetHttpTransport(), JacksonFactory.getDefaultInstance(),
                 clientId, clientSecret,
                 Arrays.asList("https://www.googleapis.com/auth/calendar",
-                        "openid", "https://www.googleapis.com/auth/userinfo.email")).setApprovalPrompt("force").setAccessType("offline").build();
+                        "openid", "https://www.googleapis.com/auth/userinfo.email")).setAccessType("offline").build();
 
         this.googleIdTokenVerifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
                 .setAudience(Collections.singletonList(clientId))
@@ -77,15 +80,29 @@ public class GoogleService {
         return tokenResponse;
     }
 
+    public ResponseEntity<?> redirectToGoogleRenew() {
+        AuthorizationCodeRequestUrl url = authorizationRefreshCodeFlow.newAuthorizationUrl();
+        url.setRedirectUri(urlRedirect);
+        String link = url.build();
+//        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+//        response.setHeader("Location", link);
+        MultiValueMap header = new HttpHeaders();
+        header.add("Location", link);
+        return new ResponseEntity(null, header, HttpStatus.MOVED_PERMANENTLY);
+        // return link;
+    }
 
-    public String redirectToGoogle(HttpServletResponse response) {
+    public ResponseEntity<?> redirectToGoogle() {
         AuthorizationCodeRequestUrl url = authorizationCodeFlow.newAuthorizationUrl();
         url.setRedirectUri(urlRedirect);
         String link = url.build();
         //String link = client.getAuthUrl();
-        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-        response.setHeader("Location", link);
-        return link;
+//        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+//        response.setHeader("Location", link);
+        //return link;
+        MultiValueMap header = new HttpHeaders();
+        header.add("Location", link);
+        return new ResponseEntity(null, header, HttpStatus.MOVED_PERMANENTLY);
     }
 
     public TokenResponse getToken(String code) throws IOException {
@@ -120,7 +137,17 @@ public class GoogleService {
         final String token = jwtTokenUtil.generateToken(userDetails);
 
         //creating google session
-        securityService.saveCurrentSession(Constants.GOOGLE_AUTH_TYPE, tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(), tokenResponse.getExpiresInSeconds() * 1000L);
+        SmUserSession smUserSession = securityService.saveCurrentSessionByLogin(
+                Constants.GOOGLE_AUTH_TYPE,
+                tokenResponse.getAccessToken(),
+                tokenResponse.getRefreshToken(),
+                tokenResponse.getExpiresInSeconds() * 1000L,
+                login);
+        if (smUserSession.getRefreshToken() == null) {
+            //need to rerequest with relogin
+            return null;
+        }
+
         return token;
     }
 }

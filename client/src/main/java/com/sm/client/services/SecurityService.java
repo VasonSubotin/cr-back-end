@@ -9,5 +9,9 @@ public interface SecurityService {
 
     SmUserSession getActiveSession(String sessionType) throws SmException;
 
+    SmUserSession getActiveSessionByLogin(String sessionType, String login) throws SmException;
+
     SmUserSession saveCurrentSession(String sessionType, String token, String refreshToken, long ttl) throws SmException;
+
+    SmUserSession saveCurrentSessionByLogin(String sessionType, String token, String refreshToken, long ttl, String login) throws SmException;
 }

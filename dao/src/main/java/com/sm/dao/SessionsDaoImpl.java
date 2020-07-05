@@ -26,20 +26,20 @@ public class SessionsDaoImpl implements SessionsDao {
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         query.setParameter("resourceId", resourceId);
-        return  query.getResultList();
+        return query.getResultList();
     }
 
 
     @Override
     public List<SmSession> getAllSessionsByAccountIdAndResourceIdAndTimeRange(Long accountId, Long resourceId, Date start, Date stop, Long limit) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmSession where (closed=0 or closed is null) and accountId=:accountId and resourceId=:resourceId and  dtStart>:start and dtStart<:stop limit :limit";
+        String hql = "FROM SmSession where (closed=0 or closed is null) and accountId=:accountId and resourceId=:resourceId and  dtStart>:start and dtStart<:stop";
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         query.setParameter("resourceId", resourceId);
         query.setParameter("start", start);
         query.setParameter("stop", stop);
-        query.setParameter("limit", limit);
+        query.setMaxResults(limit.intValue());
         return query.getResultList();
     }
 

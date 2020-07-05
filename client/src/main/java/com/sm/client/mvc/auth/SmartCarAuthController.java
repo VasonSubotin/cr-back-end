@@ -44,7 +44,7 @@ public class SmartCarAuthController {
     @Value("${smartcar.clientSecret:66448ff0-666c-491d-b755-3ab906f42f19}")
     private String clientSecret;
 
-    @Value("${smartcar.redirectUrl:http://localhost:8080/authrized}")
+    @Value("${smartcar.redirectUrl:http://localhost:8080/smartCarToken}")
     private String urlRedirect;
 
     @Value("#{'${smartcar.permissions:required:read_vehicle_info,read_odometer,read_engine_oil,read_battery,read_charge,read_fuel,read_location,control_security,read_tires,read_vin}'.split(',')}")
@@ -81,12 +81,20 @@ public class SmartCarAuthController {
     }
 
 
-    @RequestMapping("/authrized")
-    public String authrized(@RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) throws SmartcarException {
-        // this.code = code;
-        // Auth auth = client.exchangeCode(code);
+//    @RequestMapping("/authrized")
+//    public String authrized(@RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) throws SmartcarException {
+//        // this.code = code;
+//        // Auth auth = client.exchangeCode(code);
+//        return code;
+//    }
+
+    @RequestMapping(value = "/smartCarToken", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String smartCarToken(HttpServletRequest request, HttpServletResponse response, String code) {
+        logger.info("----------------------call smartCarToken -------------------");
         return code;
     }
+
+
 
     @RequestMapping(value = "/smartCarSession", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> startSession(@RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) throws SmartcarException {

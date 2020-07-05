@@ -43,32 +43,40 @@ public class GoogleAuthController {
     @Autowired
     private GoogleService googleService;
 
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
 
     @RequestMapping(value = "/googleReLogin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String googleReLogin(HttpServletRequest request,
-                              HttpServletResponse response) throws Exception {
+    public ResponseEntity<?> googleReLogin(HttpServletRequest request,
+                                           HttpServletResponse response) throws Exception {
         logger.info("----------------------call/googleLogin -------------------");
-        return googleService.redirectToGoogle(response);
+        return googleService.redirectToGoogleRenew();
     }
 
 
     @RequestMapping(value = "/googleLogin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String googleLogin(HttpServletRequest request,
-                              HttpServletResponse response) throws Exception {
+    public ResponseEntity<?> googleLogin(HttpServletRequest request,
+                                         HttpServletResponse response) throws Exception {
         logger.info("----------------------call/googleLogin -------------------");
-        return googleService.redirectToGoogle(response);
+       return googleService.redirectToGoogle();
     }
 
     @RequestMapping(value = "/googleToken", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String googleCode(HttpServletRequest request, HttpServletResponse response, String code) {
+    public ResponseEntity<?> googleCode(HttpServletRequest request, HttpServletResponse response, String code) {
         logger.info("----------------------call googleToken -------------------");
-        return code;
+        return ResponseEntity.ok(code);
     }
 
     @RequestMapping(value = "/googleAuthenticate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> googleSessionAuth(HttpServletRequest request, HttpServletResponse response, String code) throws IOException, GeneralSecurityException {
+    public ResponseEntity<?> googleSessionAuth(HttpServletRequest request, HttpServletResponse response, String code) throws Exception {
         try {
-            return ResponseEntity.ok(new AuthResponse(googleService.googleSessionAuth(code)));
+            String token = googleService.googleSessionAuth(code);
+            if (token == null) {
+                return googleReLogin(request, response);
+                //return new ResponseEntity (response.get);
+            }
+            return ResponseEntity.ok(new AuthResponse(token));
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());
             return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/googleAuthenticate"), status);

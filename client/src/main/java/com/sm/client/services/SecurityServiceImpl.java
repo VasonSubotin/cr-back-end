@@ -37,6 +37,12 @@ public class SecurityServiceImpl implements SecurityService {
         return userSessionDao.getLastSessionsByType(getAccount().getIdAccount(), sessionType);
     }
 
+    @Override
+    public SmUserSession getActiveSessionByLogin(String sessionType, String login) throws SmException {
+        SmAccount smAccount = accountsDao.getAccountByLogin(login);
+        return userSessionDao.getLastSessionsByType(smAccount.getIdAccount(), sessionType);
+    }
+
     //method to optimize sessions
     private void fixCLoseSession() {
         List<SmUserSession> smUserSessions = userSessionDao.getAllSessions();
@@ -59,10 +65,26 @@ public class SecurityServiceImpl implements SecurityService {
         if (refreshToken == null && existsSession != null) {
             refreshToken = existsSession.getRefreshToken();
         }
+        return saveSession(sessionType, token, refreshToken, ttl, getAccount().getIdAccount());
+    }
+
+    @Override
+    public SmUserSession saveCurrentSessionByLogin(String sessionType, String token, String refreshToken, long ttl, String login) throws SmException {
+        //checking the last session
+        SmAccount smAccount = accountsDao.getAccountByLogin(login);
+        SmUserSession existsSession =  userSessionDao.getLastSessionsByType(smAccount.getIdAccount(), sessionType);
+
+        if (refreshToken == null && existsSession != null) {
+            refreshToken = existsSession.getRefreshToken();
+        }
+        return saveSession(sessionType, token, refreshToken, ttl, smAccount.getIdAccount());
+    }
+
+    private SmUserSession saveSession(String sessionType, String token, String refreshToken, long ttl, Long idAccount) {
         //we need to find the last one and close
         SmUserSession smUserSession = new SmUserSession();
         smUserSession.setClosed(false);
-        smUserSession.setAccountId(getAccount().getIdAccount());
+        smUserSession.setAccountId(idAccount);
         smUserSession.setToken(token);
         smUserSession.setRefreshToken(refreshToken);
         smUserSession.setSessionType(sessionType);

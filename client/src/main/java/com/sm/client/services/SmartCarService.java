@@ -72,13 +72,11 @@ public class SmartCarService {
                 logger.error(ex.getMessage(), ex);
             }
 
-
             try {
                 vehicle.charge();
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
-
 
         }
     }
