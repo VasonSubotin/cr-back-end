@@ -42,4 +42,11 @@ public class EventsDaoImpl implements EventsDao {
         query.setParameter("limit", limit);
         return query.getResultList();
     }
+
+    @Transactional(readOnly = false)
+    @Override
+    public SmEvent saveEvent(SmEvent smEvent) {
+        smEvent.setIdEvent((Long) sessionFactory.getCurrentSession().save(smEvent));
+        return smEvent;
+    }
 }

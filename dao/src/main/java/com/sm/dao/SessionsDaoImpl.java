@@ -1,6 +1,9 @@
 package com.sm.dao;
 
 
+import com.sm.model.SmEvent;
+import com.sm.model.SmLocation;
+import com.sm.model.SmResource;
 import com.sm.model.SmSession;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -20,13 +23,15 @@ public class SessionsDaoImpl implements SessionsDao {
     private SessionFactory sessionFactory;
 
     @Override
-    public List<SmSession> getActiveSessionsByAccountIdAndResourceId(Long accountId, Long resourceId) {
+    public SmSession getActiveSessionByAccountIdAndResourceId(Long accountId, Long resourceId) {
         Session session = sessionFactory.getCurrentSession();
         String hql = "FROM SmSession where (closed=0 or closed is null) and accountId=:accountId and resourceId=:resourceId";
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         query.setParameter("resourceId", resourceId);
-        return query.getResultList();
+        List<SmSession> result = query.getResultList();
+
+        return result == null || result.isEmpty() ? null : result.iterator().next();
     }
 
 
@@ -43,4 +48,9 @@ public class SessionsDaoImpl implements SessionsDao {
         return query.getResultList();
     }
 
+    @Override
+    @javax.transaction.Transactional
+    public void saveSession(SmSession session) {
+        sessionFactory.getCurrentSession().save(session);
+    }
 }

@@ -50,10 +50,14 @@ public class SmartCarService {
         }
 
         List<SmResource> resources = resourcesDao.getAllResourceByAccountId(userSession.getAccountId());
-        Map<String, SmResource> resourceMap = resources.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a, (n, o) -> n));
 
         SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
 
+        refresh(resources, vehicleIdResponse, userSession);
+    }
+
+    public void refresh(List<SmResource> resources, SmartcarResponse<VehicleIds> vehicleIdResponse, SmUserSession userSession) throws SmartcarException {
+        Map<String, SmResource> resourceMap = resources.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a, (n, o) -> n));
         Map<String, SmResource> needToSave = new HashMap<>();
 
         for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {

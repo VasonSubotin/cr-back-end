@@ -32,6 +32,18 @@ public class RecourcesDaoImpl implements ResourcesDao {
     }
 
     @Override
+    public SmResource getResourceByExternalIdAndAccountId(String vExternal, Long accountId) {
+
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmResource where (deleted=0 or deleted is null) and externalResourceId=:vExternal";
+        Query query = session.createQuery(hql);
+        query.setParameter("vExternal", vExternal);
+        List<SmResource> result = query.getResultList();
+
+        return (result == null || result.isEmpty()) ? null : result.iterator().next();
+    }
+
+    @Override
     public SmResource saveResource(SmResource smResource, Long accountId) {
         smResource.setAccountId(accountId);
         smResource.setIdResource((Long) sessionFactory.getCurrentSession().save(smResource));
@@ -48,4 +60,6 @@ public class RecourcesDaoImpl implements ResourcesDao {
         query.executeUpdate();
         return getResourceByIdAndAccountId(id, accountId);
     }
+
+
 }

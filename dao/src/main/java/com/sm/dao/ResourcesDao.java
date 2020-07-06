@@ -9,6 +9,8 @@ public interface ResourcesDao {
 
     SmResource getResourceByIdAndAccountId(Long id,Long accountId) ;
 
+    SmResource getResourceByExternalIdAndAccountId(String vExternal, Long accountId);
+
     SmResource saveResource(SmResource smResource, Long accountId);
 
     SmResource deleteResourceByIdAndAccountId(Long id, Long accountId);

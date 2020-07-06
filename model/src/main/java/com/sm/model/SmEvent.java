@@ -11,7 +11,7 @@ public class SmEvent implements Serializable {
     @Id
     @Column(name = "ID_EVENT")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idSession;
+    private Long idEvent;
 
     @Column(name = "ACCOUNT_ID")
     private Long accountId;
@@ -58,12 +58,12 @@ public class SmEvent implements Serializable {
     @Column(name = "DT_CREATED")
     private Date dtCreated;
 
-    public Long getIdSession() {
-        return idSession;
+    public Long getIdEvent() {
+        return idEvent;
     }
 
-    public void setIdSession(Long idSession) {
-        this.idSession = idSession;
+    public void setIdEvent(Long idEvent) {
+        this.idEvent = idEvent;
     }
 
     public Long getAccountId() {
