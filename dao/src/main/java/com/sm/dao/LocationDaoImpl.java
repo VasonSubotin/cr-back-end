@@ -43,6 +43,7 @@ public class LocationDaoImpl implements LocationDao {
     @Override
     public SmLocation saveLocation(SmLocation smLocation, Long accountId) {
         smLocation.setIdLocation((Long) sessionFactory.getCurrentSession().save(smLocation));
+        smLocation.setAccountId(accountId);
         return smLocation;
     }
 

@@ -29,7 +29,7 @@ public class UserSessionDaoImpl implements UserSessionDao {
     @Override
     public List<SmUserSession> getActiveSessions(Long accountId) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmUserSession where (closed=0 or closed is null) and accountId=:accountId order by dtCreated";
+        String hql = "FROM SmUserSession where (closed=0 or closed is null) and accountId=:accountId order by dtCreated desc";
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         return query.getResultList();
@@ -38,7 +38,7 @@ public class UserSessionDaoImpl implements UserSessionDao {
     @Override
     public SmUserSession getLastSessionsByType(Long accountId, String userSessionType) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmUserSession where accountId=:accountId and sessionType=:userSessionType order by dtCreated";
+        String hql = "FROM SmUserSession where accountId=:accountId and sessionType=:userSessionType order by dtCreated desc";
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         query.setParameter("userSessionType", userSessionType);

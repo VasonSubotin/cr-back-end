@@ -1,6 +1,7 @@
 package com.sm.client.services;
 
 import com.sm.client.model.smartcar.VehicleData;
+import com.sm.dao.AccountsDao;
 import com.sm.dao.ResourcesDao;
 import com.sm.dao.conf.Constants;
 import com.sm.model.SmAccount;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,41 +35,47 @@ public class SmartCarService {
     private SecurityService securityService;
 
     @Autowired
+    private AccountsDao accountsDao;
+
+    @Autowired
     private ResourcesDao resourcesDao;
 
-    public void refreshCarData() throws SmException, SmartcarException {
+    public void refreshCarData(String login) throws SmException, SmartcarException {
         //need to getResources from smartCar
-        SmUserSession userSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
-        SmAccount smAccount = securityService.getAccount();
+
+        SmUserSession userSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+
         if (userSession == null) {
-            throw new SmException("No active smart car session found for user " + smAccount.getLogin(), HttpStatus.SC_FORBIDDEN);
+            throw new SmException("No active smart car session found for user " + login, HttpStatus.SC_FORBIDDEN);
         }
 
-        List<SmResource> resources = resourcesDao.getAllResourceByAccountId(smAccount.getIdAccount());
-        Map<String, SmResource> resourceMap = resources.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a));
+        List<SmResource> resources = resourcesDao.getAllResourceByAccountId(userSession.getAccountId());
+        Map<String, SmResource> resourceMap = resources.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a, (n, o) -> n));
 
         SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
 
         Map<String, SmResource> needToSave = new HashMap<>();
 
         for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
+            Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
+            String vId = vehicle.vin();
 
-            SmResource smResource = resourceMap.get(vehicleId);
+            SmResource smResource = resourceMap.get(vId);
             if (smResource == null) {
                 smResource = new SmResource();
-                smResource.setExternalResourceId(vehicleId);
-                smResource.setAccountId(smAccount.getIdAccount());
-                needToSave.put(vehicleId, smResource);
-                resourceMap.put(vehicleId, smResource);
+                smResource.setResourceTypeId(1L);
+                smResource.setDtCreated(new Date());
+                smResource.setExternalResourceId(vId);
+                smResource.setAccountId(userSession.getAccountId());
+                needToSave.put(vId, smResource);
+                resourceMap.put(vId, smResource);
             }
-
-
-            Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
 
             try {
                 VehicleInfo vehicleInfo = vehicle.info();
                 smResource.setModel(vehicleInfo.getModel());
                 smResource.setVendor(vehicleInfo.getMake());
+                needToSave.put(vId, smResource);
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
@@ -77,7 +85,11 @@ public class SmartCarService {
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
+        }
 
+        for (SmResource smResource : needToSave.values()) {
+            smResource.setDtUpdated(new Date());
+            resourcesDao.saveResource(smResource, userSession.getAccountId());
         }
     }
 }

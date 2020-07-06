@@ -3,6 +3,7 @@ package com.sm.client.mvc.auth;
 import com.sm.client.model.smartcar.UserData;
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.SecurityService;
+import com.sm.client.services.SmartCarService;
 import com.sm.dao.conf.Constants;
 import com.sm.model.ServiceResult;
 import com.sm.model.SmException;
@@ -56,6 +57,8 @@ public class SmartCarAuthController {
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private SmartCarService smartCarService;
 
     @PostConstruct
     public void init() {
@@ -81,13 +84,6 @@ public class SmartCarAuthController {
     }
 
 
-//    @RequestMapping("/authrized")
-//    public String authrized(@RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) throws SmartcarException {
-//        // this.code = code;
-//        // Auth auth = client.exchangeCode(code);
-//        return code;
-//    }
-
     @RequestMapping(value = "/smartCarToken", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public String smartCarToken(HttpServletRequest request, HttpServletResponse response, String code) {
         logger.info("----------------------call smartCarToken -------------------");
@@ -95,13 +91,13 @@ public class SmartCarAuthController {
     }
 
 
-
     @RequestMapping(value = "/smartCarSession", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> startSession(@RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) throws SmartcarException {
 
         Auth auth = client.exchangeCode(code);
         try {
-            securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
+            SmUserSession smUserSession = securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
+            smartCarService.refreshCarData(securityService.getAccount().getLogin());
             return new ResponseEntity(HttpStatus.OK);
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());
