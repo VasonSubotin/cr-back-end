@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -41,6 +42,48 @@ public class ResourcesController {
     public SmResource saveResource(HttpServletRequest request, HttpServletResponse response, @RequestBody SmResource smResource) throws Exception {
         return resourcesDao.saveResource(smResource, securityService.getAccount().getIdAccount());
     }
+
+    @RequestMapping(value = "/resources", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SmResource saveResourceUpadte(HttpServletRequest request, HttpServletResponse response, @RequestBody SmResource smResource) throws Exception {
+        Long accountId = securityService.getAccount().getIdAccount();
+        SmResource smResourceExists = resourcesDao.getResourceByIdAndAccountId(smResource.getIdResource(), accountId);
+        if (smResourceExists == null) {
+            smResource.setDtCreated(new Date());
+            response.setStatus(HttpStatus.CREATED.value());
+            return resourcesDao.saveResource(smResource,accountId);
+        }
+
+        if (smResource.getExternalResourceId() != null) {
+            smResourceExists.setExternalResourceId(smResource.getExternalResourceId());
+        }
+        if (smResource.getCapacity() != null) {
+            smResourceExists.setCapacity(smResource.getCapacity());
+        }
+        if (smResource.getGroupId() != null) {
+            smResourceExists.setGroupId(smResource.getGroupId());
+        }
+        if (smResource.getModel() != null) {
+            smResourceExists.setModel(smResource.getModel());
+        }
+        if (smResource.getPolicyId() != null) {
+            smResourceExists.setPolicyId(smResource.getPolicyId());
+        }
+        if (smResource.getPower() != null) {
+            smResourceExists.setPower(smResource.getPower());
+        }
+        if (smResource.getResourceTypeId() != null) {
+            smResourceExists.setResourceTypeId(smResource.getResourceTypeId());
+        }
+        if (smResource.getVendor() != null) {
+            smResourceExists.setVendor(smResource.getVendor());
+        }
+        if (smResource.getIdResource() != null) {
+            smResourceExists.setIdResource(smResource.getIdResource());
+        }
+        smResourceExists.setDtUpdated(new Date());
+        return resourcesDao.saveResource(smResourceExists,accountId);
+    }
+
 
     @RequestMapping(value = "/resources", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<SmResource> getUserResources(HttpServletRequest request) throws Exception {

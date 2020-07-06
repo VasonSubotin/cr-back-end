@@ -39,6 +39,33 @@ public class LocationsController {
         return locationDao.saveLocation(smLocation, securityService.getAccount().getIdAccount());
     }
 
+    @RequestMapping(value = "/locations", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SmLocation saveResourceUpdate(HttpServletRequest request, HttpServletResponse response, @RequestBody SmLocation smLocation) throws Exception {
+        Long accountId = securityService.getAccount().getIdAccount();
+        SmLocation smLocationExists = locationDao.getLocationByIdAndAccountId(smLocation.getIdLocation(), accountId);
+        if (smLocationExists == null) {
+            smLocation.setDeleted(false);
+            response.setStatus(HttpStatus.CREATED.value());
+            return locationDao.saveLocation(smLocation, accountId);
+        }
+        if (smLocation.getLatitude() != null) {
+            smLocationExists.setLatitude(smLocation.getLatitude());
+        }
+        if (smLocation.getLongitude() != null) {
+            smLocationExists.setLongitude(smLocation.getLongitude());
+        }
+        if (smLocation.getDescription() != null) {
+            smLocationExists.setDescription(smLocation.getDescription());
+        }
+        if (smLocation.getTimeZone() != null) {
+            smLocationExists.setTimeZone(smLocation.getTimeZone());
+        }
+
+        response.setStatus(HttpStatus.OK.value());
+        return locationDao.saveLocation(smLocationExists, accountId);
+    }
+
+
     @RequestMapping(value = "/locations", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<SmLocation> getUserResources(HttpServletRequest request, @RequestParam(value = "accountId", required = false) Long accountId) throws Exception {
         return locationDao.getAllLocations();
