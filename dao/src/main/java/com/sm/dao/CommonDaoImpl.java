@@ -1,10 +1,7 @@
 package com.sm.dao;
 
 
-import com.sm.model.SmEventType;
-import com.sm.model.SmPolicy;
-import com.sm.model.SmResourceType;
-import com.sm.model.SmSessionType;
+import com.sm.model.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,4 +57,10 @@ public class CommonDaoImpl implements CommonDao {
         return session.createQuery(hql).getResultList();
     }
 
+    @Override
+    public List<VehicleModel> getVehicles(){
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM VehicleModel where (deleted=0 or deleted is null) and battery > 0 order by year DESC";
+        return session.createQuery(hql).getResultList();
+    }
 }

@@ -36,9 +36,8 @@ public class SessionsController {
         if (start != null || stop != null) {
             start = start == null ? new Date(0) : start;
             stop = stop == null ? new Date(System.currentTimeMillis() + 100000000) : stop;
-            return sessionsDao.getAllSessionsByAccountIdAndResourceIdAndTimeRange(accountId, resourceId, start, stop, limit);
         }
-        return sessionsDao.getActiveSessionsByAccountIdAndResourceId(accountId, resourceId);
+        return sessionsDao.getAllSessionsByAccountIdAndResourceIdAndTimeRange(accountId, resourceId, start, stop, limit);
     }
 
 }

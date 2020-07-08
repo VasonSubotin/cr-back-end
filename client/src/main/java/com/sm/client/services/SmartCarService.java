@@ -1,13 +1,11 @@
 package com.sm.client.services;
 
 import com.sm.client.model.smartcar.VehicleData;
+import com.sm.client.services.cache.VehiclesCache;
 import com.sm.dao.AccountsDao;
 import com.sm.dao.ResourcesDao;
 import com.sm.dao.conf.Constants;
-import com.sm.model.SmAccount;
-import com.sm.model.SmException;
-import com.sm.model.SmResource;
-import com.sm.model.SmUserSession;
+import com.sm.model.*;
 import com.smartcar.sdk.AuthClient;
 import com.smartcar.sdk.SmartcarException;
 import com.smartcar.sdk.Vehicle;
@@ -30,6 +28,9 @@ import java.util.stream.Collectors;
 public class SmartCarService {
 
     private Logger logger = LoggerFactory.getLogger(SmartCarService.class);
+
+    @Autowired
+    private VehiclesCache vehiclesCache;
 
     @Autowired
     private SecurityService securityService;
@@ -95,5 +96,13 @@ public class SmartCarService {
             smResource.setDtUpdated(new Date());
             resourcesDao.saveResource(smResource, userSession.getAccountId());
         }
+    }
+
+    private void setBattery(SmResource smResource) {
+        List<VehicleModel> lst = vehiclesCache.getModels(smResource.getVendor(), smResource.getModel());
+        if (lst == null || lst.isEmpty()) {
+            return;
+        }
+        smResource.setCapacity(lst.iterator().next().getBattery());
     }
 }

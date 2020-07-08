@@ -1,9 +1,6 @@
 package com.sm.dao;
 
-import com.sm.model.SmEventType;
-import com.sm.model.SmPolicy;
-import com.sm.model.SmResourceType;
-import com.sm.model.SmSessionType;
+import com.sm.model.*;
 
 import java.util.List;
 
@@ -17,4 +14,6 @@ public interface CommonDao {
     List<SmSessionType> getAllSessionTypes();
 
     List<SmEventType> getAllEventTypes();
+
+    List<VehicleModel> getVehicles();
 }
