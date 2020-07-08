@@ -94,6 +94,7 @@ public class SmartCarService {
 
         for (SmResource smResource : needToSave.values()) {
             smResource.setDtUpdated(new Date());
+            setBattery(smResource);
             resourcesDao.saveResource(smResource, userSession.getAccountId());
         }
     }
