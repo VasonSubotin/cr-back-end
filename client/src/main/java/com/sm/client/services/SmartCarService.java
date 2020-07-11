@@ -1,5 +1,6 @@
 package com.sm.client.services;
 
+
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.cache.VehiclesCache;
 import com.sm.dao.AccountsDao;
@@ -12,16 +13,16 @@ import com.smartcar.sdk.Vehicle;
 import com.smartcar.sdk.data.SmartcarResponse;
 import com.smartcar.sdk.data.VehicleIds;
 import com.smartcar.sdk.data.VehicleInfo;
+
+import com.smartcar.sdk.data.VehicleLocation;
+import javafx.util.Pair;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +43,10 @@ public class SmartCarService {
     private ResourcesDao resourcesDao;
 
     public void refreshCarData(String login) throws SmException, SmartcarException {
+        refreshCarData(login, null);
+    }
+
+    public void refreshCarData(String login, Map<String, VehicleLocation> locationMap) throws SmException, SmartcarException {
         //need to getResources from smartCar
 
         SmUserSession userSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
@@ -54,12 +59,14 @@ public class SmartCarService {
 
         SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
 
-        refresh(resources, vehicleIdResponse, userSession);
+        refresh(resources, vehicleIdResponse, userSession, locationMap);
     }
 
-    public void refresh(List<SmResource> resources, SmartcarResponse<VehicleIds> vehicleIdResponse, SmUserSession userSession) throws SmartcarException {
+    public void refresh(List<SmResource> resources, SmartcarResponse<VehicleIds> vehicleIdResponse, SmUserSession userSession, Map<String, VehicleLocation> locationMap) throws SmartcarException {
         Map<String, SmResource> resourceMap = resources.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a, (n, o) -> n));
         Map<String, SmResource> needToSave = new HashMap<>();
+
+        List<Pair<SmResource, String>> ret = new ArrayList<>();
 
         for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
             Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
@@ -76,8 +83,17 @@ public class SmartCarService {
                 resourceMap.put(vId, smResource);
             }
 
+            if (locationMap != null) {
+                try {
+                    locationMap.put(smResource.getExternalResourceId(), vehicle.location().getData());
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+
             try {
                 VehicleInfo vehicleInfo = vehicle.info();
+
                 smResource.setModel(vehicleInfo.getModel());
                 smResource.setVendor(vehicleInfo.getMake());
                 needToSave.put(vId, smResource);
@@ -97,6 +113,84 @@ public class SmartCarService {
             setBattery(smResource);
             resourcesDao.saveResource(smResource, userSession.getAccountId());
         }
+    }
+
+    public VehicleData getVehicleData(SmUserSession userSession, SmResource smResource) throws SmartcarException {
+        SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
+
+        for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
+            Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
+            String vId = vehicle.vin();
+            if (vId.equals(smResource.getExternalResourceId())) {
+                return getSingleData(vehicle, vId);
+            }
+        }
+        return null;
+    }
+
+
+    private VehicleData getSingleData(Vehicle vehicle, String vin) {
+        VehicleData vehicleData = new VehicleData();
+        try {
+            vehicleData.setBattery(vehicle.battery().getData());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+
+        try {
+            vehicleData.setVehicleInfo(vehicle.info());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+
+        try {
+            vehicleData.setOdometer(vehicle.odometer());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+
+        try {
+            vehicleData.setCharge(vehicle.charge());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+
+        try {
+            vehicleData.setFuel(vehicle.fuel());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+
+        try {
+            vehicleData.setOil(vehicle.oil());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+
+        try {
+            vehicleData.setVin(vin);
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+
+        try {
+            vehicleData.setVehicleId(vehicle.getVehicleId());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+
+        try {
+            vehicleData.setLocation(vehicle.location());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+
+        try {
+            vehicleData.setTirePressure(vehicle.tirePressure());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+        return vehicleData;
     }
 
     private void setBattery(SmResource smResource) {

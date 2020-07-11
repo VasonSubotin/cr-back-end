@@ -1,5 +1,6 @@
 package com.sm.client.mvc;
 
+import com.sm.client.services.ScheduleService;
 import com.sm.model.PolicyType;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +33,9 @@ public class BuLogicController {
 
 //    @Autowired
 //    private CO2OptimizationService co2OptimizationService;
+
+    @Autowired
+    private ScheduleService scheduleService;
 
     @Autowired
     private OptimizationServiceFactory optimizationServiceFactory;
@@ -62,8 +67,8 @@ public class BuLogicController {
         return schedulerData;
     }
 
-    @RequestMapping(value = "/getScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SchedulerData getScheduler(
+    @RequestMapping(value = "/getSchedulerOld", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SchedulerData getSchedulerOld(
             @RequestParam(name = "ba", required = false) String locationId,
             @RequestParam(name = "capacity", required = false, defaultValue = "30000") Long capacity,
             @RequestParam(name = "charge", required = false, defaultValue = "15000") Long charge,
@@ -74,6 +79,16 @@ public class BuLogicController {
             @RequestParam(name = "testMode", required = false, defaultValue = "false") Boolean mock) throws Exception {
 
         return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId, mock);
+    }
+
+    @RequestMapping(value = "/getScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SchedulerData getScheduler(
+            @RequestParam(name = "resourceId") Long resourceId,
+            @RequestParam(name = "starttime", required = false) String starttime,
+            @RequestParam(name = "endtime", required = false) String endtime,
+            @RequestParam(name = "testMode", required = false, defaultValue = "false") Boolean mock) throws Exception {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
+        return scheduleService.clculateSchdule(login, resourceId, starttime, endtime);
     }
 
     @RequestMapping(value = "/getEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

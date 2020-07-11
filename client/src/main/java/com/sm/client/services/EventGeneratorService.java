@@ -21,6 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This class is not used yet, it is a prototype of events
+ */
+
 @Service
 public class EventGeneratorService {
 
@@ -58,7 +62,7 @@ public class EventGeneratorService {
         Map<String, SmResource> resurcesMap = resources.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a, (n, o) -> n));
 
         //refreshing resources just in case
-        smartCarService.refresh(resources, vehicleIdResponse, smUserSession);
+        smartCarService.refresh(resources, vehicleIdResponse, smUserSession, null);
 
         for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
             VehicleData vehicleData = new VehicleData();
@@ -152,7 +156,7 @@ public class EventGeneratorService {
         smEvent.setAccountId(accountId);
         smEvent.setEnergy(Double.valueOf(vehicleData.getBattery().getPercentRemaining()).longValue());
 
-
+        vehicleData.getCharge().getData().getState();
         vehicleData.getCharge().getData().getIsPluggedIn();
     }
 
@@ -187,7 +191,7 @@ public class EventGeneratorService {
         sessionsDao.saveSession(smSession);
     }
 
-    private void startCharge(EventData eventData){
+    private void startCharge(EventData eventData) {
         SmSession smSession = sessionsDao.getActiveSessionByAccountIdAndResourceId(eventData.getSmResource().getAccountId(), eventData.getSmResource().getPolicyId());
         if (smSession == null) {
             smSession = createSession(eventData);
@@ -195,7 +199,7 @@ public class EventGeneratorService {
         sessionsDao.saveSession(smSession);
     }
 
-    private void stopCharge(EventData eventData){
+    private void stopCharge(EventData eventData) {
         SmSession smSession = sessionsDao.getActiveSessionByAccountIdAndResourceId(eventData.getSmResource().getAccountId(), eventData.getSmResource().getPolicyId());
         if (smSession == null) {
             smSession = createSession(eventData);
