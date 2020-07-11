@@ -9,6 +9,8 @@ import com.sm.client.utils.JwtTokenUtil;
 import com.sm.dao.conf.Constants;
 import com.sm.model.SmException;
 import com.sm.model.SmUserSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +28,7 @@ import java.util.Collections;
 
 @Service
 public class GoogleService {
+    private Logger logger = LoggerFactory.getLogger(GoogleService.class);
 
     @Value("${google.clientId:513874746428-663v507o7i96n3p5vnm2l1e2tf2ldm09.apps.googleusercontent.com}")
     private String clientId;
@@ -82,6 +85,7 @@ public class GoogleService {
 
     public ResponseEntity<?> redirectToGoogleRenew() {
         AuthorizationCodeRequestUrl url = authorizationRefreshCodeFlow.newAuthorizationUrl();
+        logger.debug("-- setting redirection for google to {}",urlRedirect);
         url.setRedirectUri(urlRedirect);
         String link = url.build();
 //        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
@@ -94,6 +98,7 @@ public class GoogleService {
 
     public ResponseEntity<?> redirectToGoogle() {
         AuthorizationCodeRequestUrl url = authorizationCodeFlow.newAuthorizationUrl();
+        logger.debug("-- setting redirection for google to {}",urlRedirect);
         url.setRedirectUri(urlRedirect);
         String link = url.build();
         //String link = client.getAuthUrl();
@@ -108,7 +113,8 @@ public class GoogleService {
     public TokenResponse getToken(String code) throws IOException {
         // request
         AuthorizationCodeTokenRequest authorizationCodeTokenRequest = authorizationCodeFlow.newTokenRequest(code);
-        authorizationCodeTokenRequest.setRedirectUri("http://localhost:8080/googleToken");
+        logger.debug("-- setting redirection for google to {}",urlRedirect);
+        authorizationCodeTokenRequest.setRedirectUri(urlRedirect);
 
         return authorizationCodeTokenRequest.execute();
     }

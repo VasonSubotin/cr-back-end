@@ -1,4 +1,5 @@
 <configuration>
+    <property resource="application.properties" />
 
     <appender name="FILEOUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- encoders are assigned the type
