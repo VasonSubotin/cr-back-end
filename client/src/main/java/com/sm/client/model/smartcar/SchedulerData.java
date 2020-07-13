@@ -10,27 +10,105 @@ import java.util.List;
 public class SchedulerData implements Serializable {
 
     @JsonProperty("schedule_id")
-    private String schedulerId;
+    private Long schedulerId;
+
+    @JsonProperty("session_id")
+    private Long sessionId;
+
+    @JsonProperty("account_id")
+    private Long accountId;
+
+    @JsonProperty("policy_id")
+    private Long policyId;
+
+    @JsonProperty("resource_id")
+    private Long resourceId;
+
+    @JsonProperty("location_id")
+    private Long locationId;
+
+    @JsonProperty("co2_impact")
+    private double co2Impact;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ssZ")
     @JsonProperty("time_start")
     private Date timeStart;
 
-    @JsonProperty("co2_summary")
-    private double co2_summary;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ssZ")
+    @JsonProperty("time_stop")
+    private Date timeStop;
 
     @JsonProperty("co2_savings")
     private double co2_savings;
 
+    @JsonProperty("finance_savings")
+    private double financeSavings;
+
     @JsonProperty("Intervals")
     private List<SchedulerInterval> intervals;
 
-    public String getSchedulerId() {
+    public Long getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public Long getSchedulerId() {
         return schedulerId;
     }
 
-    public void setSchedulerId(String schedulerId) {
+    public void setSchedulerId(Long schedulerId) {
         this.schedulerId = schedulerId;
+    }
+
+    public Long getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
+    public double getCo2Impact() {
+        return co2Impact;
+    }
+
+    public void setCo2Impact(double co2Impact) {
+        this.co2Impact = co2Impact;
+    }
+
+    public Long getPolicyId() {
+        return policyId;
+    }
+
+    public void setPolicyId(Long policyId) {
+        this.policyId = policyId;
+    }
+
+    public Long getLocationId() {
+        return locationId;
+    }
+
+    public double getFinanceSavings() {
+        return financeSavings;
+    }
+
+    public void setFinanceSavings(double financeSavings) {
+        this.financeSavings = financeSavings;
+    }
+
+    public void setLocationId(Long locationId) {
+        this.locationId = locationId;
     }
 
     public Date getTimeStart() {
@@ -41,12 +119,12 @@ public class SchedulerData implements Serializable {
         this.timeStart = timeStart;
     }
 
-    public double getCo2_summary() {
-        return co2_summary;
+    public Date getTimeStop() {
+        return timeStop;
     }
 
-    public void setCo2_summary(double co2_summary) {
-        this.co2_summary = co2_summary;
+    public void setTimeStop(Date timeStop) {
+        this.timeStop = timeStop;
     }
 
     public double getCo2_savings() {

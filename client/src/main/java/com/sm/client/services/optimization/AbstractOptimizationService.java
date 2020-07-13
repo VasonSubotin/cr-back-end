@@ -160,7 +160,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
             coImpactSummary += curImpact;
             lastGridData = gridData;
         }
-        result.setCo2_summary(coImpactSummary);
+        result.setCo2Impact(coImpactSummary);
 
         //calculating simple usage
         result.setCo2_savings(calcSimpleCO2Impact(originalDataList, chargeTimeInMins) - coImpactSummary);
