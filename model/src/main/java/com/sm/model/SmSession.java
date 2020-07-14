@@ -56,7 +56,7 @@ public class SmSession implements Serializable {
     private Long sessionTypeId;
 
     @Column(name = "V_STATUS")
-    private Long status;
+    private String status;
 
     @Column(name = "B_CLOSED")
     private Boolean closed = false;
@@ -181,11 +181,11 @@ public class SmSession implements Serializable {
         this.sessionTypeId = sessionTypeId;
     }
 
-    public Long getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Long status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

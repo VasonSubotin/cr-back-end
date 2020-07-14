@@ -1,10 +1,13 @@
 package com.sm.client.mvc;
 
+import com.sm.client.services.CommonService;
 import com.sm.client.services.SecurityService;
 import com.sm.dao.AccountsDao;
 import com.sm.dao.ResourcesDao;
 import com.sm.model.SmAccount;
+import com.sm.model.SmException;
 import com.sm.model.SmResource;
+import com.sm.model.web.RecourseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,6 +28,9 @@ public class ResourcesController {
 
     @Autowired
     private ResourcesDao resourcesDao;
+
+    @Autowired
+    private CommonService commonService;
 
     @RequestMapping(value = "/resources/{resource_id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SmResource getUserResourcesById(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") int resourceId) throws Exception {
@@ -50,7 +56,7 @@ public class ResourcesController {
         if (smResourceExists == null) {
             smResource.setDtCreated(new Date());
             response.setStatus(HttpStatus.CREATED.value());
-            return resourcesDao.saveResource(smResource,accountId);
+            return resourcesDao.saveResource(smResource, accountId);
         }
 
         if (smResource.getExternalResourceId() != null) {
@@ -81,7 +87,7 @@ public class ResourcesController {
             smResourceExists.setIdResource(smResource.getIdResource());
         }
         smResourceExists.setDtUpdated(new Date());
-        return resourcesDao.saveResource(smResourceExists,accountId);
+        return resourcesDao.saveResource(smResourceExists, accountId);
     }
 
 
@@ -90,4 +96,8 @@ public class ResourcesController {
         return resourcesDao.getAllResourceByAccountId(securityService.getAccount().getIdAccount());
     }
 
+    @RequestMapping(value = "/resources/{resource_id}/resourceInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public RecourseInfo getRecourseInfo(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") long resourceId) throws SmException {
+        return commonService.getRecourseInfo(securityService.getAccount().getIdAccount(), resourceId);
+    }
 }
