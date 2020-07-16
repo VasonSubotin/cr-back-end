@@ -44,7 +44,7 @@ public class SchedulerData implements Serializable {
     @JsonProperty("finance_savings")
     private double financeSavings;
 
-    @JsonProperty("Intervals")
+    @JsonProperty("intervals")
     private List<SchedulerInterval> intervals;
 
     public Long getResourceId() {

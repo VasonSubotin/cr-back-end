@@ -79,6 +79,7 @@ public class SmartCarService {
                 smResource.setDtCreated(new Date());
                 smResource.setExternalResourceId(vId);
                 smResource.setAccountId(userSession.getAccountId());
+                smResource.setPolicyId(1L);
                 needToSave.put(vId, smResource);
                 resourceMap.put(vId, smResource);
             }

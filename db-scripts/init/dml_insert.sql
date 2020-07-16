@@ -1,13 +1,13 @@
 
 delete from Policies;
 insert into Policies(ID_POLICY,V_NAME,V_DESCRIPTION,DT_CREATED,B_DELETED)
-    values (1,'ECO','This policy has priority to minimize CO2 impact',DateTime('now'),0);
+    values (1,'ECO','This policy has priority to minimize CO2 impact',strftime('%s', 'now') * 1000,0);
 insert into Policies(ID_POLICY,V_NAME,V_DESCRIPTION,DT_CREATED,B_DELETED)
-    values (2,'ECO_PRICE','This policy has priority to minimize CO2 impact and price',DateTime('now'),0);
+    values (2,'ECO_PRICE','This policy has priority to minimize CO2 impact and price',strftime('%s', 'now') * 1000,0);
 insert into Policies(ID_POLICY,V_NAME,V_DESCRIPTION,DT_CREATED,B_DELETED)
-    values (3,'SIMPLE','This policy just have any priority',DateTime('now'),0);
+    values (3,'SIMPLE','This policy just have any priority',strftime('%s', 'now') * 1000,0);
 insert into Policies(ID_POLICY,V_NAME,V_DESCRIPTION,DT_CREATED,B_DELETED)
-    values (4,'PRICE','This policy should minimize price only',DateTime('now'),0);
+    values (4,'PRICE','This policy should minimize price only',strftime('%s', 'now') * 1000,0);
 
 
 delete from ResourceTypes;

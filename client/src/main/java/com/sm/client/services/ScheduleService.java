@@ -5,5 +5,7 @@ import com.sm.model.SmResource;
 import com.sm.model.SmUserSession;
 
 public interface ScheduleService {
-    SchedulerData clculateSchdule(String login, Long resourceId, String starttime, String endtime) throws Exception;
+    SchedulerData calculateSchedule(String login, Long resourceId, String starttime, String endtime) throws Exception;
+
+    SchedulerData getLastSchdule(String login, Long resourceId) throws Exception;
 }

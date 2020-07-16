@@ -20,7 +20,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
     @Override
     public SmSchedules getSmSchedulesById(String scheduleId, String accountId) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM Schedules where scheduleId=:scheduleId and accountId=:accountId";
+        String hql = "FROM SmSchedules where scheduleId=:scheduleId and accountId=:accountId";
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         query.setParameter("scheduleId", scheduleId);
@@ -28,6 +28,18 @@ public class ScheduleDaoImpl implements ScheduleDao {
         return (smSchedulesList == null || smSchedulesList.isEmpty()) ? null : smSchedulesList.iterator().next();
     }
 
+
+    @Override
+    public SmSchedules getLastSmSchedulesByResourceId(Long resourceId, Long accountId) {
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmSchedules where resourceId=:resourceId and accountId=:accountId order by dtCreated desc";
+        Query query = session.createQuery(hql);
+        query.setParameter("accountId", accountId);
+        query.setParameter("resourceId", resourceId);
+        query.setMaxResults(1);
+        List<SmSchedules> smSchedulesList = query.getResultList();
+        return (smSchedulesList == null || smSchedulesList.isEmpty()) ? null : smSchedulesList.iterator().next();
+    }
 
     @Transactional(readOnly = false)
     @Override

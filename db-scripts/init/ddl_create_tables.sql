@@ -100,7 +100,7 @@ create table Sessions(
 	ACCOUNT_ID INTEGER,
 	LOCATION_ID INTEGER,
 	N_LATITUDE numeric(3,7),
-	N_LONGITUTE numeric(3,7),
+	N_LONGITUDE numeric(3,7),
 	RESOURCE_ID INTEGER,
 	DT_UPDATED datetime,
 	DT_START datetime,
@@ -153,9 +153,9 @@ create table Events(
 );
 
 
-drop table if exists Schedulers;
-create table Schedulers(
-	ID_SCHEDULER INTEGER  Primary key AUTOINCREMENT,
+drop table if exists Schedules;
+create table Schedules(
+	ID_SCHEDULE INTEGER  Primary key AUTOINCREMENT,
 	ACCOUNT_ID INTEGER,
 	LOCATION_ID INTEGER,
 	RESOURCE_ID INTEGER,

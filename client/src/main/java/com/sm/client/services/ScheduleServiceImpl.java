@@ -45,7 +45,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private ScheduleDao scheduleDao;
 
     @Override
-    public SchedulerData clculateSchdule(String login, Long resourceId, String starttime, String endtime) throws Exception {
+    public SchedulerData calculateSchedule(String login, Long resourceId, String starttime, String endtime) throws Exception {
 
         SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
 
@@ -82,5 +82,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.saveSmSchedules(scheduleTransformService.scheduleWebToSmSchedules(schedulerData)));
     }
 
+
+    @Override
+    public SchedulerData getLastSchdule(String login, Long resourceId) throws Exception {
+        SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+        return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.getLastSmSchedulesByResourceId(resourceId, smUserSession.getAccountId()));
+    }
 
 }

@@ -81,14 +81,21 @@ public class BuLogicController {
         return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId, mock);
     }
 
-    @RequestMapping(value = "/getScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SchedulerData getScheduler(
+    @RequestMapping(value = "/calculateScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SchedulerData calculateScheduler(
             @RequestParam(name = "resourceId") Long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime,
             @RequestParam(name = "testMode", required = false, defaultValue = "false") Boolean mock) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        return scheduleService.clculateSchdule(login, resourceId, starttime, endtime);
+        return scheduleService.calculateSchedule(login, resourceId, starttime, endtime);
+    }
+
+    @RequestMapping(value = "/getScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SchedulerData getScheduler(
+            @RequestParam(name = "resourceId") Long resourceId) throws Exception {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
+        return scheduleService.getLastSchdule(login, resourceId);
     }
 
     @RequestMapping(value = "/getEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
