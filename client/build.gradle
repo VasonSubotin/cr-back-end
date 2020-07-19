@@ -25,6 +25,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'
 
+
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 
