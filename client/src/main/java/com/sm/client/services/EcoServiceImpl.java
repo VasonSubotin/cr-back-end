@@ -136,6 +136,21 @@ public class EcoServiceImpl implements EcoService {
                                      String endtime,
                                      String moerversion,
                                      String style) throws Exception {
+        try {
+           return getEcoDataInternal(obrev, latitude, longitude, starttime, endtime, moerversion, style);
+        } catch (Exception ex) {
+            logger.error("Failed to get location eco time watt by params obrev={}, latitude={}, longitude={} -- wil try again with default location CAISO_ZP26", obrev, latitude, longitude);
+            return getEcoDataInternal("CAISO_ZP26", latitude, longitude, starttime, endtime, moerversion, style);
+        }
+    }
+
+    private List<GridData> getEcoDataInternal(String obrev,
+                                              Double latitude,
+                                              Double longitude,
+                                              String starttime,
+                                              String endtime,
+                                              String moerversion,
+                                              String style) throws Exception {
         if ((latitude == null || longitude == null) && (obrev == null || obrev.isEmpty())) {
             throw new Exception("Both ba and  latitude/longitude are empty. You need to setup at least one of them");
         }

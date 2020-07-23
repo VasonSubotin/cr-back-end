@@ -6,8 +6,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Component
@@ -42,6 +42,7 @@ public class RecourcesDaoImpl implements ResourcesDao {
         return (result == null || result.isEmpty()) ? null : result.iterator().next();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public SmResource saveResource(SmResource smResource, Long accountId) {
         smResource.setAccountId(accountId);

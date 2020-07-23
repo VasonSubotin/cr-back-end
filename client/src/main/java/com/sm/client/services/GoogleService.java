@@ -58,7 +58,7 @@ public class GoogleService {
         this.authorizationRefreshCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
                 new NetHttpTransport(), JacksonFactory.getDefaultInstance(),
                 clientId, clientSecret,
-                Arrays.asList("https://www.googleapis.com/auth/calendar",
+                Arrays.asList("https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events.readonly",
                         "openid", "https://www.googleapis.com/auth/userinfo.email")).setApprovalPrompt("force").setAccessType("offline").build();
 
         this.authorizationCodeFlow = new GoogleAuthorizationCodeFlow.Builder(

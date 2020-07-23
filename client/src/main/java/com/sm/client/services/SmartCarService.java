@@ -10,11 +10,8 @@ import com.sm.model.*;
 import com.smartcar.sdk.AuthClient;
 import com.smartcar.sdk.SmartcarException;
 import com.smartcar.sdk.Vehicle;
-import com.smartcar.sdk.data.SmartcarResponse;
-import com.smartcar.sdk.data.VehicleIds;
-import com.smartcar.sdk.data.VehicleInfo;
+import com.smartcar.sdk.data.*;
 
-import com.smartcar.sdk.data.VehicleLocation;
 import javafx.util.Pair;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -135,7 +132,8 @@ public class SmartCarService {
         try {
             vehicleData.setBattery(vehicle.battery().getData());
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            logger.error("ailed to get battery info for {} due to error : {} - will use default value 50%" , ex.getMessage(), ex);
+            vehicleData.setBattery(new VehicleBattery(100D,50D));
         }
 
         try {

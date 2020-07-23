@@ -1,5 +1,6 @@
 package com.sm.client.mvc;
 
+import com.sm.client.services.GoogleLocationService;
 import com.sm.client.services.SecurityService;
 import com.sm.dao.CommonDao;
 import com.sm.model.*;
@@ -18,6 +19,9 @@ public class CommonController {
 
     @Autowired
     private CommonDao commonDao;
+
+    @Autowired
+    private GoogleLocationService googleLocationService;
 
     @RequestMapping(value = "/policiesList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<SmPolicy> getAllPlicies(HttpServletRequest request) throws Exception {
@@ -43,5 +47,11 @@ public class CommonController {
     @RequestMapping(value = "/eventTypesList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<SmEventType> getEventTypes(HttpServletRequest request) throws Exception {
         return commonDao.getAllEventTypes();
+    }
+
+
+    @RequestMapping(value = "/getGoogleLocation", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public double[] getGoogleLocation(HttpServletRequest request, @RequestParam(value = "address") String address) throws Exception {
+        return googleLocationService.getLatitudeAndLongitute(address);
     }
 }

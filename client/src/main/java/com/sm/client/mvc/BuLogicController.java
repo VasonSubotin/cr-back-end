@@ -15,10 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -81,9 +78,9 @@ public class BuLogicController {
         return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId, mock);
     }
 
-    @RequestMapping(value = "/calculateScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/resources/{resourceId}/calculate", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SchedulerData calculateScheduler(
-            @RequestParam(name = "resourceId") Long resourceId,
+            @PathVariable("resourceId") long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime,
             @RequestParam(name = "testMode", required = false, defaultValue = "false") Boolean mock) throws Exception {
@@ -91,9 +88,9 @@ public class BuLogicController {
         return scheduleService.calculateSchedule(login, resourceId, starttime, endtime);
     }
 
-    @RequestMapping(value = "/getScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/resources/{resourceId}/schedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SchedulerData getScheduler(
-            @RequestParam(name = "resourceId") Long resourceId) throws Exception {
+            @PathVariable("resourceId") long resourceId) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
         return scheduleService.getLastSchdule(login, resourceId);
     }
