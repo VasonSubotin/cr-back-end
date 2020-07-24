@@ -62,13 +62,19 @@ public class ScheduleServiceImpl implements ScheduleService {
         // first getting current state of car
         VehicleData smData = smartCarService.getVehicleData(smUserSession, smResource);
 
+        String locationAbrv = "ba";
         if (smData == null) {
-            logger.error("*** Failed to get location of car for resource by external id[{}] ****", smResource.getExternalResourceId());
+            logger.error("*** Failed to get data of car for resource by external id[{}] ****", smResource.getExternalResourceId());
             throw new SmException("*** Failed to get location of car for resource by external id[" + smResource.getExternalResourceId() + "] ****", HttpStatus.SC_NOT_FOUND);
         }
 
-        LocationData locationData = ecoService.getLocation(smData.getLocation().getData().getLatitude(), smData.getLocation().getData().getLongitude());
-        logger.debug("resource[{}] - found location abbrev[{}]", smResource.getIdResource(), locationData.getAbbrev());
+        if (smData.getLocation() == null || smData.getLocation().getData() == null) {
+            logger.error("*** Failed to get location of car for resource by external id[{}] -- will use default location ba ****", smResource.getExternalResourceId());
+        } else {
+            LocationData locationData = ecoService.getLocation(smData.getLocation().getData().getLatitude(), smData.getLocation().getData().getLongitude());
+            locationAbrv = locationData.getAbbrev();
+        }
+        logger.debug("resource[{}] - found location abbrev[{}]", smResource.getIdResource(), locationAbrv);
         long rate = smResource.getPower() == null ? DEFAULT_RATE : smResource.getPower();
         logger.debug("resource[{}] - using  rate[{}]", smResource.getIdResource(), rate);
         SchedulerData schedulerData = optimizationServiceFactory.getService(policyType).optimize(
@@ -77,8 +83,12 @@ public class ScheduleServiceImpl implements ScheduleService {
                 smResource.getCapacity(),
                 (long) (smResource.getCapacity().doubleValue() * (100D - smData.getBattery().getPercentRemaining()) / 100D),
                 rate,
-                locationData.getAbbrev(),
+                locationAbrv,
                 false);
+        schedulerData.setAccountId(smResource.getAccountId());
+        schedulerData.setResourceId(smResource.getIdResource());
+        schedulerData.setPolicyId(smResource.getPolicyId());
+
         return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.saveSmSchedules(scheduleTransformService.scheduleWebToSmSchedules(schedulerData)));
     }
 
