@@ -18,7 +18,7 @@ public class GoogleLocationService {
     @Autowired
     private RestTemplate googleLocationTemplate;
 
-    @Value("${rt.googleLocation.apikey:AIzaSyD3-H0BJioht5NVDRmp2VV35wCZBbStg10}")
+    @Value("${rt.googleLocation.apikey:#{null}}")
     private String apiKey;
 
     @Value("${rt.googleLocation.url:https://maps.googleapis.com/maps/api/geocode/json?}")
