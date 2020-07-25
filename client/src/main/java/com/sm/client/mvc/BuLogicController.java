@@ -1,6 +1,8 @@
 package com.sm.client.mvc;
 
+import com.sm.client.services.LocationScheduleService;
 import com.sm.client.services.ScheduleService;
+import com.sm.client.services.SecurityService;
 import com.sm.model.PolicyType;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
@@ -9,6 +11,8 @@ import com.sm.client.model.to.EventIntervalTO;
 import com.sm.client.services.EcoService;
 import com.sm.client.services.optimization.OptimizationServiceFactory;
 import com.sm.client.utils.StringDateUtil;
+import com.sm.model.SmAccount;
+import com.sm.model.web.LocationScheduleItem;
 import com.smartcar.sdk.SmartcarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +39,13 @@ public class BuLogicController {
     private ScheduleService scheduleService;
 
     @Autowired
+    private LocationScheduleService locationScheduleService;
+
+    @Autowired
     private OptimizationServiceFactory optimizationServiceFactory;
+
+    @Autowired
+    private SecurityService securityService;
 
     @Autowired
     private EcoService ecoService;
@@ -115,5 +125,14 @@ public class BuLogicController {
     }
 
 
+    @RequestMapping(value = "/resources/{resourceId}/calculateLocationScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<LocationScheduleItem> calculateLocationScheduler(
+            @PathVariable("resourceId") long resourceId,
+            @RequestParam(name = "starttime", required = false) String starttime,
+            @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
+
+        SmAccount smAccount = securityService.getAccount();
+        return locationScheduleService.calculate(smAccount.getIdAccount(), resourceId, 300, StringDateUtil.parseDate(starttime), StringDateUtil.parseDate(endtime));
+    }
 
 }

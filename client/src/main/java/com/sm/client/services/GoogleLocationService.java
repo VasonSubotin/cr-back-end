@@ -1,5 +1,8 @@
 package com.sm.client.services;
 
+import com.sm.dao.cache.CoordinatesCacheDao;
+import com.sm.model.cache.Coordinates;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,9 @@ public class GoogleLocationService {
     private static final Logger logger = LoggerFactory.getLogger(GoogleLocationService.class);
 
     @Autowired
+    private CoordinatesCacheDao coordinatesCacheDao;
+
+    @Autowired
     private RestTemplate googleLocationTemplate;
 
     @Value("${rt.googleLocation.apikey:#{null}}")
@@ -24,7 +30,18 @@ public class GoogleLocationService {
     @Value("${rt.googleLocation.url:https://maps.googleapis.com/maps/api/geocode/json?}")
     private String url;
 
-    public double[] getLatitudeAndLongitute(String address) {
+    public Coordinates getLatitudeAndLongitute(String address) {
+        if (address == null) {
+            return null;
+        }
+        //trying to look at cache
+        String key = address.trim().toUpperCase();
+        Coordinates coordinates = coordinatesCacheDao.loadCoordinates(key);
+
+        if (coordinates != null) {
+            return coordinates;
+        }
+
         ResponseEntity<Map> responseEntity = googleLocationTemplate.getForEntity(url + "key=" + apiKey + "&address=" + address, Map.class);
         try {
             List<Map<String, Object>> results = (List<Map<String, Object>>) responseEntity.getBody().get("results");
@@ -32,7 +49,9 @@ public class GoogleLocationService {
                 for (Map<String, Object> result : results) {
                     double[] ret = getFromResult(result);
                     if (ret != null && ret.length == 2) {
-                        return ret;
+                        coordinates = new Coordinates(key, ret[0], ret[1]);
+                        coordinatesCacheDao.saveCoordinates(coordinates);
+                        return coordinates;
                     }
                 }
             }

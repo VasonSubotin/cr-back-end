@@ -12,6 +12,8 @@ public interface LocationDao {
 
     SmLocation getLocationByIdAndAccountId(Long id, Long accountId);
 
+    List<SmLocation> getLocationsInSmallRangeAndAccountId(Long accountId, double latitudeA, double longitudeA, double latitudeB, double longitudeB);
+
     SmLocation saveLocation(SmLocation smLocation, Long accountId);
 
     @Transactional

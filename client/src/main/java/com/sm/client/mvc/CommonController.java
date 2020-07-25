@@ -4,6 +4,7 @@ import com.sm.client.services.GoogleLocationService;
 import com.sm.client.services.SecurityService;
 import com.sm.dao.CommonDao;
 import com.sm.model.*;
+import com.sm.model.cache.Coordinates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -51,7 +52,7 @@ public class CommonController {
 
 
     @RequestMapping(value = "/getGoogleLocation", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public double[] getGoogleLocation(HttpServletRequest request, @RequestParam(value = "address") String address) throws Exception {
+    public Coordinates getGoogleLocation(HttpServletRequest request, @RequestParam(value = "address") String address) throws Exception {
         return googleLocationService.getLatitudeAndLongitute(address);
     }
 }
