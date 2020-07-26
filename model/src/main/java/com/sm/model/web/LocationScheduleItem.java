@@ -35,6 +35,7 @@ public class LocationScheduleItem implements Serializable {
 
     public static class LocationDistance implements Serializable {
         private Long locationId;
+        private double price;
         private double distance;
         private double latitude;
         private double longitude;
@@ -69,6 +70,14 @@ public class LocationScheduleItem implements Serializable {
 
         public void setLongitude(double longitude) {
             this.longitude = longitude;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public void setPrice(double price) {
+            this.price = price;
         }
     }
 }

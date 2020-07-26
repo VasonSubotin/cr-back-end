@@ -37,7 +37,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
 
     @Override
     public List<LocationScheduleItem> calculate(Long accountId, Long resourceId, double maxRadius, Date start, Date stop) throws SmException, IOException {
-        //Events events = googleService.getCalendar().events().list("primary").setMaxResults(maxResult).execute();
+
         Events events = googleService.getEvents(maxResult);
         if (events == null || events.isEmpty()) {
             // no events found
@@ -78,7 +78,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
                 logger.debug("For account {} - No locations found for coordinates from {}, {}  to {}, {}", accountId, latitudes[0], longitude[0], latitudes[1], longitude[1]);
                 continue;
             }
-            //key is distance, value list of location on that distance, normally it should be a single location but theoretically it could be more
+            //key is price, value list of location on that distance, normally it should be a single location but theoretically it could be more
             Map<Double, List<LocationWrapper>> mpLocation = new TreeMap<>();
             for (SmLocation location : locations) {
                 Double distance = GeoUtils.calculateDistance(location.getLatitude(), location.getLongitude(), eventsWrapper.getCoordinates().getLatitude(), eventsWrapper.getCoordinates().getLongitude());
@@ -109,6 +109,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
                     locationDistance.setDistance(locationWrapper.getDistance());
                     locationDistance.setLatitude(smLocation.getLatitude());
                     locationDistance.setLongitude(smLocation.getLongitude());
+                    locationDistance.setPrice(smLocation.getPrice());
                     locationDistances.add(locationDistance);
                 }
             }

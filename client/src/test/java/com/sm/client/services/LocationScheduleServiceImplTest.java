@@ -10,6 +10,7 @@ import com.sm.model.SmException;
 import com.sm.model.SmLocation;
 import com.sm.model.cache.Coordinates;
 import com.sm.model.web.LocationScheduleItem;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -47,13 +48,60 @@ public class LocationScheduleServiceImplTest {
 
         LocationDao locationDao = Mockito.mock(LocationDao.class);
         locationScheduleService.setLocationDao(locationDao);
-        when(locationDao.getLocationsInSmallRangeAndAccountId(eq(1L), anyDouble(), anyDouble(), anyDouble(), anyDouble())).thenReturn(makeLocations());
+        List<SmLocation> locations = makeLocations();
+        when(locationDao.getLocationsInSmallRangeAndAccountId(eq(1L), anyDouble(), anyDouble(), anyDouble(), anyDouble())).thenReturn(locations);
 
+        Events events = generateEvenets();
         GoogleService googleService = Mockito.mock(GoogleService.class);
-        when(googleService.getEvents(anyInt())).thenReturn(generateEvenets());
+        when(googleService.getEvents(anyInt())).thenReturn(events);
         locationScheduleService.setGoogleService(googleService);
 
         List<LocationScheduleItem> actualList = locationScheduleService.calculate(1L, 1L, 300D, sdf.parse("2020-07-21T00:00:00"), sdf.parse("2020-07-22T00:00:00"));
+        int index = 0;
+        for (LocationScheduleItem locationScheduleItem : actualList) {
+            if (index == 4) {
+                index++;
+            }
+            Event event = events.getItems().get(index);
+            Assert.assertEquals("Start date check failed " + index, locationScheduleItem.getStart().getTime(), event.getStart().getDateTime().getValue());
+            Assert.assertEquals("Stop date check failed " + index, locationScheduleItem.getStop().getTime(), event.getEnd().getDateTime().getValue());
+
+
+            if (index == 0) {
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=0", locationScheduleItem.getLocationDistances().get(0).getLocationId(), locations.get(1).getIdLocation());
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=1", locationScheduleItem.getLocationDistances().get(1).getLocationId(), locations.get(3).getIdLocation());
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=2", locationScheduleItem.getLocationDistances().get(2).getLocationId(), locations.get(0).getIdLocation());
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=3", locationScheduleItem.getLocationDistances().get(3).getLocationId(), locations.get(2).getIdLocation());
+            }
+
+            if (index == 1) {
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=0", locationScheduleItem.getLocationDistances().get(0).getLocationId(), locations.get(5).getIdLocation());
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=1", locationScheduleItem.getLocationDistances().get(1).getLocationId(), locations.get(7).getIdLocation());
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=2", locationScheduleItem.getLocationDistances().get(2).getLocationId(), locations.get(6).getIdLocation());
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=3", locationScheduleItem.getLocationDistances().get(3).getLocationId(), locations.get(8).getIdLocation());
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=4", locationScheduleItem.getLocationDistances().get(4).getLocationId(), locations.get(4).getIdLocation());
+
+            }
+            if (index == 2) {
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=0", locationScheduleItem.getLocationDistances().get(0).getLocationId(), locations.get(1).getIdLocation());
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=1", locationScheduleItem.getLocationDistances().get(1).getLocationId(), locations.get(3).getIdLocation());
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=2", locationScheduleItem.getLocationDistances().get(2).getLocationId(), locations.get(0).getIdLocation());
+                Assert.assertEquals("Location Id check failed index="+index+" locIndex=3", locationScheduleItem.getLocationDistances().get(3).getLocationId(), locations.get(2).getIdLocation());
+            }
+//            if (index == 4) {
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=0", locationScheduleItem.getLocationDistances().get(0).getLocationId(), locations.get(1).getIdLocation());
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=1", locationScheduleItem.getLocationDistances().get(1).getLocationId(), locations.get(3).getIdLocation());
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=2", locationScheduleItem.getLocationDistances().get(2).getLocationId(), locations.get(0).getIdLocation());
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=3", locationScheduleItem.getLocationDistances().get(3).getLocationId(), locations.get(2).getIdLocation());
+//            }
+//            if (index == 5) {
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=0", locationScheduleItem.getLocationDistances().get(0).getLocationId(), locations.get(1).getIdLocation());
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=1", locationScheduleItem.getLocationDistances().get(1).getLocationId(), locations.get(3).getIdLocation());
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=2", locationScheduleItem.getLocationDistances().get(2).getLocationId(), locations.get(0).getIdLocation());
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=3", locationScheduleItem.getLocationDistances().get(3).getLocationId(), locations.get(2).getIdLocation());
+//            }
+            index++;
+        }
 
     }
 
@@ -90,50 +138,51 @@ public class LocationScheduleServiceImplTest {
     private List<SmLocation> makeLocations() {
         return Arrays.asList(
                 //for address1  32.891669, -97.501231
-                makeLocation("location1", 21.4, 32.890660, -97.499300),
-                makeLocation("location2", 12.4, 32.891259, -97.502089),
-                makeLocation("location3", 33.4, 32.891367, -97.501193),
-                makeLocation("location4", 14.4, 32.891993, -97.501574),
+                makeLocation(1L, "location1", 21.4, 32.890660, -97.499300),
+                makeLocation(2L, "location2", 12.4, 32.891259, -97.502089),
+                makeLocation(3L, "location3", 33.4, 32.891367, -97.501193),
+                makeLocation(4L, "location4", 14.4, 32.891993, -97.501574),
 
                 //for address2  32.886326, -97.491135
-                makeLocation("location5", 65.4, 32.886948, -97.492648),
-                makeLocation("location6", 16.4, 32.887209, -97.489869),
-                makeLocation("location7", 27.4, 32.886533, -97.490604),
-                makeLocation("location8", 18.4, 32.887069, -97.493072),
-                makeLocation("location9", 39.4, 32.886987, -97.490092),
+                makeLocation(5L, "location5", 65.4, 32.886948, -97.492648),
+                makeLocation(6L, "location6", 16.4, 32.887209, -97.489869),
+                makeLocation(7L, "location7", 27.4, 32.886533, -97.490604),
+                makeLocation(8L, "location8", 18.4, 32.887069, -97.493072),
+                makeLocation(9L, "location9", 39.4, 32.886987, -97.490092),
 
                 //for address3  32.872874, -97.487208
-                makeLocation("location10", 20.4, 32.873242, -97.486217),
-                makeLocation("location11", 21.4, 32.872514, -97.488093),
-                makeLocation("location12", 22.4, 32.872401, -97.487256),
+                makeLocation(10L, "location10", 20.4, 32.873242, -97.486217),
+                makeLocation(11L, "location11", 21.4, 32.872514, -97.488093),
+                makeLocation(12L, "location12", 22.4, 32.872401, -97.487256),
 
                 //for address4  32.880154, -97.465150
-                makeLocation("location13", 23.4, 32.879334, -97.466588),
-                makeLocation("location14", 14.4, 32.880127, -97.462350),
-                makeLocation("location15", 25.4, 32.881290, -97.463981),
-                makeLocation("location16", 36.4, 32.882119, -97.465375),
+                makeLocation(13L, "location13", 23.4, 32.879334, -97.466588),
+                makeLocation(14L, "location14", 14.4, 32.880127, -97.462350),
+                makeLocation(15L, "location15", 25.4, 32.881290, -97.463981),
+                makeLocation(16L, "location16", 36.4, 32.882119, -97.465375),
 
                 //for address5   32.890268, -97.451237
-                makeLocation("location17", 27.4, 32.889903, -97.451948),
-                makeLocation("location18", 17.4, 32.890110, -97.450711),
+                makeLocation(17L, "location17", 27.4, 32.889903, -97.451948),
+                makeLocation(18L, "location18", 17.4, 32.890110, -97.450711),
 
                 //for address6  32.891986, -97.470553
-                makeLocation("location19", 67.4, 32.891331, -97.471535),
-                makeLocation("location20", 58.4, 32.891434, -97.469899),
-                makeLocation("location21", 49.4, 32.892056, -97.468783),
-                makeLocation("location22", 30.4, 32.893511, -97.469335),
-                makeLocation("location23", 21.4, 32.892772, -97.470802),
+                makeLocation(19L, "location19", 67.4, 32.891331, -97.471535),
+                makeLocation(20L, "location20", 58.4, 32.891434, -97.469899),
+                makeLocation(21L, "location21", 49.4, 32.892056, -97.468783),
+                makeLocation(22L, "location22", 30.4, 32.893511, -97.469335),
+                makeLocation(23L, "location23", 21.4, 32.892772, -97.470802),
 
                 //for address7   32.911616, -97.483077
-                makeLocation("location24", 12.4, 32.910839, -97.484271),
-                makeLocation("location25", 23.4, 32.911001, -97.481336),
-                makeLocation("location26", 14.4, 32.912019, -97.482012),
-                makeLocation("location27", 25.4, 32.912604, -97.484812)
+                makeLocation(24L, "location24", 12.4, 32.910839, -97.484271),
+                makeLocation(25L, "location25", 23.4, 32.911001, -97.481336),
+                makeLocation(26L, "location26", 14.4, 32.912019, -97.482012),
+                makeLocation(27L, "location27", 25.4, 32.912604, -97.484812)
         );
     }
 
-    private SmLocation makeLocation(String name, double price, double latitude, double longitude) {
+    private SmLocation makeLocation(long id, String name, double price, double latitude, double longitude) {
         SmLocation smLocation = new SmLocation();
+        smLocation.setIdLocation(id);
         smLocation.setPrice(price);
         smLocation.setName(name);
         smLocation.setLatitude(latitude);
