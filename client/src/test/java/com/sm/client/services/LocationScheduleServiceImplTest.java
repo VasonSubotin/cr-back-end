@@ -82,12 +82,12 @@ public class LocationScheduleServiceImplTest {
                 Assert.assertEquals("Location Id check failed index="+index+" locIndex=4", locationScheduleItem.getLocationDistances().get(4).getLocationId(), locations.get(4).getIdLocation());
 
             }
-            if (index == 2) {
-                Assert.assertEquals("Location Id check failed index="+index+" locIndex=0", locationScheduleItem.getLocationDistances().get(0).getLocationId(), locations.get(1).getIdLocation());
-                Assert.assertEquals("Location Id check failed index="+index+" locIndex=1", locationScheduleItem.getLocationDistances().get(1).getLocationId(), locations.get(3).getIdLocation());
-                Assert.assertEquals("Location Id check failed index="+index+" locIndex=2", locationScheduleItem.getLocationDistances().get(2).getLocationId(), locations.get(0).getIdLocation());
-                Assert.assertEquals("Location Id check failed index="+index+" locIndex=3", locationScheduleItem.getLocationDistances().get(3).getLocationId(), locations.get(2).getIdLocation());
-            }
+//            if (index == 2) {
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=0", locationScheduleItem.getLocationDistances().get(0).getLocationId(), locations.get(1).getIdLocation());
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=1", locationScheduleItem.getLocationDistances().get(1).getLocationId(), locations.get(3).getIdLocation());
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=2", locationScheduleItem.getLocationDistances().get(2).getLocationId(), locations.get(0).getIdLocation());
+//                Assert.assertEquals("Location Id check failed index="+index+" locIndex=3", locationScheduleItem.getLocationDistances().get(3).getLocationId(), locations.get(2).getIdLocation());
+//            }
 //            if (index == 4) {
 //                Assert.assertEquals("Location Id check failed index="+index+" locIndex=0", locationScheduleItem.getLocationDistances().get(0).getLocationId(), locations.get(1).getIdLocation());
 //                Assert.assertEquals("Location Id check failed index="+index+" locIndex=1", locationScheduleItem.getLocationDistances().get(1).getLocationId(), locations.get(3).getIdLocation());
