@@ -37,7 +37,8 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
 
     @Override
     public List<LocationScheduleItem> calculate(Long accountId, Long resourceId, double maxRadius, Date start, Date stop) throws SmException, IOException {
-        Events events = googleService.getCalendar().events().list("primary").setMaxResults(maxResult).execute();
+        //Events events = googleService.getCalendar().events().list("primary").setMaxResults(maxResult).execute();
+        Events events = googleService.getEvents(maxResult);
         if (events == null || events.isEmpty()) {
             // no events found
             throw new SmException("No calendar events found !", HttpStatus.SC_NOT_FOUND);
@@ -68,7 +69,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         }
 
         List<LocationScheduleItem> ret = new ArrayList<>();
-        //now looking for cheapest location in 500м радиус
+        //now looking for cheapest location in 300м радиус
         for (EventWrapper eventsWrapper : eventsWrappers) {
             double latitudes[] = GeoUtils.calculateLatRange(eventsWrapper.getCoordinates().getLatitude(), 1000);
             double longitude[] = GeoUtils.calculateLngRange(eventsWrapper.getCoordinates().getLatitude(), eventsWrapper.getCoordinates().getLongitude(), 1000);
@@ -78,33 +79,34 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
                 continue;
             }
             //key is distance, value list of location on that distance, normally it should be a single location but theoretically it could be more
-            Map<Double, List<SmLocation>> mpLocation = new TreeMap<>();
+            Map<Double, List<LocationWrapper>> mpLocation = new TreeMap<>();
             for (SmLocation location : locations) {
                 Double distance = GeoUtils.calculateDistance(location.getLatitude(), location.getLongitude(), eventsWrapper.getCoordinates().getLatitude(), eventsWrapper.getCoordinates().getLongitude());
                 if (distance > maxRadius) {
                     continue;
                 }
-                List<SmLocation> lst = mpLocation.get(distance);
+                List<LocationWrapper> lst = mpLocation.get(location.getPrice());
                 if (lst == null) {
                     lst = new ArrayList<>();
-                    mpLocation.put(distance, lst);
+                    mpLocation.put(location.getPrice(), lst);
                 }
-                lst.add(location);
+                lst.add(new LocationWrapper(location, distance));
             }
 
             //creating scheduler item
             LocationScheduleItem locationScheduleItem = new LocationScheduleItem();
             ret.add(locationScheduleItem);
             locationScheduleItem.setStart(eventsWrapper.getStart());
-            locationScheduleItem.setStop(locationScheduleItem.getStop());
+            locationScheduleItem.setStop(eventsWrapper.getStop());
 
             List<LocationScheduleItem.LocationDistance> locationDistances = new ArrayList<>();
             locationScheduleItem.setLocationDistances(locationDistances);
-            for (Map.Entry<Double, List<SmLocation>> entry : mpLocation.entrySet()) {
+            for (Map.Entry<Double, List<LocationWrapper>> entry : mpLocation.entrySet()) {
                 LocationScheduleItem.LocationDistance locationDistance = new LocationScheduleItem.LocationDistance();
-                for (SmLocation smLocation : entry.getValue()) {
+                for (LocationWrapper locationWrapper : entry.getValue()) {
+                    SmLocation smLocation = locationWrapper.getSmLocation();
                     locationDistance.setLocationId(smLocation.getIdLocation());
-                    locationDistance.setDistance(entry.getKey());
+                    locationDistance.setDistance(locationWrapper.getDistance());
                     locationDistance.setLatitude(smLocation.getLatitude());
                     locationDistance.setLongitude(smLocation.getLongitude());
                     locationDistances.add(locationDistance);
@@ -120,6 +122,22 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             return null;
         }
         return new Date(eventDateTime.getDateTime().getValue());
+    }
+
+    public void setMaxResult(int maxResult) {
+        this.maxResult = maxResult;
+    }
+
+    public void setGoogleService(GoogleService googleService) {
+        this.googleService = googleService;
+    }
+
+    public void setGoogleLocationService(GoogleLocationService googleLocationService) {
+        this.googleLocationService = googleLocationService;
+    }
+
+    public void setLocationDao(LocationDao locationDao) {
+        this.locationDao = locationDao;
     }
 
     private static class EventWrapper {
@@ -170,24 +188,20 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
 
     private static class LocationWrapper {
 
-        private double latitude;
-        private double longitude;
+        private SmLocation smLocation;
         private Double distance;
 
-        public double getLatitude() {
-            return latitude;
+        public LocationWrapper(SmLocation smLocation, Double distance) {
+            this.smLocation = smLocation;
+            this.distance = distance;
         }
 
-        public void setLatitude(double latitude) {
-            this.latitude = latitude;
+        public SmLocation getSmLocation() {
+            return smLocation;
         }
 
-        public double getLongitude() {
-            return longitude;
-        }
-
-        public void setLongitude(double longitude) {
-            this.longitude = longitude;
+        public void setSmLocation(SmLocation smLocation) {
+            this.smLocation = smLocation;
         }
 
         public Double getDistance() {

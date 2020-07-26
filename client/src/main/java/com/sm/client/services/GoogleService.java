@@ -5,6 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Events;
 import com.sm.client.utils.JwtTokenUtil;
 import com.sm.dao.conf.Constants;
 import com.sm.model.SmException;
@@ -85,7 +86,7 @@ public class GoogleService {
 
     public ResponseEntity<?> redirectToGoogleRenew() {
         AuthorizationCodeRequestUrl url = authorizationRefreshCodeFlow.newAuthorizationUrl();
-        logger.debug("-- setting redirection for google to {}",urlRedirect);
+        logger.debug("-- setting redirection for google to {}", urlRedirect);
         url.setRedirectUri(urlRedirect);
         String link = url.build();
 //        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
@@ -98,7 +99,7 @@ public class GoogleService {
 
     public ResponseEntity<?> redirectToGoogle() {
         AuthorizationCodeRequestUrl url = authorizationCodeFlow.newAuthorizationUrl();
-        logger.debug("-- setting redirection for google to {}",urlRedirect);
+        logger.debug("-- setting redirection for google to {}", urlRedirect);
         url.setRedirectUri(urlRedirect);
         String link = url.build();
         //String link = client.getAuthUrl();
@@ -113,7 +114,7 @@ public class GoogleService {
     public TokenResponse getToken(String code) throws IOException {
         // request
         AuthorizationCodeTokenRequest authorizationCodeTokenRequest = authorizationCodeFlow.newTokenRequest(code);
-        logger.debug("-- setting redirection for google to {}",urlRedirect);
+        logger.debug("-- setting redirection for google to {}", urlRedirect);
         authorizationCodeTokenRequest.setRedirectUri(urlRedirect);
 
         return authorizationCodeTokenRequest.execute();
@@ -124,6 +125,10 @@ public class GoogleService {
         SmUserSession smUserSession = securityService.getActiveSession(Constants.GOOGLE_AUTH_TYPE);
         credential.setAccessToken(smUserSession.getToken());
         return new Calendar.Builder(authorizationCodeFlow.getTransport(), authorizationCodeFlow.getJsonFactory(), credential).build();
+    }
+
+    public Events getEvents(int maxResult) throws SmException, IOException {
+        return getCalendar().events().list("primary").setMaxResults(maxResult).execute();
     }
 
 

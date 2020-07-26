@@ -40,6 +40,9 @@ public class SmLocation {
     @Column(name = "N_LONGITUDE")
     private Double longitude;
 
+    @Column(name = "F_PRICE")
+    private Double price;
+
     @Column(name = "V_TIME_ZONE")
     private String timeZone;
 
@@ -114,6 +117,14 @@ public class SmLocation {
 
     public void setDtCreated(Date dtCreated) {
         this.dtCreated = dtCreated;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
     public Boolean getTouEnabled() {

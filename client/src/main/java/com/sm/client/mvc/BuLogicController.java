@@ -131,8 +131,12 @@ public class BuLogicController {
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
 
-        SmAccount smAccount = securityService.getAccount();
-        return locationScheduleService.calculate(smAccount.getIdAccount(), resourceId, 300, StringDateUtil.parseDate(starttime), StringDateUtil.parseDate(endtime));
+        return locationScheduleService.calculate(
+                securityService.getAccount().getIdAccount(),
+                resourceId,
+                300,
+                StringDateUtil.parseDate(starttime),
+                StringDateUtil.parseDate(endtime));
     }
 
 }
