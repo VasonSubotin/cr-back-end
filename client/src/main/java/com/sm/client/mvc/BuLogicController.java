@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
+import static com.sm.client.utils.StringDateUtil.getBeginningOfDay;
+import static com.sm.client.utils.StringDateUtil.getEndOfDay;
 
 @RestController
 public class BuLogicController {
@@ -58,16 +58,14 @@ public class BuLogicController {
         schedulerInterval1.setDuration(4505);
         schedulerInterval1.setChargeRate(5000);
         schedulerInterval1.setPrimaryTrigger("text");
-        schedulerInterval1.setIntervalType("DRAM");
-        schedulerInterval1.setEconomicImpact(0.37);
+        schedulerInterval1.setIntervalType(SchedulerInterval.IntervalType.CHR);
         schedulerInterval1.setCo2Impact(125);
 
         SchedulerInterval schedulerInterval2 = new SchedulerInterval();
         schedulerInterval2.setDuration(4506);
         schedulerInterval2.setChargeRate(4700);
         schedulerInterval2.setPrimaryTrigger("text2");
-        schedulerInterval2.setIntervalType("DRAM");
-        schedulerInterval2.setEconomicImpact(0.32);
+        schedulerInterval2.setIntervalType(SchedulerInterval.IntervalType.CHR);
         schedulerInterval2.setCo2Impact(121);
         schedulerData.setIntervals(Arrays.asList(schedulerInterval1, schedulerInterval1));
 
@@ -126,17 +124,21 @@ public class BuLogicController {
 
 
     @RequestMapping(value = "/resources/{resourceId}/calculateLocationScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<LocationScheduleItem> calculateLocationScheduler(
+    public SchedulerData calculateLocationScheduler(
             @PathVariable("resourceId") long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
-
+        Date start = StringDateUtil.parseDate(starttime);
+        start = start != null ? start : getBeginningOfDay();
+        Date stop = StringDateUtil.parseDate(endtime);
+        stop = stop != null ? stop : getEndOfDay();
+        //List<LocationScheduleItem>
         return locationScheduleService.calculate(
                 securityService.getAccount().getIdAccount(),
                 resourceId,
-                300,
-                StringDateUtil.parseDate(starttime),
-                StringDateUtil.parseDate(endtime));
+                300, start,
+                stop
+        );
     }
 
 }

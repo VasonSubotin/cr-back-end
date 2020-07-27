@@ -3,6 +3,8 @@ package com.sm.client.services;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
+import com.sm.client.model.smartcar.SchedulerData;
+import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.utils.GeoUtils;
 import com.sm.dao.LocationDao;
 import com.sm.model.SmException;
@@ -36,7 +38,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
 
 
     @Override
-    public List<LocationScheduleItem> calculate(Long accountId, Long resourceId, double maxRadius, Date start, Date stop) throws SmException, IOException {
+    public SchedulerData calculate(Long accountId, Long resourceId, double maxRadius, Date start, Date stop) throws SmException, IOException {
 
         Events events = googleService.getEvents(maxResult);
         if (events == null || events.isEmpty()) {
@@ -46,29 +48,37 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
 
         List<EventWrapper> eventsWrappers = new ArrayList<>();
         for (Event event : events.getItems()) {
-            if (event.getLocation() != null && (event.getLocation().toUpperCase().startsWith("HTTP://") || event.getLocation().toUpperCase().startsWith("HTTPS://"))) {
-                //can't detect address for this location
-                logger.debug("-- Location {} does not look like address - it will be ignored --", event.getLocation());
-                continue;
-            }
-            Date stopDate = makeDate(event.getEnd());
-            Date startDate = makeDate(event.getStart());
+            try {
+                if (event.getLocation()==null ||(event.getLocation().toUpperCase().startsWith("HTTP://") || event.getLocation().toUpperCase().startsWith("HTTPS://"))) {
+                    //can't detect address for this location
+                    logger.debug("-- Location {} does not look like address - it will be ignored --", event.getLocation());
+                    continue;
+                }
+                Date stopDate = makeDate(event.getEnd());
+                Date startDate = makeDate(event.getStart());
 
-            if (stopDate.before(start) || startDate.after(stop)) {
-                //no cross - excluding
-                logger.debug("Event with date interval [{} - {}] does not cross with out range [{} - {}] - ignoring", startDate, stopDate, start, stop);
-                continue;
+                if (stopDate.before(start) || startDate.after(stop)) {
+                    //no cross - excluding
+                    logger.debug("Event with date interval [{} - {}] does not cross with out range [{} - {}] - ignoring", startDate, stopDate, start, stop);
+                    continue;
+                }
+                //Looking for location coordinates
+                Coordinates coordinates = googleLocationService.getLatitudeAndLongitute(event.getLocation());
+                if (coordinates == null) {
+                    logger.debug("-- Failed to find address location {} - it will be ignored --", event.getLocation());
+                    continue;
+                }
+                eventsWrappers.add(new EventWrapper(startDate, stopDate, coordinates, event.getDescription()));
+            } catch (Exception ex) {
+                logger.error("Failed to process event {} ", event.toPrettyString());
             }
-            //Looking for location coordinates
-            Coordinates coordinates = googleLocationService.getLatitudeAndLongitute(event.getLocation());
-            if (coordinates == null) {
-                logger.debug("-- Failed to find address location {} - it will be ignored --", event.getLocation());
-                continue;
-            }
-            eventsWrappers.add(new EventWrapper(startDate, stopDate, coordinates, event.getDescription()));
         }
 
-        List<LocationScheduleItem> ret = new ArrayList<>();
+        SchedulerData ret = new SchedulerData();
+
+        List<SchedulerInterval> intervals = new ArrayList<>();
+        ret.setIntervals(intervals);
+        // List<LocationScheduleItem> ret = new ArrayList<>();
         //now looking for cheapest location in 300м радиус
         for (EventWrapper eventsWrapper : eventsWrappers) {
             double latitudes[] = GeoUtils.calculateLatRange(eventsWrapper.getCoordinates().getLatitude(), 1000);
@@ -94,23 +104,28 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             }
 
             //creating scheduler item
-            LocationScheduleItem locationScheduleItem = new LocationScheduleItem();
-            ret.add(locationScheduleItem);
-            locationScheduleItem.setStart(eventsWrapper.getStart());
-            locationScheduleItem.setStop(eventsWrapper.getStop());
-
+            //LocationScheduleItem locationScheduleItem = new LocationScheduleItem();
+            SchedulerInterval schedulerInterval = new SchedulerInterval();
+            intervals.add(schedulerInterval);
+            schedulerInterval.setStarttime(eventsWrapper.getStart());
+            schedulerInterval.setDuration(eventsWrapper.getStop().getTime() - eventsWrapper.getStart().getTime());
+            schedulerInterval.setIntervalType(SchedulerInterval.IntervalType.DRV);
             List<LocationScheduleItem.LocationDistance> locationDistances = new ArrayList<>();
-            locationScheduleItem.setLocationDistances(locationDistances);
+            // schedulerInterval.setLocationDistances(locationDistances);
+            mlocationLevel:
             for (Map.Entry<Double, List<LocationWrapper>> entry : mpLocation.entrySet()) {
                 LocationScheduleItem.LocationDistance locationDistance = new LocationScheduleItem.LocationDistance();
                 for (LocationWrapper locationWrapper : entry.getValue()) {
-                    SmLocation smLocation = locationWrapper.getSmLocation();
-                    locationDistance.setLocationId(smLocation.getIdLocation());
-                    locationDistance.setDistance(locationWrapper.getDistance());
-                    locationDistance.setLatitude(smLocation.getLatitude());
-                    locationDistance.setLongitude(smLocation.getLongitude());
-                    locationDistance.setPrice(smLocation.getPrice());
-                    locationDistances.add(locationDistance);
+                    schedulerInterval.setLocationId(locationWrapper.getSmLocation().getIdLocation());
+                    // schedulerInterval.setCostOfCharging(locationWrapper.getSmLocation().getPrice() * );
+                    break mlocationLevel;
+//                    SmLocation smLocation = locationWrapper.getSmLocation();
+//                    locationDistance.setLocationId(smLocation.getIdLocation());
+//                    locationDistance.setDistance(locationWrapper.getDistance());
+//                    locationDistance.setLatitude(smLocation.getLatitude());
+//                    locationDistance.setLongitude(smLocation.getLongitude());
+//                    locationDistance.setPrice(smLocation.getPrice());
+//                    locationDistances.add(locationDistance);
                 }
             }
         }

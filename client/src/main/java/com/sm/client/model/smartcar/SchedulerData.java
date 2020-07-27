@@ -27,21 +27,29 @@ public class SchedulerData implements Serializable {
     @JsonProperty("location_id")
     private Long locationId;
 
+    // can be flying, driving, changing
+    @JsonProperty("session_type")
+    private String sessionType;
+
     @JsonProperty("co2_impact")
     private double co2Impact;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ssZ")
-    @JsonProperty("time_start")
+    @JsonProperty("start_time")
     private Date timeStart;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ssZ")
-    @JsonProperty("time_stop")
+    @JsonProperty("end_time")
     private Date timeStop;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ssZ")
+    @JsonProperty("create_time")
+    private Date createdTime;
 
     @JsonProperty("co2_savings")
     private double co2_savings;
 
-    @JsonProperty("finance_savings")
+    @JsonProperty("monetary_savings")
     private double financeSavings;
 
     @JsonProperty("intervals")
@@ -141,5 +149,21 @@ public class SchedulerData implements Serializable {
 
     public void setIntervals(List<SchedulerInterval> intervals) {
         this.intervals = intervals;
+    }
+
+    public String getSessionType() {
+        return sessionType;
+    }
+
+    public void setSessionType(String sessionType) {
+        this.sessionType = sessionType;
+    }
+
+    public Date getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(Date createdTime) {
+        this.createdTime = createdTime;
     }
 }

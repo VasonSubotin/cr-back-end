@@ -2,6 +2,8 @@ package com.sm.client.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -37,6 +39,14 @@ public class StringDateUtil {
         return new SimpleDateFormat(dateFormat).parse(dateString);
     }
 
+    public static Date getBeginningOfDay() {
+        return new Date(LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+    }
+
+    public static Date getEndOfDay() {
+        return new Date(LocalDate.now().plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+    }
+
     public static Date setDateFrom(Date daysFromDate, Date daysToDate) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(daysFromDate.getTime());
@@ -44,7 +54,7 @@ public class StringDateUtil {
         Calendar calendarTo = Calendar.getInstance();
         calendarTo.setTimeInMillis(daysToDate.getTime());
 
-        calendarTo.set(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH) , calendar.get(Calendar.DAY_OF_MONTH));
+        calendarTo.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
 
         return new Date(calendarTo.getTimeInMillis());
     }

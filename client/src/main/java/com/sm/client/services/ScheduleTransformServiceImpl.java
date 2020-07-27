@@ -18,11 +18,11 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
     private Logger logger = LoggerFactory.getLogger(ScheduleTransformServiceImpl.class);
 
 
-    private  ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
 
     @Override
-    public  SmSchedules scheduleWebToSmSchedules(SchedulerData schedulerData) throws JsonProcessingException {
+    public SmSchedules scheduleWebToSmSchedules(SchedulerData schedulerData) throws JsonProcessingException {
         if (schedulerData == null) {
             return null;
         }
@@ -38,17 +38,16 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         smSchedules.setDtStart(schedulerData.getTimeStart());
         smSchedules.setDtStop(schedulerData.getTimeStop());
         smSchedules.setPolicyId(schedulerData.getPolicyId());
-
+        smSchedules.setDtCreated(schedulerData.getCreatedTime());
         smSchedules.setLocationId(schedulerData.getLocationId());
         smSchedules.setResourceId(schedulerData.getResourceId());
 
         smSchedules.setData(objectMapper.writeValueAsBytes(schedulerData.getIntervals()));
-
         return smSchedules;
     }
 
     @Override
-    public  SchedulerData smSchedulesToScheduleWeb(SmSchedules smSchedules) throws IOException {
+    public SchedulerData smSchedulesToScheduleWeb(SmSchedules smSchedules) throws IOException {
         SchedulerData schedulerData = new SchedulerData();
         schedulerData.setCo2_savings(smSchedules.getCarbonSavings());
         schedulerData.setCo2Impact(smSchedules.getCarbonImpact());
@@ -61,6 +60,7 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         schedulerData.setTimeStart(smSchedules.getDtStart());
         schedulerData.setTimeStop(smSchedules.getDtStop());
         schedulerData.setSchedulerId(smSchedules.getIdSchedule());
+        schedulerData.setCreatedTime(smSchedules.getDtCreated());
         schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), List.class));
 
         return schedulerData;
