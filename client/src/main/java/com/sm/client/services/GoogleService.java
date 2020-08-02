@@ -31,10 +31,10 @@ import java.util.Collections;
 public class GoogleService {
     private Logger logger = LoggerFactory.getLogger(GoogleService.class);
 
-    @Value("${google.clientId:513874746428-663v507o7i96n3p5vnm2l1e2tf2ldm09.apps.googleusercontent.com}")
+    @Value("${google.clientId:#{null}}")
     private String clientId;
 
-    @Value("${google.clientSecret:80-cBgW-v5EDVFVBEIzsXtew}")
+    @Value("${google.clientSecret:#{null}}")
     private String clientSecret;
 
     @Value("${google.redirectUrl:http://localhost:8080/googleToken}")

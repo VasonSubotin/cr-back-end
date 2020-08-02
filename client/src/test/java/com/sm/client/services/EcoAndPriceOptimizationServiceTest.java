@@ -91,7 +91,7 @@ public class EcoAndPriceOptimizationServiceTest {
         interval1.setStarttime(start);
         interval1.setDuration(length);
         interval1.setCo2Impact(0.9);
-        interval1.setIntervalType("test");
+        interval1.setIntervalType(SchedulerInterval.IntervalType.DRV);
         interval1.setPrimaryTrigger("test-trigger");
         return interval1;
     }

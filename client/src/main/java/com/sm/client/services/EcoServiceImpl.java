@@ -43,10 +43,10 @@ public class EcoServiceImpl implements EcoService {
     @Value("${rt.eco.data.url:https://api2.watttime.org/v2/data/}")
     private String urlEcoData;
 
-    @Value("${rt.eco.username:test-api2020}")
+    @Value("${rt.eco.username:#{null}}")
     private String username;
 
-    @Value("${rt.eco.password:max12345qwert}")
+    @Value("${rt.eco.password:#{null}}")
     private String password;
 
     private String currentToken;

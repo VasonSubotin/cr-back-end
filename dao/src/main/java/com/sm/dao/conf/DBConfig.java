@@ -26,10 +26,10 @@ public class DBConfig {
     @Value("${db.url:jdbc:sqlite:sm.sqlite}")//jdbc:sqlite:memory:myDb?cache=shared
     private String url;
 
-    @Value("${db.user:sa}")
+    @Value("${db.user:#{null}}")
     private String user;
 
-    @Value("${db.password:sa}")
+    @Value("${db.password:#{null}}")
     private String password;
 
     @Bean

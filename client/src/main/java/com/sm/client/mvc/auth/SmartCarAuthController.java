@@ -39,10 +39,10 @@ public class SmartCarAuthController {
     // private String code;
     // private String access;
 
-    @Value("${smartcar.clientId:70789610-4ebe-41b8-b913-c870ef6228ce}")
+    @Value("${smartcar.clientId:#{null}}")
     private String clientId;
 
-    @Value("${smartcar.clientSecret:66448ff0-666c-491d-b755-3ab906f42f19}")
+    @Value("${smartcar.clientSecret:#{null}}")
     private String clientSecret;
 
     @Value("${smartcar.redirectUrl:http://localhost:8080/smartCarToken}")
