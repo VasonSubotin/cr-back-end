@@ -50,13 +50,28 @@ drop table if exists TimeOfUsages;
 create table TimeOfUsages(
 	ID_TOU INTEGER Primary key AUTOINCREMENT,
 	ACCOUNT_ID INTEGER,
+	LOCATION_ID INTEGER,
 	N_START numeric(10),
 	N_STOP numeric(10),
 	DT_CREATED datetime,
 	B_DELETED numeric(1),
-	FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT )
+	FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT ),
+	FOREIGN KEY (LOCATION_ID)  REFERENCES Locations (ID_LOCATION )
 );
 
+
+drop table if exists DREvents;
+create table DREvents(
+	ID_DR_EVENT INTEGER Primary key AUTOINCREMENT,
+	ACCOUNT_ID INTEGER,
+	LOCATION_ID INTEGER,
+	N_START numeric(10),
+	N_STOP numeric(10),
+	DT_CREATED datetime,
+	B_DELETED numeric(1),
+	FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT ),
+	FOREIGN KEY (LOCATION_ID)  REFERENCES Locations (ID_LOCATION )
+);
 
 drop table if exists UserSessions;
 create table UserSessions(
@@ -135,7 +150,7 @@ create table Events(
 	LOCATION_ID INTEGER,
 	RESOURCE_ID INTEGER,
 	SESSION_ID INTEGER,
-	IEVENT_TYPE_ID INTEGER,
+	EVENT_TYPE_ID INTEGER,
 	N_LATITUDE numeric(3,7),
 	N_LONGITUTE numeric(3,7),
 	N_CURRENT numeric(6),
@@ -149,7 +164,7 @@ create table Events(
     FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT),
     FOREIGN KEY (RESOURCE_ID)  REFERENCES Resources (ID_RESOURCE),
     FOREIGN KEY (LOCATION_ID)  REFERENCES Locations (ID_LOCATION),
-    FOREIGN KEY (IEVENT_TYPE_ID)  REFERENCES EventTypes (ID_IEVENT_TYPE),
+    FOREIGN KEY (EVENT_TYPE_ID)  REFERENCES EventTypes (ID_IEVENT_TYPE),
     FOREIGN KEY (SESSION_ID)  REFERENCES Sessions (ID_SESSION)
 );
 
