@@ -35,10 +35,41 @@ public class TimeOfUsageController {
         return timeOfUsageDao.saveTimeOfUsage(smTimeOfUsage, securityService.getAccount().getIdAccount());
     }
 
-    @RequestMapping(value = "/tous", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SmTimeOfUsage updateTimeOfUsage(HttpServletRequest request, @RequestBody SmTimeOfUsage smTimeOfUsage) throws Exception {
+    @RequestMapping(value = "/resource/{resource_id}/tou", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SmTimeOfUsage getTimeOfUsageByResource(HttpServletRequest request, @RequestBody SmTimeOfUsage smTimeOfUsage, @PathVariable("resource_id") Long resourceId) throws Exception {
         Long accountId = securityService.getAccount().getIdAccount();
-        SmTimeOfUsage existing = timeOfUsageDao.getTimeOfUsageByIdAndAccountId(smTimeOfUsage.getAccountId(), accountId);
+        return timeOfUsageDao.getTimeOfUsageByResourceIdAndAccountId(resourceId, accountId);
+    }
+
+    @RequestMapping(value = "/resource/{resource_id}/tou", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SmTimeOfUsage updateTimeOfUsageByResource(HttpServletRequest request, @RequestBody SmTimeOfUsage smTimeOfUsage, @PathVariable("resource_id") Long resourceId) throws Exception {
+        Long accountId = securityService.getAccount().getIdAccount();
+        SmTimeOfUsage existing = timeOfUsageDao.getTimeOfUsageByResourceIdAndAccountId(resourceId, accountId);
+        if (existing == null) {
+            return null;
+        }
+        if (smTimeOfUsage.getResourceId() != null) {
+            existing.setResourceId(smTimeOfUsage.getResourceId());
+        }
+        if (smTimeOfUsage.getLocationId() != null) {
+            existing.setLocationId(smTimeOfUsage.getLocationId());
+        }
+        if (smTimeOfUsage.getIdTou() != null) {
+            existing.setIdTou(smTimeOfUsage.getIdTou());
+        }
+        if (smTimeOfUsage.getStart() != null) {
+            existing.setStart(smTimeOfUsage.getStart());
+        }
+        if (smTimeOfUsage.getStop() != null) {
+            existing.setStop(smTimeOfUsage.getStop());
+        }
+        return timeOfUsageDao.saveTimeOfUsage(existing, accountId);
+    }
+
+    @RequestMapping(value = "/tous/{tou_id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SmTimeOfUsage updateTimeOfUsage(HttpServletRequest request, @RequestBody SmTimeOfUsage smTimeOfUsage, @PathVariable("tou_id") Long touId) throws Exception {
+        Long accountId = securityService.getAccount().getIdAccount();
+        SmTimeOfUsage existing = timeOfUsageDao.getTimeOfUsageByIdAndAccountId(touId, accountId);
         if (existing == null) {
             return timeOfUsageDao.saveTimeOfUsage(smTimeOfUsage, accountId);
         }

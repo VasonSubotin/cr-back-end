@@ -16,6 +16,12 @@ public class SmTimeOfUsage implements Serializable {
     @Column(name = "ACCOUNT_ID")
     private Long accountId;
 
+    @Column(name = "RESOURCE_ID")
+    private Long resourceId;
+
+    @Column(name = "LOCATION_ID")
+    private Long locationId;
+
     @Column(name = "N_START")
     private Long start;
 
@@ -74,5 +80,21 @@ public class SmTimeOfUsage implements Serializable {
 
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public Long getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public Long getLocationId() {
+        return locationId;
+    }
+
+    public void setLocationId(Long locationId) {
+        this.locationId = locationId;
     }
 }

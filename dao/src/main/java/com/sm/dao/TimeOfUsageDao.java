@@ -12,6 +12,8 @@ public interface TimeOfUsageDao {
 
     SmTimeOfUsage getTimeOfUsageByIdAndAccountId(Long id, Long accountId);
 
+    SmTimeOfUsage getTimeOfUsageByResourceIdAndAccountId(Long resourceId, Long accountId);
+
     @Transactional(readOnly = false)
     SmTimeOfUsage saveTimeOfUsage(SmTimeOfUsage smTimeOfUsage, Long accountId);
 

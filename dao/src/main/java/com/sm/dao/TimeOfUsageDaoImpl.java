@@ -39,6 +39,18 @@ public class TimeOfUsageDaoImpl implements TimeOfUsageDao {
         return sessionFactory.getCurrentSession().get(SmTimeOfUsage.class, id);
     }
 
+    @Override
+    public SmTimeOfUsage getTimeOfUsageByResourceIdAndAccountId(Long resourceId, Long accountId) {
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmTimeOfUsage where (deleted=0 or deleted is null) and accountId=:accountId and resourceId=:resourceId";
+        Query query = session.createQuery(hql);
+        query.setParameter("accountId", accountId);
+        query.setParameter("resourceId", resourceId);
+        List results = query.getResultList();
+
+        return results.isEmpty() ? null : (SmTimeOfUsage) results.get(0);
+    }
+
     @Transactional(readOnly = false)
     @Override
     public SmTimeOfUsage saveTimeOfUsage(SmTimeOfUsage smTimeOfUsage, Long accountId) {

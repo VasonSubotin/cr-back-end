@@ -45,10 +45,10 @@ public class ResourcesController {
         return resourcesDao.saveResource(smResource, securityService.getAccount().getIdAccount());
     }
 
-    @RequestMapping(value = "/resources", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SmResource saveResourceUpadte(HttpServletRequest request, HttpServletResponse response, @RequestBody SmResource smResource) throws Exception {
+    @RequestMapping(value = "/resources/{resource_id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SmResource saveResourceUpadte(HttpServletRequest request, HttpServletResponse response, @RequestBody SmResource smResource, @PathVariable("resource_id") Long resourceId) throws Exception {
         Long accountId = securityService.getAccount().getIdAccount();
-        SmResource smResourceExists = resourcesDao.getResourceByIdAndAccountId(smResource.getIdResource(), accountId);
+        SmResource smResourceExists = resourcesDao.getResourceByIdAndAccountId(resourceId, accountId);
         if (smResourceExists == null) {
             smResource.setDtCreated(new Date());
             response.setStatus(HttpStatus.CREATED.value());
