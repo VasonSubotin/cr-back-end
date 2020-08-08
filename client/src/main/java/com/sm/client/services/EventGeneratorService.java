@@ -2,7 +2,6 @@ package com.sm.client.services;
 
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.dao.*;
-import com.sm.dao.conf.Constants;
 import com.sm.model.*;
 import com.smartcar.sdk.AuthClient;
 import com.smartcar.sdk.SmartcarException;

@@ -4,10 +4,12 @@ import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Events;
 import com.sm.client.utils.JwtTokenUtil;
-import com.sm.dao.conf.Constants;
+
+import com.sm.model.Constants;
 import com.sm.model.SmException;
 import com.sm.model.SmUserSession;
 import org.slf4j.Logger;
@@ -26,6 +28,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 
 @Service
 public class GoogleService {
@@ -131,6 +134,17 @@ public class GoogleService {
         return getCalendar().events().list("primary").setMaxResults(maxResult).execute();
     }
 
+    public Events getEventsForPeriodInMills(Long from, long timeRangeInMills) throws SmException, IOException {
+        long current = from == null ? System.currentTimeMillis() : from;
+        long end = current + timeRangeInMills;
+        return getCalendar().events().list("primary").setTimeMin(new DateTime(current)).setTimeMax(new DateTime(end)).execute();
+    }
+
+    private final long time24hours = 24 * 3600 * 1000;
+
+    public Events getEventsForNext24hours() throws SmException, IOException {
+        return getEventsForPeriodInMills(null, time24hours);
+    }
 
     public void stratSession(String code) throws SmException, IOException {
         TokenResponse tokenResponse = getToken(code);

@@ -8,18 +8,6 @@ import java.util.Date;
 @Table(name = "Locations")
 public class SmLocation {
 
-
-//    ID_LOCATION INTEGER Primary key AUTOINCREMENT,
-//    V_NAME varchar(32),
-//    V_DESCRIPTION varchar(128),
-//    N_LATITUDE numeric(10),
-//    N_LONGITUTE numeric(10),
-//    V_TIME_ZONE varchar(8),
-//    DT_CREATED datetime,
-//    B_TOU_ENABLED numeric(1),
-//    B_DELETED numeric(1)
-
-
     @Id
     @Column(name = "ID_LOCATION")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +30,9 @@ public class SmLocation {
 
     @Column(name = "F_PRICE")
     private Double price;
+
+    @Column(name = "N_POWER")
+    private Long power;
 
     @Column(name = "V_TIME_ZONE")
     private String timeZone;
@@ -125,6 +116,14 @@ public class SmLocation {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Long getPower() {
+        return power;
+    }
+
+    public void setPower(Long power) {
+        this.power = power;
     }
 
     public Boolean getTouEnabled() {

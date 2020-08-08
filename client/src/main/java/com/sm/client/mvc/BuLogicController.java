@@ -1,7 +1,8 @@
 package com.sm.client.mvc;
 
-import com.sm.client.services.LocationScheduleService;
-import com.sm.client.services.ScheduleService;
+import com.sm.client.services.calcs.LocationScheduleService;
+import com.sm.client.services.calcs.SchedulerService;
+import com.sm.client.services.calcs.TimeScheduleService;
 import com.sm.client.services.SecurityService;
 import com.sm.model.PolicyType;
 import com.sm.client.model.smartcar.SchedulerData;
@@ -11,8 +12,6 @@ import com.sm.client.model.to.EventIntervalTO;
 import com.sm.client.services.EcoService;
 import com.sm.client.services.optimization.OptimizationServiceFactory;
 import com.sm.client.utils.StringDateUtil;
-import com.sm.model.SmAccount;
-import com.sm.model.web.LocationScheduleItem;
 import com.smartcar.sdk.SmartcarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,7 @@ public class BuLogicController {
 //    private CO2OptimizationService co2OptimizationService;
 
     @Autowired
-    private ScheduleService scheduleService;
+    private SchedulerService schedulerService;
 
     @Autowired
     private LocationScheduleService locationScheduleService;
@@ -90,17 +89,15 @@ public class BuLogicController {
     public SchedulerData calculateScheduler(
             @PathVariable("resourceId") long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,
-            @RequestParam(name = "endtime", required = false) String endtime,
-            @RequestParam(name = "testMode", required = false, defaultValue = "false") Boolean mock) throws Exception {
-        String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        return scheduleService.calculateSchedule(login, resourceId, starttime, endtime);
+            @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
+        return schedulerService.calculateSchedule(resourceId);
     }
 
     @RequestMapping(value = "/resources/{resourceId}/schedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SchedulerData getScheduler(
             @PathVariable("resourceId") long resourceId) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        return scheduleService.getLastSchdule(login, resourceId);
+        return schedulerService.getLastSchdule(login, resourceId);
     }
 
     @RequestMapping(value = "/getEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -123,22 +120,24 @@ public class BuLogicController {
     }
 
 
-    @RequestMapping(value = "/resources/{resourceId}/calculateLocationScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SchedulerData calculateLocationScheduler(
-            @PathVariable("resourceId") long resourceId,
-            @RequestParam(name = "starttime", required = false) String starttime,
-            @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
-        Date start = StringDateUtil.parseDate(starttime);
-        start = start != null ? start : getBeginningOfDay();
-        Date stop = StringDateUtil.parseDate(endtime);
-        stop = stop != null ? stop : getEndOfDay();
-        //List<LocationScheduleItem>
-        return locationScheduleService.calculate(
-                securityService.getAccount().getIdAccount(),
-                resourceId,
-                300, start,
-                stop
-        );
-    }
+//    @RequestMapping(value = "/resources/{resourceId}/calculateLocationScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public SchedulerData calculateLocationScheduler(
+//            @PathVariable("resourceId") long resourceId,
+//            @RequestParam(name = "starttime", required = false) String starttime,
+//            @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
+//        Date start = StringDateUtil.parseDate(starttime);
+//        start = start != null ? start : getBeginningOfDay();
+//        Date stop = StringDateUtil.parseDate(endtime);
+//        stop = stop != null ? stop : getEndOfDay();
+//
+//
+//
+//        return locationScheduleService.calculate(
+//                securityService.getAccount().getIdAccount(),
+//                resourceId,
+//                300, start,
+//                stop
+//        );
+//    }
 
 }

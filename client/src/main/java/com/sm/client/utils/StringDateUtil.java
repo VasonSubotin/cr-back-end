@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class StringDateUtil {
+    public static final long DAY_IN_MILLS = 24L * 3600000L;
 
     public static Integer getDayOfWeek(Date date) {
         Calendar calendar = Calendar.getInstance();

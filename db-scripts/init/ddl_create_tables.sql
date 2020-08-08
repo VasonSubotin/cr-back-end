@@ -91,7 +91,8 @@ drop table if exists Locations;
 create table Locations(
 	ID_LOCATION INTEGER Primary key AUTOINCREMENT,
 	ACCOUNT_ID INTEGER,
-	F_PRICE numeric(6,6)
+	F_PRICE numeric(6,6),
+	N_POWER numeric(6),
 	V_NAME varchar(32),
 	V_DESCRIPTION varchar(128),
 	N_LATITUDE numeric(3,7),

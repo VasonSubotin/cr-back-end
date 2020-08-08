@@ -1,7 +1,7 @@
 package com.sm.client.services;
 
 import com.sm.dao.AccountsDao;
-import com.sm.dao.conf.Constants;
+
 import com.sm.model.SmAccount;
 import com.sm.model.SmException;
 import org.apache.http.HttpStatus;

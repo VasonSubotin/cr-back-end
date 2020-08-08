@@ -5,7 +5,7 @@ import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.cache.VehiclesCache;
 import com.sm.dao.AccountsDao;
 import com.sm.dao.ResourcesDao;
-import com.sm.dao.conf.Constants;
+
 import com.sm.model.*;
 import com.smartcar.sdk.AuthClient;
 import com.smartcar.sdk.SmartcarException;
@@ -113,15 +113,19 @@ public class SmartCarService {
         }
     }
 
-    public VehicleData getVehicleData(SmUserSession userSession, SmResource smResource) throws SmartcarException {
-        SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
-
-        for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
-            Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
-            String vId = vehicle.vin();
-            if (vId.equals(smResource.getExternalResourceId())) {
-                return getSingleData(vehicle, vId);
+    public VehicleData getVehicleData(SmUserSession userSession, SmResource smResource) throws SmException {
+        try {
+            SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
+            for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
+                Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
+                String vId = vehicle.vin();
+                if (vId.equals(smResource.getExternalResourceId())) {
+                    return getSingleData(vehicle, vId);
+                }
             }
+        } catch (SmartcarException e) {
+            logger.error(e.getMessage(), e);
+            throw new SmException(e.getMessage(), HttpStatus.SC_EXPECTATION_FAILED);
         }
         return null;
     }
@@ -132,8 +136,8 @@ public class SmartCarService {
         try {
             vehicleData.setBattery(vehicle.battery().getData());
         } catch (Exception ex) {
-            logger.error("ailed to get battery info for {} due to error : {} - will use default value 50%" , ex.getMessage(), ex);
-            vehicleData.setBattery(new VehicleBattery(100D,50D));
+            logger.error("ailed to get battery info for {} due to error : {} - will use default value 50%", ex.getMessage(), ex);
+            vehicleData.setBattery(new VehicleBattery(100D, 50D));
         }
 
         try {

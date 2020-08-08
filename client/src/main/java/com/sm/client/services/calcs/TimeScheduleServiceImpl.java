@@ -1,16 +1,14 @@
-package com.sm.client.services;
+package com.sm.client.services.calcs;
 
 import com.sm.client.model.eco.LocationData;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.VehicleData;
+import com.sm.client.services.EcoService;
+import com.sm.client.services.ScheduleTransformService;
+import com.sm.client.services.SecurityService;
 import com.sm.client.services.optimization.OptimizationServiceFactory;
-import com.sm.dao.ResourcesDao;
 import com.sm.dao.ScheduleDao;
-import com.sm.dao.conf.Constants;
-import com.sm.model.PolicyType;
-import com.sm.model.SmException;
-import com.sm.model.SmResource;
-import com.sm.model.SmUserSession;
+import com.sm.model.*;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,22 +16,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ScheduleServiceImpl implements ScheduleService {
+public class TimeScheduleServiceImpl implements TimeScheduleService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ScheduleServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(TimeScheduleServiceImpl.class);
 
     private static final long DEFAULT_RATE = 10000;
+
     @Autowired
     private OptimizationServiceFactory optimizationServiceFactory;
 
     @Autowired
     private EcoService ecoService;
 
-    @Autowired
-    private SmartCarService smartCarService;
-
-    @Autowired
-    private ResourcesDao resourcesDao;
 
     @Autowired
     private SecurityService securityService;
@@ -45,11 +39,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private ScheduleDao scheduleDao;
 
     @Override
-    public SchedulerData calculateSchedule(String login, Long resourceId, String starttime, String endtime) throws Exception {
-
-        SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
-
-        SmResource smResource = resourcesDao.getResourceByIdAndAccountId(resourceId, smUserSession.getAccountId());
+    public SchedulerData calculateSchedule(VehicleData smData, SmResource smResource, String starttime, String endtime) throws Exception {
 
         PolicyType policyType = PolicyType.getById(smResource.getPolicyId());
         if (policyType == null) {
@@ -57,16 +47,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             throw new SmException("Failed to understand policy by id[" + smResource.getPolicyId() + "]", HttpStatus.SC_NOT_FOUND);
         }
 
-        logger.debug("resource[{}] - found location policyType[{}]", smResource.getIdResource(), policyType);
-
-        // first getting current state of car
-        VehicleData smData = smartCarService.getVehicleData(smUserSession, smResource);
-
         String locationAbrv = "ba";
-        if (smData == null) {
-            logger.error("*** Failed to get data of car for resource by external id[{}] ****", smResource.getExternalResourceId());
-            throw new SmException("*** Failed to get location of car for resource by external id[" + smResource.getExternalResourceId() + "] ****", HttpStatus.SC_NOT_FOUND);
-        }
 
         if (smData.getLocation() == null || smData.getLocation().getData() == null) {
             logger.error("*** Failed to get location of car for resource by external id[{}] -- will use default location ba ****", smResource.getExternalResourceId());
@@ -91,12 +72,4 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.saveSmSchedules(scheduleTransformService.scheduleWebToSmSchedules(schedulerData)));
     }
-
-
-    @Override
-    public SchedulerData getLastSchdule(String login, Long resourceId) throws Exception {
-        SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
-        return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.getLastSmSchedulesByResourceId(resourceId, smUserSession.getAccountId()));
-    }
-
 }
