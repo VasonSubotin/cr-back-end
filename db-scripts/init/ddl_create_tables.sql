@@ -27,7 +27,7 @@ create table Resources(
 	V_MODEL varchar(64),
 	POLICY_ID numeric(2),
 	ACCOUNT_ID numeric(10),
-	CHARGE_BY_TIME  numeric(6),
+	N_CHARGE_BY_TIME  numeric(6),
 	RESOURCE_TYPE_ID varchar(64),
 	V_GROUP_ID varchar(64),
 	N_POWER numeric(6),

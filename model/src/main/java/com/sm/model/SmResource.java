@@ -1,5 +1,8 @@
 package com.sm.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -39,6 +42,10 @@ public class SmResource implements Serializable {
 
     @Column(name = "N_CAPACITY")
     private Long capacity;
+
+    @JsonProperty("chargeby_time")
+    @Column(name = "N_CHARGE_BY_TIME")
+    private Long nChargeByTime;
 
     @Column(name = "DT_UPDATED")
     private Date dtUpdated;
@@ -151,5 +158,13 @@ public class SmResource implements Serializable {
 
     public Boolean getDeleted() {
         return deleted;
+    }
+
+    public Long getnChargeByTime() {
+        return nChargeByTime;
+    }
+
+    public void setnChargeByTime(Long nChargeByTime) {
+        this.nChargeByTime = nChargeByTime;
     }
 }
