@@ -93,6 +93,7 @@ public class SchedulerServiceimpl implements SchedulerService {
             schedulerData = locationScheduleService.calculate(smUserSession.getAccountId(), smData, smResource);
         }
         schedulerData.setInitialEnergy((long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity()));
+        scheduleDao.saveSmSchedules(scheduleTransformService.scheduleWebToSmSchedules(schedulerData));
         return schedulerData;
     }
 
