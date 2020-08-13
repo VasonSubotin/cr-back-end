@@ -27,6 +27,9 @@ public class SmSchedules {
     @Column(name = "F_CARBON_SAVINGS")
     private Double carbonSavings;
 
+    @Column(name = "N_INIT_ENERGY")
+    private Long initEnergy;
+
     @Column(name = "F_FINANCE_SAVINGS")
     private Double financeSavings;
 
@@ -102,6 +105,14 @@ public class SmSchedules {
 
     public void setFinanceSavings(Double financeSavings) {
         this.financeSavings = financeSavings;
+    }
+
+    public Long getInitEnergy() {
+        return initEnergy;
+    }
+
+    public void setInitEnergy(Long initEnergy) {
+        this.initEnergy = initEnergy;
     }
 
     public Long getSessionId() {

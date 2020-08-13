@@ -27,6 +27,9 @@ public class SchedulerData implements Serializable {
     @JsonProperty("location_id")
     private Long locationId;
 
+    @JsonProperty("initial_energy ")
+    private Long initialEnergy;
+
     // can be flying, driving, changing
     @JsonProperty("session_type")
     private String sessionType;
@@ -165,5 +168,13 @@ public class SchedulerData implements Serializable {
 
     public void setCreatedTime(Date createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public Long getInitialEnergy() {
+        return initialEnergy;
+    }
+
+    public void setInitialEnergy(Long initialEnergy) {
+        this.initialEnergy = initialEnergy;
     }
 }

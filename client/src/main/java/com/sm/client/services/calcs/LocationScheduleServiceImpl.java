@@ -175,6 +175,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             schedulerInterval.setEnergy(intervalOfLocation.getCharge());
             schedulerInterval.setCostOfCharging(intervalOfLocation.getSummaryPrice());
         }
+        ret.setInitialEnergy(currentEnergy);
         return ret;
     }
 

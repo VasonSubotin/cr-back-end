@@ -40,8 +40,9 @@ public class EcoOptimizationService extends AbstractOptimizationService {
                 break;
             }
         }
-
-        return calculateSchedulerData(co2DataList, timeSortedResult, rateInWt, timeInMinsNeed);
+        SchedulerData schedulerData = calculateSchedulerData(co2DataList, timeSortedResult, rateInWt, timeInMinsNeed);
+        schedulerData.setInitialEnergy(chargeLevelInWt);
+        return schedulerData;
     }
 
     @Override

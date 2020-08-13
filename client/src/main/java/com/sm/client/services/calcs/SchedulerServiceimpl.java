@@ -70,7 +70,7 @@ public class SchedulerServiceimpl implements SchedulerService {
             logger.error("*** Failed to get data of car for resource by external id[{}] ****", smResource.getExternalResourceId());
             throw new SmException("*** Failed to get location of car for resource by external id[" + smResource.getExternalResourceId() + "] ****", HttpStatus.SC_NOT_FOUND);
         }
-
+        SchedulerData schedulerData = null;
         //checking state of recource
         if (smData.getCharge() != null && smData.getCharge().getData() != null && smData.getCharge().getData().getIsPluggedIn()) {
             // if plugined - generates Time scheduler
@@ -87,11 +87,13 @@ public class SchedulerServiceimpl implements SchedulerService {
                 startTime = sdf.format(new Date(event.getStart().getDate().getValue()));
                 endTime = sdf.format(new Date(event.getEnd().getDate().getValue()));
             }
-            return timeScheduleService.calculateSchedule(smData, smResource, startTime, endTime);
+            schedulerData = timeScheduleService.calculateSchedule(smData, smResource, startTime, endTime);
         } else {
             //generates location scheduler
-            return locationScheduleService.calculate(smUserSession.getAccountId(), smData, smResource);
+            schedulerData = locationScheduleService.calculate(smUserSession.getAccountId(), smData, smResource);
         }
+        schedulerData.setInitialEnergy((long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity()));
+        return schedulerData;
     }
 
     @Override
