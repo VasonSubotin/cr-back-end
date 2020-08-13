@@ -6,7 +6,7 @@
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <file>${file.log}</file>
         <encoder>
-            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+            <pattern>%d{"yyyy-MM-dd HH:mm:ss.SSS"}  [%thread] %-5level %logger{35} - %msg %n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${log.file}.%d{yyyy-MM-dd}.gz</fileNamePattern>
