@@ -63,7 +63,9 @@ public class SchedulerServiceimpl implements SchedulerService {
 
         //trying to get current state of resources
         SmResource smResource = resourcesDao.getResourceByIdAndAccountId(resourceId, smUserSession.getAccountId());
-
+        if (smResource == null) {
+            throw new SmException("Can't find resource with id=" + resourceId, 404);
+        }
         // first getting current state of car
         VehicleData smData = smartCarService.getVehicleData(smUserSession, smResource);
         if (smData == null) {
