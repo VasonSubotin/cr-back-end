@@ -119,7 +119,7 @@ public class BuLogicController {
         return Arrays.asList();
     }
 
-    @RequestMapping(value = "/resources/{resource_id}/calculateGeo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/resources/{resourceId}/calculateGeo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SchedulerData calculateGeo(
             @PathVariable("resourceId") long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,
