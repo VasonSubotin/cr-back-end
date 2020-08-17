@@ -22,6 +22,7 @@ import com.sm.model.cache.Coordinates;
 import com.sm.model.calcs.EventWrapper;
 import com.sm.model.calcs.LocationWrapper;
 import com.sm.model.web.LocationScheduleItem;
+import com.smartcar.sdk.data.VehicleLocation;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,6 +177,76 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             schedulerInterval.setCostOfCharging(intervalOfLocation.getSummaryPrice());
         }
         ret.setInitialEnergy(currentEnergy);
+        return ret;
+    }
+
+    @Override
+    public SchedulerData calculateGeo(Long accountId, VehicleData smData, SmResource smResource) throws SmException, IOException {
+        VehicleLocation vehicleLocation = smData.getLocation().getData();
+        double latitudes[] = GeoUtils.calculateLatRange(vehicleLocation.getLatitude(), 15000);
+        double longitude[] = GeoUtils.calculateLngRange(vehicleLocation.getLatitude(), vehicleLocation.getLongitude(), 15000);
+        List<SmLocation> locations = locationDao.getLocationsInSmallRangeAndAccountId(accountId, latitudes[0], longitude[0], latitudes[1], longitude[1]);
+
+        if (locations == null || locations.isEmpty()) {
+            throw new SmException("Can't find any location near point " + vehicleLocation.getLatitude() + "," + vehicleLocation.getLongitude() + " within 10 mills", HttpStatus.SC_NOT_FOUND);
+        }
+
+        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity());
+
+        Double minCost = Double.MAX_VALUE;
+        SmLocation smLocationMinPrice = null;
+        double minPriceDistance = Double.MAX_VALUE;
+        double minEnergyPrice = 0;
+
+        double minDistance = Double.MAX_VALUE;
+        SmLocation smLocationMinDistance = null;
+        double minEnergyDistance = 0;
+        //calculatig optimal price and distance
+        for (SmLocation smLocation : locations) {
+
+            //calculating distance to location
+            Double distance = GeoUtils.calculateDistance(vehicleLocation.getLatitude(), vehicleLocation.getLongitude(), smLocation.getLatitude(), smLocation.getLongitude());
+            long needMinEnergy = (long) (distance / Constants.KILLOMETER_PER_WATT);
+            if (distance < minDistance) {
+                smLocationMinDistance = smLocation;
+                minEnergyDistance = needMinEnergy;
+            }
+
+            if (smLocation.getPrice() == null || smLocation.getPrice() == 0) {
+                continue;
+            }
+            double cost = (smResource.getCapacity() - (currentEnergy - needMinEnergy)) * smLocation.getPrice();
+            if (cost < minCost) {
+                smLocationMinPrice = smLocation;
+                minPriceDistance = distance;
+                minEnergyPrice = needMinEnergy;
+            }
+        }
+
+        if (smLocationMinPrice == null) {
+            smLocationMinPrice = smLocationMinDistance;
+            minCost = null;
+            minPriceDistance = minDistance;
+            minEnergyPrice = minEnergyDistance;
+        }
+
+        //generating schedule
+        SchedulerData ret = new SchedulerData();
+
+        //creating scheduler item
+        SchedulerInterval schedulerInterval = new SchedulerInterval();
+        ret.setIntervals(Arrays.asList(schedulerInterval));
+
+        schedulerInterval.setIntervalType(SchedulerInterval.IntervalType.DRV);
+        schedulerInterval.setLocationId(smLocationMinPrice.getIdLocation());
+        schedulerInterval.setPrice(minCost);
+        schedulerInterval.setChargeRate(smLocationMinPrice.getPower());
+
+        //calculating time which we need to reach location
+        long timeToLocation = (long) ((3600D * minPriceDistance / 30000D) * 1000D);
+        schedulerInterval.setStarttime(new Date(System.currentTimeMillis() + timeToLocation));
+        schedulerInterval.setDuration((long) (3600000 * minEnergyPrice / smLocationMinPrice.getPower()));
+
         return ret;
     }
 

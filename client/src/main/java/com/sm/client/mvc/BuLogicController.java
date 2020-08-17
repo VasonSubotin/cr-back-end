@@ -90,7 +90,7 @@ public class BuLogicController {
             @PathVariable("resourceId") long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
-        return schedulerService.calculateSchedule(resourceId);
+        return schedulerService.calculateSchedule(resourceId, false);
     }
 
     @RequestMapping(value = "/resources/{resourceId}/schedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -119,6 +119,14 @@ public class BuLogicController {
         return Arrays.asList();
     }
 
+    @RequestMapping(value = "/resources/{resource_id}/calculateGeo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SchedulerData calculateGeo(
+            @PathVariable("resourceId") long resourceId,
+            @RequestParam(name = "starttime", required = false) String starttime,
+            @RequestParam(name = "endtime", required = false) String endtime
+    ) throws Exception {
+        return schedulerService.calculateSchedule(resourceId, true);
+    }
 
 //    @RequestMapping(value = "/resources/{resourceId}/calculateLocationScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 //    public SchedulerData calculateLocationScheduler(

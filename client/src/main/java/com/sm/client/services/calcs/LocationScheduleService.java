@@ -10,4 +10,6 @@ import java.util.Date;
 
 public interface LocationScheduleService {
     SchedulerData calculate(Long accountId, VehicleData smData, SmResource smResource) throws SmException, IOException;
+
+    SchedulerData calculateGeo(Long accountId, VehicleData smData, SmResource smResource) throws SmException, IOException;
 }

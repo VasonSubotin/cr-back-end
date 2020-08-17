@@ -56,7 +56,7 @@ public class SchedulerServiceimpl implements SchedulerService {
     private ScheduleDao scheduleDao;
 
     @Override
-    public SchedulerData calculateSchedule(Long resourceId) throws Exception {
+    public SchedulerData calculateSchedule(Long resourceId, boolean geo) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         SmUserSession smUserSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
@@ -74,25 +74,29 @@ public class SchedulerServiceimpl implements SchedulerService {
         }
         SchedulerData schedulerData = null;
         //checking state of recource
-        if (smData.getCharge() != null && smData.getCharge().getData() != null && smData.getCharge().getData().getIsPluggedIn()) {
-            // if plugined - generates Time scheduler
-            //getting current event if any
-            Event event = getCurrentEvent();
-            String startTime = null;
-            String endTime = null;
-            if (event == null) {
-                // no calendar is avilable
-                startTime = sdf.format(new Date());
-                endTime = sdf.format(new Date(System.currentTimeMillis() + StringDateUtil.DAY_IN_MILLS));
-                logger.info("no current event is avilable - will use unlimited time range[{} - {}]", startTime, endTime);
-            } else {
-                startTime = sdf.format(new Date(event.getStart().getDate().getValue()));
-                endTime = sdf.format(new Date(event.getEnd().getDate().getValue()));
-            }
-            schedulerData = timeScheduleService.calculateSchedule(smData, smResource, startTime, endTime);
+        if (geo) {
+            schedulerData = locationScheduleService.calculateGeo(smUserSession.getAccountId(), smData, smResource);
         } else {
-            //generates location scheduler
-            schedulerData = locationScheduleService.calculate(smUserSession.getAccountId(), smData, smResource);
+            if (smData.getCharge() != null && smData.getCharge().getData() != null && smData.getCharge().getData().getIsPluggedIn()) {
+                // if plugined - generates Time scheduler
+                //getting current event if any
+                Event event = getCurrentEvent();
+                String startTime = null;
+                String endTime = null;
+                if (event == null) {
+                    // no calendar is avilable
+                    startTime = sdf.format(new Date());
+                    endTime = sdf.format(new Date(System.currentTimeMillis() + StringDateUtil.DAY_IN_MILLS));
+                    logger.info("no current event is avilable - will use unlimited time range[{} - {}]", startTime, endTime);
+                } else {
+                    startTime = sdf.format(new Date(event.getStart().getDate().getValue()));
+                    endTime = sdf.format(new Date(event.getEnd().getDate().getValue()));
+                }
+                schedulerData = timeScheduleService.calculateSchedule(smData, smResource, startTime, endTime);
+            } else {
+                //generates location scheduler
+                schedulerData = locationScheduleService.calculate(smUserSession.getAccountId(), smData, smResource);
+            }
         }
         schedulerData.setInitialEnergy((long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity()));
         scheduleDao.saveSmSchedules(scheduleTransformService.scheduleWebToSmSchedules(schedulerData));
