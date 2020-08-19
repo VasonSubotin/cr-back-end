@@ -1,6 +1,7 @@
 package com.sm.client.services;
 
 
+import com.sm.client.model.smartcar.SmResourceState;
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.cache.VehiclesCache;
 import com.sm.dao.AccountsDao;
@@ -130,6 +131,39 @@ public class SmartCarService {
         return null;
     }
 
+    public List<SmResourceState> getResourceState(String login) throws SmException {
+        SmUserSession userSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+
+        if (userSession == null) {
+            throw new SmException("No active smart car session found for user " + login, HttpStatus.SC_FORBIDDEN);
+        }
+
+        List<SmResource> resources = resourcesDao.getAllResourceByAccountId(userSession.getAccountId());
+        Map<String, SmResource> resourceMap = resources.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a, (n, o) -> n));
+
+        List<SmResourceState> ret = new ArrayList<>();
+        Set<String> unUsedVins = new HashSet<>(resourceMap.keySet());
+        try {
+            SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
+            for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
+                Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
+                String vId = vehicle.vin();
+                SmResource resource = resourceMap.get(vId);
+                if (resource != null) {
+                    ret.add(new SmResourceState(getSingleData(vehicle, vId), resource));
+                    unUsedVins.remove(vId);
+                }
+            }
+            for (String vId : unUsedVins) {
+                SmResource resource = resourceMap.get(vId);
+                ret.add(new SmResourceState(null, resource));
+            }
+        } catch (SmartcarException e) {
+            logger.error(e.getMessage(), e);
+            throw new SmException(e.getMessage(), HttpStatus.SC_EXPECTATION_FAILED);
+        }
+        return ret;
+    }
 
     private VehicleData getSingleData(Vehicle vehicle, String vin) {
         VehicleData vehicleData = new VehicleData();

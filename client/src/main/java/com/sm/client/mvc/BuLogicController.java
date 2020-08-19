@@ -85,19 +85,34 @@ public class BuLogicController {
         return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId, mock);
     }
 
-    @RequestMapping(value = "/resources/{resourceId}/calculate", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SchedulerData calculateScheduler(
+    @RequestMapping(value = "/resources/{resourceId}/drivingSchedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SchedulerData drivingSchedule(
             @PathVariable("resourceId") long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
-        return schedulerService.calculateSchedule(resourceId, false);
+        return schedulerService.calculateDrivingSchedule(resourceId);
     }
+
+    @RequestMapping(value = "/resources/{resourceId}/charingSchedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SchedulerData charingSchedule(
+            @PathVariable("resourceId") long resourceId,
+            @RequestParam(name = "starttime", required = false) String starttime,
+            @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
+        return schedulerService.calculateCharingSchedule(resourceId);
+    }
+
 
     @RequestMapping(value = "/resources/{resourceId}/schedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SchedulerData getScheduler(
             @PathVariable("resourceId") long resourceId) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
         return schedulerService.getLastSchdule(login, resourceId);
+    }
+
+    @RequestMapping(value = "/resources/{resourceId}/schedule", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public SchedulerData saveScheduler(
+            @RequestBody SchedulerData schedulerData) throws Exception {
+        return schedulerService.saveSchdule(schedulerData, securityService.getAccount().getIdAccount());
     }
 
     @RequestMapping(value = "/getEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -118,6 +133,18 @@ public class BuLogicController {
         }
         return Arrays.asList();
     }
+//    Implement  /resources/{resource_id}/DrivingSchedule
+//    Implement  /resources/{resource_id}/CharingSchedule
+//    @RequestMapping(value = "/resources/{resourceId}/calculateGeo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public SchedulerData calculateGeo(
+//            @PathVariable("resourceId") long resourceId,
+//            @RequestParam(name = "starttime", required = false) String starttime,
+//            @RequestParam(name = "endtime", required = false) String endtime
+//    ) throws Exception {
+//        return schedulerService.calculateSchedule(resourceId, true);
+//    }
+
+
 
     @RequestMapping(value = "/resources/{resourceId}/calculateGeo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SchedulerData calculateGeo(
@@ -125,27 +152,6 @@ public class BuLogicController {
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime
     ) throws Exception {
-        return schedulerService.calculateSchedule(resourceId, true);
+        return schedulerService.calculateDrivingScheduleGeo(resourceId);
     }
-
-//    @RequestMapping(value = "/resources/{resourceId}/calculateLocationScheduler", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public SchedulerData calculateLocationScheduler(
-//            @PathVariable("resourceId") long resourceId,
-//            @RequestParam(name = "starttime", required = false) String starttime,
-//            @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
-//        Date start = StringDateUtil.parseDate(starttime);
-//        start = start != null ? start : getBeginningOfDay();
-//        Date stop = StringDateUtil.parseDate(endtime);
-//        stop = stop != null ? stop : getEndOfDay();
-//
-//
-//
-//        return locationScheduleService.calculate(
-//                securityService.getAccount().getIdAccount(),
-//                resourceId,
-//                300, start,
-//                stop
-//        );
-//    }
-
 }

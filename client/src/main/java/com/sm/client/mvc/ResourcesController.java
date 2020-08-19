@@ -1,7 +1,9 @@
 package com.sm.client.mvc;
 
+import com.sm.client.model.smartcar.SmResourceState;
 import com.sm.client.services.CommonService;
 import com.sm.client.services.SecurityService;
+import com.sm.client.services.SmartCarService;
 import com.sm.dao.ResourcesDao;
 import com.sm.model.SmException;
 import com.sm.model.SmResource;
@@ -27,6 +29,9 @@ public class ResourcesController {
 
     @Autowired
     private CommonService commonService;
+
+    @Autowired
+    private SmartCarService smartCarService;
 
     @RequestMapping(value = "/resources/{resource_id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SmResource getUserResourcesById(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") int resourceId) throws Exception {
@@ -95,5 +100,10 @@ public class ResourcesController {
     @RequestMapping(value = "/resources/{resource_id}/resourceInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public RecourseInfo getRecourseInfo(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") long resourceId) throws SmException {
         return commonService.getRecourseInfo(securityService.getAccount().getIdAccount(), resourceId);
+    }
+
+    @RequestMapping(value = "/resources/stateInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<SmResourceState> getRecourseState(HttpServletRequest request, HttpServletResponse response) throws SmException {
+        return smartCarService.getResourceState(securityService.getAccount().getLogin());
     }
 }
