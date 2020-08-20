@@ -36,7 +36,7 @@ public class TimeOfUsageController {
     }
 
     @RequestMapping(value = "/resource/{resource_id}/tou", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SmTimeOfUsage getTimeOfUsageByResource(HttpServletRequest request, @RequestBody SmTimeOfUsage smTimeOfUsage, @PathVariable("resource_id") Long resourceId) throws Exception {
+    public SmTimeOfUsage getTimeOfUsageByResource(HttpServletRequest request, @PathVariable("resource_id") Long resourceId) throws Exception {
         Long accountId = securityService.getAccount().getIdAccount();
         return timeOfUsageDao.getTimeOfUsageByResourceIdAndAccountId(resourceId, accountId);
     }

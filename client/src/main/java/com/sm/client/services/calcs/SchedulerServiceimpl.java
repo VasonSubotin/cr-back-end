@@ -12,7 +12,7 @@ import com.sm.client.utils.StringDateUtil;
 import com.sm.dao.ResourcesDao;
 import com.sm.dao.ScheduleDao;
 import com.sm.model.*;
-import javafx.util.Pair;
+
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,7 +165,7 @@ public class SchedulerServiceimpl implements SchedulerService {
             throw new SmException("*** Failed to get location of car for resource by external id[" + smResource.getExternalResourceId() + "] ****", HttpStatus.SC_NOT_FOUND);
         }
 
-        return new Pair<>(smData, smResource);
+        return new Pair<VehicleData,SmResource>(smData, smResource);
     }
 
     @Override
