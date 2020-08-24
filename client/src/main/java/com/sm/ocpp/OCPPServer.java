@@ -20,6 +20,12 @@ public class OCPPServer {
     @Value("${sm.ocpp.server.type:JSON}")
     private ServerType type;
 
+    @Value("${sm.ocpp.server.host:localhost}")
+    private String host;
+
+    @Value("${sm.ocpp.server.port:80}")
+    private int port;
+
     @Autowired
     private SmServerCoreEventHandler smServerCoreEventHandler;
 
@@ -42,7 +48,7 @@ public class OCPPServer {
                 logger.error("***** Unknown OCPP server type[{}] - can't start OCPP server! *****", type);
         }
 
-        server.open("localhost", 8887, new ServerEvents() {
+        server.open(host, port, new ServerEvents() {
 
             @Override
             public void newSession(UUID sessionIndex, SessionInformation information) {
