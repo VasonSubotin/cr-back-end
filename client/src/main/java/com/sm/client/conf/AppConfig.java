@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableEncryptableProperties
-@ComponentScan(basePackages = {"com.sm.client","com.sm.dao"})
+@ComponentScan(basePackages = {"com.sm.client","com.sm.dao","com.sm.ocpp"})
 public class AppConfig {
 
     @Bean(name = "encryptConfig")
