@@ -87,6 +87,9 @@ public class ResourcesController {
         if (smResource.getIdResource() != null) {
             smResourceExists.setIdResource(smResource.getIdResource());
         }
+        if (smResource.getnChargeByTime() != null) {
+            smResourceExists.setnChargeByTime(smResource.getnChargeByTime());
+        }
         smResourceExists.setDtUpdated(new Date());
         return resourcesDao.saveResource(smResourceExists, accountId);
     }

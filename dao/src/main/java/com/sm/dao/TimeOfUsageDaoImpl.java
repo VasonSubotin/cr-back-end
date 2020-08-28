@@ -54,6 +54,7 @@ public class TimeOfUsageDaoImpl implements TimeOfUsageDao {
     @Transactional(readOnly = false)
     @Override
     public SmTimeOfUsage saveTimeOfUsage(SmTimeOfUsage smTimeOfUsage, Long accountId) {
+        smTimeOfUsage.setAccountId(accountId);
         smTimeOfUsage.setIdTou((Long) sessionFactory.getCurrentSession().save(smTimeOfUsage));
         return smTimeOfUsage;
     }

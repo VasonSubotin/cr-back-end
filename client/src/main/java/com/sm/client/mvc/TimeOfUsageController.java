@@ -32,16 +32,17 @@ public class TimeOfUsageController {
 
     @RequestMapping(value = "/tous", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public SmTimeOfUsage saveTimeOfUsage(HttpServletRequest request, @RequestBody SmTimeOfUsage smTimeOfUsage) throws Exception {
+
         return timeOfUsageDao.saveTimeOfUsage(smTimeOfUsage, securityService.getAccount().getIdAccount());
     }
 
-    @RequestMapping(value = "/resource/{resource_id}/tou", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/resources/{resource_id}/tou", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SmTimeOfUsage getTimeOfUsageByResource(HttpServletRequest request, @PathVariable("resource_id") Long resourceId) throws Exception {
         Long accountId = securityService.getAccount().getIdAccount();
         return timeOfUsageDao.getTimeOfUsageByResourceIdAndAccountId(resourceId, accountId);
     }
 
-    @RequestMapping(value = "/resource/{resource_id}/tou", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/resources/{resource_id}/tou", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public SmTimeOfUsage updateTimeOfUsageByResource(HttpServletRequest request, @RequestBody SmTimeOfUsage smTimeOfUsage, @PathVariable("resource_id") Long resourceId) throws Exception {
         Long accountId = securityService.getAccount().getIdAccount();
         SmTimeOfUsage existing = timeOfUsageDao.getTimeOfUsageByResourceIdAndAccountId(resourceId, accountId);
