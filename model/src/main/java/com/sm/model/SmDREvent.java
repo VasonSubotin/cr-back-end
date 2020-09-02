@@ -10,10 +10,10 @@ public class SmDREvent {
     @Id
     @Column(name = "ID_DR_EVENT")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idTou;
+    private Long idDrEvent;
 
-    @Column(name = "ACCOUNT_ID")
-    private Long accountId;
+    @Column(name = "RESOURCE_ID")
+    private Long resourceId;
 
     @Column(name = "LOCATION_ID")
     private Long locationId;
@@ -30,20 +30,20 @@ public class SmDREvent {
     @Column(name = "B_DELETED")
     private Boolean deleted;
 
-    public Long getIdTou() {
-        return idTou;
+    public Long getIdDrEvent() {
+        return idDrEvent;
     }
 
-    public void setIdTou(Long idTou) {
-        this.idTou = idTou;
+    public void setIdDrEvent(Long idDrEvent) {
+        this.idDrEvent = idDrEvent;
     }
 
-    public Long getAccountId() {
-        return accountId;
+    public Long getResourceId() {
+        return resourceId;
     }
 
-    public void setAccountId(Long accountId) {
-        this.accountId = accountId;
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
     }
 
     public Long getLocationId() {

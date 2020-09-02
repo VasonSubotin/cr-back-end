@@ -13,9 +13,6 @@ public class SmTimeOfUsage implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTou;
 
-    @Column(name = "ACCOUNT_ID")
-    private Long accountId;
-
     @Column(name = "RESOURCE_ID")
     private Long resourceId;
 
@@ -40,14 +37,6 @@ public class SmTimeOfUsage implements Serializable {
 
     public void setIdTou(Long idTou) {
         this.idTou = idTou;
-    }
-
-    public Long getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(Long accountId) {
-        this.accountId = accountId;
     }
 
     public Long getStart() {

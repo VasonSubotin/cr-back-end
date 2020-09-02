@@ -79,10 +79,9 @@ public class BuLogicController {
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime,
             @RequestParam(name = "rate", required = false, defaultValue = "6600") Long rate,
-            @RequestParam(name = "policy", required = false, defaultValue = "ECO") PolicyType policyType,
-            @RequestParam(name = "testMode", required = false, defaultValue = "false") Boolean mock) throws Exception {
+            @RequestParam(name = "policy", required = false, defaultValue = "ECO") PolicyType policyType) throws Exception {
 
-        return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId, mock);
+        return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId,null);
     }
 
     @RequestMapping(value = "/resources/{resourceId}/drivingSchedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

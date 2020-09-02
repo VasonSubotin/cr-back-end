@@ -34,20 +34,14 @@ public abstract class AbstractOptimizationService implements OptimizationService
      * @param start      - start date in string format like ISO yyyy-MM-ddThh:mm:ssZ
      * @param stop-      stop date in string format like ISO yyyy-MM-ddThh:mm:ssZ
      * @param locationId - locationId of location where we need to calculate CO2
-     * @param mock       - will use mock data from file
      * @return list of elements which represents  CO2 info
      * @throws Exception
      */
     protected List<GridData> getData(String start,
                                      String stop,
                                      String locationId,
-                                     boolean mock) throws Exception {
-        List<GridData> co2DataList = null;
-        if (mock) {
-            co2DataList = ecoService.getEcoDataMock(locationId, null, null, start, stop, null, STYLE);
-        } else {
-            co2DataList = ecoService.getEcoData(locationId, null, null, start, stop, null, STYLE);
-        }
+                                     Long resourceId) throws Exception {
+        List<GridData> co2DataList = ecoService.getEcoData(locationId, null, null, start, stop, null, STYLE);
 
         if (co2DataList == null || co2DataList.isEmpty()) {
             logger.error("No grid data found for the specified time range {} - {} and location {}", start, stop, locationId);

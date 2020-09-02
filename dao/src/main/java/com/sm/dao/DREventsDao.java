@@ -7,5 +7,5 @@ import java.util.List;
 public interface DREventsDao {
     List<SmDREvent> getAllDREvents();
 
-    List<SmDREvent> getPersonalDREvents(Long accountId);
+    List<SmDREvent> getDREventsByResourceId(Long resourceId);
 }

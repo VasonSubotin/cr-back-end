@@ -18,8 +18,8 @@ public class SimpleOptimizationService extends AbstractOptimizationService {
                                   long chargeLevelInWt,
                                   long rateInWt,
                                   String locationId,
-                                  boolean mock) throws Exception {
-        List<GridData> co2DataList = getData(start, stop, locationId, mock);
+                                  Long resourceId) throws Exception {
+        List<GridData> co2DataList = getData(start, stop, locationId, resourceId);
 
         //calculating time
         long timeInMinsNeed = (60 * (capacityInWt - chargeLevelInWt)) / rateInWt;

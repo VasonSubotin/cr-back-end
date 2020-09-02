@@ -5,6 +5,7 @@ import com.sm.client.model.eco.ForecastData;
 import com.sm.client.model.eco.GridData;
 import com.sm.client.model.eco.LocationData;
 import com.sm.client.model.to.EventInterval;
+import com.sm.model.SmException;
 
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -23,6 +24,8 @@ public interface EcoService {
                               String endtime,
                               String moerversion,
                               String style) throws Exception;
+
+    List<EventInterval> getEventInterval(Long resourceId) throws SmException;
 
     List<EventInterval> getEventIntervalMock(Date start, Date stop);
 

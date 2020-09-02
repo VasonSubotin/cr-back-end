@@ -6,6 +6,8 @@ import com.sm.client.model.eco.GridData;
 import com.sm.client.model.eco.LocationData;
 import com.sm.client.model.to.EventInterval;
 import com.sm.client.utils.StringDateUtil;
+import com.sm.model.SmDREvent;
+import com.sm.model.SmException;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +56,9 @@ public class EcoServiceImpl implements EcoService {
     @Autowired
     private RestTemplate ecoTemplate;
 
+    @Autowired
+    private DREventService drEventService;
+
     private List<GridData> mockCache = new ArrayList<>();
 
     private Map<Integer, List<EventInterval>> mockEventCache = new HashMap<>();
@@ -66,38 +71,38 @@ public class EcoServiceImpl implements EcoService {
 
     @PostConstruct
     public void init() throws Exception {
-        BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/moc_eco.txt")));
-        while (in.ready()) {
-            String line = in.readLine();
-            String s[] = line.split(" ");
-            GridData gridData = new GridData();
-            mockCache.add(gridData);
-            gridData.setPointTime(sdf.parse(s[0]));
-            gridData.setDatatype("MOER");
-            gridData.setFrequence(300L);
-            gridData.setValue(Double.valueOf(s[1]));
-            gridData.setVersion("MockData-2018-11");
-        }
-        in.close();
+//        BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/moc_eco.txt")));
+//        while (in.ready()) {
+//            String line = in.readLine();
+//            String s[] = line.split(" ");
+//            GridData gridData = new GridData();
+//            mockCache.add(gridData);
+//            gridData.setPointTime(sdf.parse(s[0]));
+//            gridData.setDatatype("MOER");
+//            gridData.setFrequence(300L);
+//            gridData.setValue(Double.valueOf(s[1]));
+//            gridData.setVersion("MockData-2018-11");
+//        }
+//        in.close();
 
-        in = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/moc_event.txt")));
-        while (in.ready()) {
-            String line = in.readLine();
-            String s[] = line.split(" ");
-            EventInterval eventInterval = new EventInterval();
-            Date startDate = sdf.parse(s[0]);
-            eventInterval.setStart(startDate.getTime());
-            Integer dayOfWeek = getDayOfWeek(startDate);
-            List<EventInterval> events = mockEventCache.get(dayOfWeek);
-            if (events == null) {
-                events = new ArrayList<>();
-                mockEventCache.put(dayOfWeek, events);
-            }
-            eventInterval.setDuration(Long.parseLong(s[1]));
-            eventInterval.setStop(eventInterval.getStart() + eventInterval.getDuration());
-            events.add(eventInterval);
-        }
-        in.close();
+//        in = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/moc_event.txt")));
+//        while (in.ready()) {
+//            String line = in.readLine();
+//            String s[] = line.split(" ");
+//            EventInterval eventInterval = new EventInterval();
+//            Date startDate = sdf.parse(s[0]);
+//            eventInterval.setStart(startDate.getTime());
+//            Integer dayOfWeek = getDayOfWeek(startDate);
+//            List<EventInterval> events = mockEventCache.get(dayOfWeek);
+//            if (events == null) {
+//                events = new ArrayList<>();
+//                mockEventCache.put(dayOfWeek, events);
+//            }
+//            eventInterval.setDuration(Long.parseLong(s[1]));
+//            eventInterval.setStop(eventInterval.getStart() + eventInterval.getDuration());
+//            events.add(eventInterval);
+//        }
+//        in.close();
     }
 
 
@@ -137,7 +142,7 @@ public class EcoServiceImpl implements EcoService {
                                      String moerversion,
                                      String style) throws Exception {
         try {
-           return getEcoDataInternal(obrev, latitude, longitude, starttime, endtime, moerversion, style);
+            return getEcoDataInternal(obrev, latitude, longitude, starttime, endtime, moerversion, style);
         } catch (Exception ex) {
             logger.error("Failed to get location eco time watt by params obrev={}, latitude={}, longitude={} -- wil try again with default location CAISO_ZP26", obrev, latitude, longitude);
             return getEcoDataInternal("CAISO_ZP26", latitude, longitude, starttime, endtime, moerversion, style);
@@ -191,6 +196,22 @@ public class EcoServiceImpl implements EcoService {
         }
         return null;
     }
+
+    @Override
+    public List<EventInterval> getEventInterval(Long resourceId) throws SmException {
+        List<SmDREvent> result = drEventService.getDREventsByResourceId(resourceId);
+
+        List<EventInterval> ret = new ArrayList<>();
+        for (SmDREvent smDREvent : result) {
+            EventInterval eventInterval = new EventInterval();
+            eventInterval.setStart(StringDateUtil.setTimeFromMinutesOfDay(new Date(), smDREvent.getStart()).getTime());
+            eventInterval.setStop(StringDateUtil.setTimeFromMinutesOfDay(new Date(), smDREvent.getStop()).getTime());
+            eventInterval.setDuration(eventInterval.getStop() - eventInterval.getStart());
+            ret.add(eventInterval);
+        }
+        return ret;
+    }
+
 
     @Override
     public List<EventInterval> getEventIntervalMock(Date start, Date stop) {

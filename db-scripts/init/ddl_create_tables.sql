@@ -50,14 +50,12 @@ create table Policies(
 drop table if exists TimeOfUsages;
 create table TimeOfUsages(
 	ID_TOU INTEGER Primary key AUTOINCREMENT,
-	ACCOUNT_ID INTEGER,
 	LOCATION_ID INTEGER,
 	RESOURCE_ID INTEGER,
 	N_START numeric(10),
 	N_STOP numeric(10),
 	DT_CREATED datetime,
 	B_DELETED numeric(1),
-	FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT ),
 	FOREIGN KEY (LOCATION_ID)  REFERENCES Locations (ID_LOCATION ),
 	FOREIGN KEY (RESOURCE_ID)  REFERENCES Locations (ID_RESOURCE )
 );
@@ -66,13 +64,13 @@ create table TimeOfUsages(
 drop table if exists DREvents;
 create table DREvents(
 	ID_DR_EVENT INTEGER Primary key AUTOINCREMENT,
-	ACCOUNT_ID INTEGER,
+	RESOURCE_ID INTEGER,
 	LOCATION_ID INTEGER,
 	N_START numeric(10),
 	N_STOP numeric(10),
 	DT_CREATED datetime,
 	B_DELETED numeric(1),
-	FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT ),
+	FOREIGN KEY (RESOURCE_ID)  REFERENCES Resources (ID_RESOURCE ),
 	FOREIGN KEY (LOCATION_ID)  REFERENCES Locations (ID_LOCATION )
 );
 

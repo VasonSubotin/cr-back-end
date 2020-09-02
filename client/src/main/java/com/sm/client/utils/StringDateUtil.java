@@ -59,5 +59,9 @@ public class StringDateUtil {
 
         return new Date(calendarTo.getTimeInMillis());
     }
+
+    public static Date setTimeFromMinutesOfDay(Date daysFromDate,long minutesFromTheBeginingOfDay){
+        return setDateFrom(daysFromDate, new Date(minutesFromTheBeginingOfDay*60000));
+    }
 }
 

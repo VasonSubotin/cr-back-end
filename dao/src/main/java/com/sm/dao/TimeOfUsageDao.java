@@ -8,15 +8,15 @@ import java.util.List;
 public interface TimeOfUsageDao {
     List<SmTimeOfUsage> getAllSmTimeOfUsages();
 
-    List<SmTimeOfUsage> getAllPersonalTimeOfUsages(Long accountId);
+    List<SmTimeOfUsage> getTimeOfUsagesByResourceIn(List<Long> resourcesId);
 
-    SmTimeOfUsage getTimeOfUsageByIdAndAccountId(Long id, Long accountId);
+    SmTimeOfUsage getTimeOfUsageById(Long id);
 
-    SmTimeOfUsage getTimeOfUsageByResourceIdAndAccountId(Long resourceId, Long accountId);
-
-    @Transactional(readOnly = false)
-    SmTimeOfUsage saveTimeOfUsage(SmTimeOfUsage smTimeOfUsage, Long accountId);
+    SmTimeOfUsage getTimeOfUsageByResourceId(Long resourceId);
 
     @Transactional(readOnly = false)
-    SmTimeOfUsage deleteTimeOfUsageById(Long id, Long accountId);
+    SmTimeOfUsage saveTimeOfUsage(SmTimeOfUsage smTimeOfUsage);
+
+    @Transactional(readOnly = false)
+    SmTimeOfUsage deleteTimeOfUsageById(Long id);
 }

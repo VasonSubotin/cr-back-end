@@ -11,7 +11,7 @@ public interface OptimizationService {
                            long chargeLevelInWt,
                            long rateInWt,
                            String locationId,
-                           boolean mock) throws Exception;
+                           Long resourceId) throws Exception;
 
     PolicyType getPolicy();
 }

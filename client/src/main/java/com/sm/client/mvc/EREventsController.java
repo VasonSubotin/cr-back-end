@@ -1,5 +1,6 @@
 package com.sm.client.mvc;
 
+import com.sm.client.services.DREventService;
 import com.sm.client.services.SecurityService;
 import com.sm.dao.DREventsDao;
 import com.sm.model.SmDREvent;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,14 +27,18 @@ public class EREventsController {
     @Autowired
     private DREventsDao drEventsDao;
 
+    @Autowired
+    private DREventService drEventService;
+
     @RequestMapping(value = "/allDREvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public  List<SmDREvent> getAllDREvents(HttpServletRequest request) throws Exception {
+    public List<SmDREvent> getAllDREvents(HttpServletRequest request) throws Exception {
         return drEventsDao.getAllDREvents();
     }
 
-
-    @RequestMapping(value = "/DREvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public  List<SmDREvent> getDREvents(HttpServletRequest request) throws Exception {
-        return  drEventsDao.getPersonalDREvents(securityService.getAccount().getIdAccount());
+    @RequestMapping(value = "/resources/{resource_id}/DREvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<SmDREvent> getDREvents(HttpServletRequest request, @PathVariable("resource_id") Long resourceId) throws Exception {
+        //return  drEventsDao.getDREventsByResourceId(securityService.getAccount().getIdAccount());
+        return drEventService.getDREventsByResourceId(resourceId);
     }
+
 }

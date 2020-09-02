@@ -5,14 +5,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class SchedulerInterval implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'")
     @JsonProperty("time_start")
     private Date starttime;
 
-    @JsonProperty("location")
-    private Long locationId;
+    @JsonProperty("calendar_location")
+    private LocationPoint eventLocation;
+
+    @JsonProperty("station_locations")
+    private List<LocationPoint> stations;
 
     @JsonProperty("duration")
     private long duration;
@@ -98,12 +102,20 @@ public class SchedulerInterval implements Serializable {
         this.starttime = starttime;
     }
 
-    public Long getLocationId() {
-        return locationId;
+    public LocationPoint getEventLocation() {
+        return eventLocation;
     }
 
-    public void setLocationId(Long locationId) {
-        this.locationId = locationId;
+    public void setEventLocation(LocationPoint eventLocation) {
+        this.eventLocation = eventLocation;
+    }
+
+    public List<LocationPoint> getStations() {
+        return stations;
+    }
+
+    public void setStations(List<LocationPoint> stations) {
+        this.stations = stations;
     }
 
     public long getEnergy() {

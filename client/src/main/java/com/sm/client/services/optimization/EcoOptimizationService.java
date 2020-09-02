@@ -14,9 +14,9 @@ import java.util.TreeSet;
 public class EcoOptimizationService extends AbstractOptimizationService {
 
     @Override
-    public SchedulerData optimize(String start, String stop, long capacityInWt, long chargeLevelInWt, long rateInWt, String locationId, boolean mock) throws Exception {
+    public SchedulerData optimize(String start, String stop, long capacityInWt, long chargeLevelInWt, long rateInWt, String locationId, Long recourceId) throws Exception {
 
-        List<GridData> co2DataList = getData(start, stop, locationId, mock);
+        List<GridData> co2DataList = getData(start, stop, locationId, recourceId);
 
         List<GridData> co2DataListSorted = new ArrayList<>(co2DataList);
         co2DataListSorted.sort(gridDataValueComparator);

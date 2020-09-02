@@ -3,6 +3,7 @@ package com.sm.client.services.calcs;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
+import com.sm.client.model.smartcar.LocationPoint;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.model.smartcar.VehicleData;
@@ -159,14 +160,34 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             schedulerInterval.setDuration(eventsWrapper.getStop().getTime() - eventsWrapper.getStart().getTime());
             schedulerInterval.setIntervalType(SchedulerInterval.IntervalType.DRV);
 
+            schedulerInterval.setEventLocation(new LocationPoint(
+                    null,
+                    eventsWrapper.getCoordinates().getAddress(),
+                    eventsWrapper.getName(),
+                    eventsWrapper.getCoordinates().getLongitude(),
+                    eventsWrapper.getCoordinates().getLatitude()));
 
+            List<LocationPoint> stations = new ArrayList<>();
+            schedulerInterval.setStations(stations);
+
+            int amountOfOptions = 0;
             mlocationLevel:
             for (Map.Entry<Double, List<LocationWrapper>> entry : mpLocation.entrySet()) {
                 for (LocationWrapper locationWrapper : entry.getValue()) {
-                    schedulerInterval.setLocationId(locationWrapper.getSmLocation().getIdLocation());
-                    schedulerInterval.setPrice(locationWrapper.getSmLocation().getPrice());
-                    listForOptimization.add(new IntervalOfLocation(0, needMinEnergy, locationWrapper.getPriceRate(), schedulerInterval));
-                    break mlocationLevel;
+                    if (stations.isEmpty()) {
+                        schedulerInterval.setPrice(locationWrapper.getSmLocation().getPrice());
+                        listForOptimization.add(new IntervalOfLocation(0, needMinEnergy, locationWrapper.getPriceRate(), schedulerInterval));
+                    }
+                    stations.add(new LocationPoint(
+                            locationWrapper.getSmLocation().getIdLocation(),
+                            locationWrapper.getSmLocation().getDescription(),
+                            locationWrapper.getSmLocation().getName(),
+                            locationWrapper.getSmLocation().getLongitude(),
+                            locationWrapper.getSmLocation().getLatitude()
+                    ));
+                    if (amountOfOptions++ > 3) {
+                        break mlocationLevel;
+                    }
                 }
             }
         }
@@ -191,43 +212,50 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             throw new SmException("Can't find any location near point " + vehicleLocation.getLatitude() + "," + vehicleLocation.getLongitude() + " within 10 mills", HttpStatus.SC_NOT_FOUND);
         }
 
+
         long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity());
 
-        Double minCost = Double.MAX_VALUE;
-        SmLocation smLocationMinPrice = null;
-        double minPriceDistance = Double.MAX_VALUE;
-        double minEnergyPrice = 0;
+        TreeMap<Double, LocationWrapper> locationsMap = new TreeMap<>();
+        TreeMap<Double, LocationWrapper> locationsMinDistanceMap = new TreeMap<>();
 
-        double minDistance = Double.MAX_VALUE;
-        SmLocation smLocationMinDistance = null;
-        double minEnergyDistance = 0;
-        //calculatig optimal price and distance
         for (SmLocation smLocation : locations) {
 
             //calculating distance to location
             Double distance = GeoUtils.calculateDistance(vehicleLocation.getLatitude(), vehicleLocation.getLongitude(), smLocation.getLatitude(), smLocation.getLongitude());
-            long needMinEnergy = (long) (distance / Constants.KILLOMETER_PER_WATT);
-            if (distance < minDistance) {
-                smLocationMinDistance = smLocation;
-                minEnergyDistance = needMinEnergy;
-            }
+
+            locationsMinDistanceMap.put(distance, new LocationWrapper(smLocation, distance));
 
             if (smLocation.getPrice() == null || smLocation.getPrice() == 0) {
                 continue;
             }
+
+            long needMinEnergy = (long) (distance / Constants.KILLOMETER_PER_WATT);
             double cost = (smResource.getCapacity() - (currentEnergy - needMinEnergy)) * smLocation.getPrice();
-            if (cost < minCost) {
-                smLocationMinPrice = smLocation;
-                minPriceDistance = distance;
-                minEnergyPrice = needMinEnergy;
-            }
+            LocationWrapper locationWrapper = new LocationWrapper(smLocation, distance);
+            locationWrapper.setPriceRate(smLocation.getPrice());
+            locationsMap.put(cost, locationWrapper);
         }
 
-        if (smLocationMinPrice == null) {
-            smLocationMinPrice = smLocationMinDistance;
-            minCost = null;
-            minPriceDistance = minDistance;
-            minEnergyPrice = minEnergyDistance;
+        //finding the first location which will be preferred
+        Map.Entry<Double, LocationWrapper> prefEntry = !locationsMap.isEmpty() ? locationsMap.entrySet().iterator().next() : locationsMinDistanceMap.isEmpty() ? null : locationsMinDistanceMap.entrySet().iterator().next();
+        if (prefEntry == null) {
+            throw new SmException("No locations found !", HttpStatus.SC_NOT_FOUND);
+        }
+        double preferredCost = prefEntry.getKey();
+        LocationWrapper preferredLocationWrapper = prefEntry.getValue();
+        SmLocation preferredLocation = preferredLocationWrapper.getSmLocation();
+
+        List<LocationPoint> stations = new ArrayList<>();
+        for (LocationWrapper locationWrapper : locationsMap.values()) {
+            SmLocation location = locationWrapper.getSmLocation();
+            stations.add(new LocationPoint(location.getIdLocation(), location.getDescription(), location.getName(), location.getLongitude(), location.getLatitude()));
+        }
+
+        if (stations.size() < 3) {
+            for (LocationWrapper locationWrapper : locationsMinDistanceMap.values()) {
+                SmLocation location = locationWrapper.getSmLocation();
+                stations.add(new LocationPoint(location.getIdLocation(), location.getDescription(), location.getName(), location.getLongitude(), location.getLatitude()));
+            }
         }
 
         //generating schedule
@@ -238,14 +266,16 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         ret.setIntervals(Arrays.asList(schedulerInterval));
 
         schedulerInterval.setIntervalType(SchedulerInterval.IntervalType.DRV);
-        schedulerInterval.setLocationId(smLocationMinPrice.getIdLocation());
-        schedulerInterval.setPrice(minCost);
-        schedulerInterval.setChargeRate(smLocationMinPrice.getPower());
+
+        schedulerInterval.setStations(stations);
+        schedulerInterval.setPrice(preferredLocation.getPrice());
+        schedulerInterval.setChargeRate(preferredLocation.getPower());
 
         //calculating time which we need to reach location
-        long timeToLocation = (long) ((3600D * minPriceDistance / 30000D) * 1000D);
+        long timeToLocation = (long) ((3600D * preferredLocationWrapper.getDistance() / 30000D) * 1000D);
         schedulerInterval.setStarttime(new Date(System.currentTimeMillis() + timeToLocation));
-        schedulerInterval.setDuration((long) (3600000 * minEnergyPrice / smLocationMinPrice.getPower()));
+
+        schedulerInterval.setDuration((long) (3600000 * preferredCost / preferredLocation.getPrice()));
 
         return ret;
     }

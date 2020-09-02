@@ -24,12 +24,13 @@ public class DREventsDaoImpl implements DREventsDao {
     }
 
     @Override
-    public List<SmDREvent> getPersonalDREvents(Long accountId) {
+    public List<SmDREvent> getDREventsByResourceId(Long resourceId) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmDREvent where (deleted=0 or deleted is null) and accountId=:accountId";
+        String hql = "FROM SmDREvent where (deleted=0 or deleted is null) and resourceId=:resourceId";
         Query query = session.createQuery(hql);
-        query.setParameter("accountId", accountId);
-        return query.getResultList();
+        query.setParameter("resourceId", resourceId);
+
+        return  query.getResultList();
     }
 
 }
