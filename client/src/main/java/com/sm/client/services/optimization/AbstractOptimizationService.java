@@ -151,6 +151,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
             current.setDuration(current.getDuration() + gridData.getStop() - gridData.getStart());
             double curImpact = (gridData.getStop() - gridData.getStart()) / 3600000D * gridData.getValue();
             current.setCo2Impact(current.getCo2Impact() + curImpact);
+            current.setIntervalType(SchedulerInterval.IntervalType.CHR);
             coImpactSummary += curImpact;
             lastGridData = gridData;
         }
