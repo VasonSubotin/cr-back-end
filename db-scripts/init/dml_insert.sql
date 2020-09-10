@@ -37,3 +37,35 @@ insert into SessionTypes(ID_SESSION_TYPE,V_NAME,V_DESCRIPTION)
     values (2, 'NonCharge','Represents Non-charging session');
 
 
+-- insert locations based on tmp table
+------------------------------------------------------------------
+-- any string with KW or KWH
+ insert into Locations(
+     F_PRICE,
+     N_POWER,
+     V_NAME,
+     V_DESCRIPTION,
+     N_LATITUDE,
+     N_LONGITUDE,
+     V_TIME_ZONE,
+     DT_CREATED,
+     B_TOU_ENABLED,
+     B_DELETED)
+ select
+     CAST(substr(replace(replace(UPPER(V_COST_DESCRIPTION), '/',''),'$0.','$.'), INSTR(replace(replace(UPPER(V_COST_DESCRIPTION), '/',''),'$0.','$.'),'KW')-3,3) as NUMERIC(6,6)),
+     N_KILOWATTS*1000,
+     V_NAME,
+     V_ADDRESS,
+     N_LATITUDE,
+     N_LONGITUDE,
+     'UTC-7',
+     strftime('%s', 'now') * 1000,
+     1,
+     0
+ from tmp_location_price
+    where
+        INSTR(replace(replace(UPPER(V_COST_DESCRIPTION), '/',''),'$0.','$.'),'KW') > 1
+        and
+        CAST(substr(replace(replace(UPPER(V_COST_DESCRIPTION), '/',''),'$0.','$.'), INSTR(replace(replace(UPPER(V_COST_DESCRIPTION), '/',''),'$0.','$.'),'KW')-3,3) as NUMERIC(6,6))
+            between 0.001 and 1;
+

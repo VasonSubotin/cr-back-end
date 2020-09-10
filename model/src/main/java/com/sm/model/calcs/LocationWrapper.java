@@ -6,7 +6,7 @@ import com.sm.model.SmLocation;
 public class LocationWrapper {
     private SmLocation smLocation;
     private Double distance;
-    private Double priceRate;
+    private Double priceRate; //
 
     public LocationWrapper(SmLocation smLocation, Double distance) {
         this.smLocation = smLocation;

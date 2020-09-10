@@ -16,9 +16,6 @@ import java.util.List;
 public class EcoAndPriceOptimizationService extends EcoOptimizationService {
     private static final Logger logger = LoggerFactory.getLogger(EcoAndPriceOptimizationService.class);
 
-    @Autowired
-    private EcoService ecoService;
-
 
     @Override
     protected List<GridData> getData(String start,
@@ -27,9 +24,6 @@ public class EcoAndPriceOptimizationService extends EcoOptimizationService {
                                      Long resourceId) throws Exception {
         List<GridData> co2DataList = super.getData(start, stop, locationId, resourceId);
 
-//        if (mock) {
-//            co2DataList = applyEvents(ecoService.getEventIntervalMock(StringDateUtil.parseDate(start), StringDateUtil.parseDate(stop)), co2DataList);
-//        }
         co2DataList = applyEvents(ecoService.getEventInterval(resourceId), co2DataList);
         return co2DataList;
     }

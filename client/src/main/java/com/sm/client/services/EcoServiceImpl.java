@@ -359,4 +359,28 @@ public class EcoServiceImpl implements EcoService {
         httpHeaders.set("Authorization", "Basic " + new String(Base64.encodeBase64((username + ":" + password).getBytes(Charset.forName("US-ASCII")))));
         return httpHeaders;
     }
+
+    public void setDrEventService(DREventService drEventService) {
+        this.drEventService = drEventService;
+    }
+
+    public void setEcoTemplate(RestTemplate ecoTemplate) {
+        this.ecoTemplate = ecoTemplate;
+    }
+
+    public void setUrlEcoForecast(String urlEcoForecast) {
+        this.urlEcoForecast = urlEcoForecast;
+    }
+
+    public void setUrlEcoLocation(String urlEcoLocation) {
+        this.urlEcoLocation = urlEcoLocation;
+    }
+
+    public void setUrlEcoIndex(String urlEcoIndex) {
+        this.urlEcoIndex = urlEcoIndex;
+    }
+
+    public void setUrlEcoData(String urlEcoData) {
+        this.urlEcoData = urlEcoData;
+    }
 }

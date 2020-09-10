@@ -23,4 +23,11 @@ public enum PolicyType {
         return null;
     }
 
+    public long getId() {
+        return id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }

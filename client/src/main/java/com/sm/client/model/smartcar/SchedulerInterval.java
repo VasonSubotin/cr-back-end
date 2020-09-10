@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 public class SchedulerInterval implements Serializable {
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     @JsonProperty("time_start")
     private Date starttime;
 

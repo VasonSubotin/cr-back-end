@@ -1,14 +1,17 @@
 package com.sm.client.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sm.client.model.smartcar.SchedulerData;
+import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.model.SmSchedules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -62,7 +65,7 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         schedulerData.setSchedulerId(smSchedules.getIdSchedule());
         schedulerData.setCreatedTime(smSchedules.getDtCreated());
         schedulerData.setInitialEnergy(smSchedules.getInitEnergy());
-        schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), List.class));
+        schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), new TypeReference<List<SchedulerInterval>>(){}));
 
         return schedulerData;
     }

@@ -5,14 +5,17 @@ import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.model.to.EventInterval;
 import com.sm.client.services.EcoService;
+import com.sm.client.services.TimeOfUsageService;
+import com.sm.client.utils.StringDateUtil;
+import com.sm.client.utils.intervals.Interval;
+import com.sm.client.utils.intervals.IntervalTransformerUtils;
+import com.sm.client.utils.intervals.IntervalUtils;
+import com.sm.model.SmTimeOfUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static com.sm.client.services.optimization.EcoAndPriceOptimizationService.gridDataValueComparator;
 
@@ -27,6 +30,8 @@ public abstract class AbstractOptimizationService implements OptimizationService
     @Autowired
     protected EcoService ecoService;
 
+    @Autowired
+    protected TimeOfUsageService timeOfUsageService;
 
     /**
      * Method will get grid of CO2, we need it to calculate CO2 impact
@@ -47,7 +52,23 @@ public abstract class AbstractOptimizationService implements OptimizationService
             logger.error("No grid data found for the specified time range {} - {} and location {}", start, stop, locationId);
             throw new Exception("No grid data found for the specified time range " + start + " - " + stop + " and location " + locationId);
         }
-
+        SmTimeOfUsage timeOfUsage = timeOfUsageService.getTimeOfUsageByResourceId(resourceId);
+        if (timeOfUsage != null) {
+            List<Interval> tousInterval = IntervalTransformerUtils.touToIntervals(timeOfUsage, StringDateUtil.parseDate(start));
+            if (tousInterval != null && !tousInterval.isEmpty()) {
+                List<Interval> gridsInterval = IntervalTransformerUtils.gridDataListToIntervals(co2DataList);
+                // applying tous
+                List<Interval> gridIntervalAfterTou = IntervalUtils.intersection(gridsInterval, tousInterval);
+                //restoring grids according new intervals
+                co2DataList = new ArrayList<>();
+                for (Interval<GridData> interval : gridIntervalAfterTou) {
+                    GridData cloned = IntervalTransformerUtils.cloneGridData(interval.getData());
+                    cloned.setStart(interval.getStart());
+                    cloned.setStop(interval.getStop());
+                    co2DataList.add(cloned);
+                }
+            }
+        }
         return co2DataList;
     }
 
@@ -178,4 +199,12 @@ public abstract class AbstractOptimizationService implements OptimizationService
 
         return a.getValue().compareTo(b.getValue());
     };
+
+    public void setEcoService(EcoService ecoService) {
+        this.ecoService = ecoService;
+    }
+
+    public void setTimeOfUsageService(TimeOfUsageService timeOfUsageService) {
+        this.timeOfUsageService = timeOfUsageService;
+    }
 }

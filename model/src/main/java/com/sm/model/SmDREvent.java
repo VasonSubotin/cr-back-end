@@ -19,10 +19,10 @@ public class SmDREvent {
     private Long locationId;
 
     @Column(name = "N_START")
-    private Long start;
+    private Long start; // time im mins from the beginning of day
 
     @Column(name = "N_STOP")
-    private Long stop;
+    private Long stop; // time im mins from the beginning of day
 
     @Column(name = "DT_CREATED")
     private Date dtCreated;

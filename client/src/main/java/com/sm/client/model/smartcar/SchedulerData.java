@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -37,15 +38,15 @@ public class SchedulerData implements Serializable {
     @JsonProperty("co2_impact")
     private double co2Impact;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ssZ")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
     @JsonProperty("start_time")
     private Date timeStart;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ssZ")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
     @JsonProperty("end_time")
     private Date timeStop;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ssZ")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
     @JsonProperty("create_time")
     private Date createdTime;
 
@@ -56,7 +57,7 @@ public class SchedulerData implements Serializable {
     private double financeSavings;
 
     @JsonProperty("intervals")
-    private List<SchedulerInterval> intervals;
+    private List<SchedulerInterval> intervals = new ArrayList<>();
 
     public Long getResourceId() {
         return resourceId;

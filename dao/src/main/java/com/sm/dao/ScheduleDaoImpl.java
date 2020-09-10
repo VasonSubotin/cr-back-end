@@ -48,4 +48,8 @@ public class ScheduleDaoImpl implements ScheduleDao {
         smSchedules.setSessionId((Long) sessionFactory.getCurrentSession().save(smSchedules));
         return smSchedules;
     }
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
 }

@@ -70,6 +70,28 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
         schedulerData.setResourceId(smResource.getIdResource());
         schedulerData.setPolicyId(smResource.getPolicyId());
 
-        return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.saveSmSchedules(scheduleTransformService.scheduleWebToSmSchedules(schedulerData)));
+        return scheduleTransformService.smSchedulesToScheduleWeb(
+                scheduleDao.saveSmSchedules(
+                        scheduleTransformService.scheduleWebToSmSchedules(schedulerData)));
+    }
+
+    public void setOptimizationServiceFactory(OptimizationServiceFactory optimizationServiceFactory) {
+        this.optimizationServiceFactory = optimizationServiceFactory;
+    }
+
+    public void setEcoService(EcoService ecoService) {
+        this.ecoService = ecoService;
+    }
+
+    public void setSecurityService(SecurityService securityService) {
+        this.securityService = securityService;
+    }
+
+    public void setScheduleTransformService(ScheduleTransformService scheduleTransformService) {
+        this.scheduleTransformService = scheduleTransformService;
+    }
+
+    public void setScheduleDao(ScheduleDao scheduleDao) {
+        this.scheduleDao = scheduleDao;
     }
 }

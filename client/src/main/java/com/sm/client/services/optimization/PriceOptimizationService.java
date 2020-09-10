@@ -17,9 +17,7 @@ public class PriceOptimizationService extends SimpleOptimizationService {
                                      Long resourceId) throws Exception {
         List<GridData> co2DataList = super.getData(start, stop, locationId, resourceId);
 
-//        if (mock) {
-//            co2DataList = applyEvents(ecoService.getEventIntervalMock(StringDateUtil.parseDate(start), StringDateUtil.parseDate(stop)), co2DataList);
-//        }
+
         co2DataList = applyEvents(ecoService.getEventInterval(resourceId), co2DataList);
         return co2DataList;
     }

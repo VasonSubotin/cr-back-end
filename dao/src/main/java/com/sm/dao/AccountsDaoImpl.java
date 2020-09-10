@@ -69,7 +69,7 @@ public class AccountsDaoImpl implements AccountsDao {
     @Transactional(readOnly = false)
     public SmAccount deleteAccountById(Long id) {
 
-        Query query = sessionFactory.getCurrentSession().createQuery("update SmAccount set deleted = 1 where accountId = :id");
+        Query query = sessionFactory.getCurrentSession().createQuery("update SmAccount set deleted = 1 where idAccount = :id");
         query.setParameter("id", id);
         query.executeUpdate();
         return getAccountById(id);

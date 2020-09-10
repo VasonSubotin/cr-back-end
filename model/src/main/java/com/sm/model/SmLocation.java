@@ -29,10 +29,10 @@ public class SmLocation {
     private Double longitude;
 
     @Column(name = "F_PRICE")
-    private Double price;
+    private Double price; // price for 1 hour
 
     @Column(name = "N_POWER")
-    private Long power;
+    private Long power; // how many kW can be provided by station
 
     @Column(name = "V_TIME_ZONE")
     private String timeZone;

@@ -108,7 +108,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         ret.setIntervals(intervals);
 
         List<IntervalOfLocation> listForOptimization = new ArrayList<>();
-        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity());
+        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity()/100);
         Long needMinEnergy = minChargePerLocationInWatt;
         //now looking for cheapest location in 300m radius
         for (EventWrapper eventsWrapper : eventsWrappers) {
