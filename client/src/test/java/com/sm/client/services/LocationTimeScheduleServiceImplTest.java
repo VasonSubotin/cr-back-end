@@ -70,7 +70,7 @@ public class LocationTimeScheduleServiceImplTest {
             }
             Event event = events.getItems().get(index);
 
-            Assert.assertEquals("Start date check failed " + index, locationScheduleItem.getStarttime().getTime(), event.getStart().getDateTime().getValue());
+            Assert.assertEquals("Start date check failed " + index, locationScheduleItem.getStartTime().getTime(), event.getStart().getDateTime().getValue());
             Assert.assertEquals("Stop date check failed " + index, locationScheduleItem.getDuration(), event.getEnd().getDateTime().getValue() - event.getStart().getDateTime().getValue());
 
             if (index == 0) {

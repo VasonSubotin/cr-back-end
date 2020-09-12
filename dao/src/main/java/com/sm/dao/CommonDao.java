@@ -2,6 +2,7 @@ package com.sm.dao;
 
 import com.sm.model.*;
 
+import java.util.Date;
 import java.util.List;
 
 public interface CommonDao {
@@ -16,4 +17,6 @@ public interface CommonDao {
     List<SmEventType> getAllEventTypes();
 
     List<VehicleModel> getVehicles();
+
+    List<SmMoer> getMoerByDateIn(Date start, Date stop, String externalLocationId);
 }

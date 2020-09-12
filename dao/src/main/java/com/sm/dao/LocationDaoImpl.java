@@ -42,7 +42,7 @@ public class LocationDaoImpl implements LocationDao {
     @Override
     public List<SmLocation> getLocationsInSmallRangeAndAccountId(Long accountId, double latitudeA, double longitudeA, double latitudeB, double longitudeB) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmLocation where (deleted=0 or deleted is null) AND accountId=:accountId AND latitude between :latitudeA and :latitudeB AND longitude between :longitudeA and  :longitudeB";
+        String hql = "FROM SmLocation where (deleted=0 or deleted is null) AND (accountId=:accountId OR accountId is null) AND latitude between :latitudeA and :latitudeB AND longitude between :longitudeA and  :longitudeB";
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         query.setParameter("latitudeA", latitudeA);

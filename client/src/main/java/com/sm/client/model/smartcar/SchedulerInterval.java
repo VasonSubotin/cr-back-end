@@ -10,7 +10,7 @@ import java.util.List;
 public class SchedulerInterval implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     @JsonProperty("time_start")
-    private Date starttime;
+    private Date startTime;
 
     @JsonProperty("calendar_location")
     private LocationPoint eventLocation;
@@ -94,12 +94,12 @@ public class SchedulerInterval implements Serializable {
         this.co2Impact = co2Impact;
     }
 
-    public Date getStarttime() {
-        return starttime;
+    public Date getStartTime() {
+        return startTime;
     }
 
-    public void setStarttime(Date starttime) {
-        this.starttime = starttime;
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 
     public LocationPoint getEventLocation() {

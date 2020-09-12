@@ -49,6 +49,7 @@ insert into SessionTypes(ID_SESSION_TYPE,V_NAME,V_DESCRIPTION)
      N_LONGITUDE,
      V_TIME_ZONE,
      DT_CREATED,
+     V_EXTERNAL_LOCATION_ID,
      B_TOU_ENABLED,
      B_DELETED)
  select
@@ -60,6 +61,7 @@ insert into SessionTypes(ID_SESSION_TYPE,V_NAME,V_DESCRIPTION)
      N_LONGITUDE,
      'UTC-7',
      strftime('%s', 'now') * 1000,
+     'NP15',
      1,
      0
  from tmp_location_price

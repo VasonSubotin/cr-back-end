@@ -9,7 +9,6 @@ import com.sm.client.model.to.EventInterval;
 import com.sm.model.SmSchedules;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -88,7 +87,7 @@ public class EcoAndPriceOptimizationServiceTest {
 
         SchedulerInterval interval1 = new SchedulerInterval();
         interval1.setChargeRate(1000);
-        interval1.setStarttime(start);
+        interval1.setStartTime(start);
         interval1.setDuration(length);
         interval1.setCo2Impact(0.9);
         interval1.setIntervalType(SchedulerInterval.IntervalType.DRV);

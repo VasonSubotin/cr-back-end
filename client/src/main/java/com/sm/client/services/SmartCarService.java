@@ -4,6 +4,7 @@ package com.sm.client.services;
 import com.sm.client.model.smartcar.SmResourceState;
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.cache.VehiclesCache;
+import com.sm.client.utils.TestLocations;
 import com.sm.dao.AccountsDao;
 import com.sm.dao.ResourcesDao;
 
@@ -18,6 +19,7 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -39,6 +41,9 @@ public class SmartCarService {
 
     @Autowired
     private ResourcesDao resourcesDao;
+
+    @Value("${smartcar.testMode:false}")
+    private boolean testMode = false;
 
     public void refreshCarData(String login) throws SmException, SmartcarException {
         refreshCarData(login, null);
@@ -217,7 +222,11 @@ public class SmartCarService {
         }
 
         try {
-            vehicleData.setLocation(vehicle.location());
+            if (testMode) {
+                vehicleData.setLocation(TestLocations.getTestCarLocationByVin(vin));
+            } else {
+                vehicleData.setLocation(vehicle.location());
+            }
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }

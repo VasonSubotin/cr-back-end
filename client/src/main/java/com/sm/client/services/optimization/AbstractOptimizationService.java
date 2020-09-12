@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
-import static com.sm.client.services.optimization.EcoAndPriceOptimizationService.gridDataValueComparator;
-
 public abstract class AbstractOptimizationService implements OptimizationService {
 
     private static Logger logger = LoggerFactory.getLogger(AbstractOptimizationService.class);
@@ -162,7 +160,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
         for (GridData gridData : optimizesDataList) {
             if (lastGridData == null || lastGridData.getStop() != gridData.getStart()) {
                 current = new SchedulerInterval();
-                current.setStarttime(gridData.getPointTime());
+                current.setStartTime(gridData.getPointTime());
                 current.setDuration(0);
                 current.setDuration(0);
                 current.setChargeRate(rateInWt);

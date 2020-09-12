@@ -15,14 +15,10 @@ import com.sm.client.services.location.optimization.SimpleOptimizationService;
 import com.sm.client.utils.GeoUtils;
 import com.sm.dao.LocationDao;
 import com.sm.dao.ResourcesDao;
-import com.sm.model.Constants;
-import com.sm.model.SmException;
-import com.sm.model.SmLocation;
-import com.sm.model.SmResource;
+import com.sm.model.*;
 import com.sm.model.cache.Coordinates;
 import com.sm.model.calcs.EventWrapper;
 import com.sm.model.calcs.LocationWrapper;
-import com.sm.model.web.LocationScheduleItem;
 import com.smartcar.sdk.data.VehicleLocation;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -108,7 +104,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         ret.setIntervals(intervals);
 
         List<IntervalOfLocation> listForOptimization = new ArrayList<>();
-        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity()/100);
+        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity() / 100);
         Long needMinEnergy = minChargePerLocationInWatt;
         //now looking for cheapest location in 300m radius
         for (EventWrapper eventsWrapper : eventsWrappers) {
@@ -122,7 +118,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             }
             if (eventsWrapper.getDistanceToTheNextEventLocation() != null) {
                 //for the next location we need at least
-                needMinEnergy = (long) (eventsWrapper.getDistanceToTheNextEventLocation() / Constants.KILLOMETER_PER_WATT);
+                needMinEnergy = (long) (eventsWrapper.getDistanceToTheNextEventLocation() * Constants.METER_PER_WATT);
                 needMinEnergy = minChargePerLocationInWatt > needMinEnergy ? minChargePerLocationInWatt : needMinEnergy;
             }
 
@@ -156,7 +152,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             //creating scheduler item
             SchedulerInterval schedulerInterval = new SchedulerInterval();
             intervals.add(schedulerInterval);
-            schedulerInterval.setStarttime(eventsWrapper.getStart());
+            schedulerInterval.setStartTime(eventsWrapper.getStart());
             schedulerInterval.setDuration(eventsWrapper.getStop().getTime() - eventsWrapper.getStart().getTime());
             schedulerInterval.setIntervalType(SchedulerInterval.IntervalType.DRV);
 
@@ -203,6 +199,9 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
 
     @Override
     public SchedulerData calculateGeo(Long accountId, VehicleData smData, SmResource smResource) throws SmException, IOException {
+        if (smData.getLocation() == null || smData.getLocation().getData() == null) {
+            throw new SmException("No location was return by Smart Car service for recource id=" + smResource.getIdResource(), HttpStatus.SC_NOT_FOUND);
+        }
         VehicleLocation vehicleLocation = smData.getLocation().getData();
         double latitudes[] = GeoUtils.calculateLatRange(vehicleLocation.getLatitude(), 15000);
         double longitude[] = GeoUtils.calculateLngRange(vehicleLocation.getLatitude(), vehicleLocation.getLongitude(), 15000);
@@ -213,13 +212,15 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         }
 
 
-        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity());
+        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity() / 100);
 
         TreeMap<Double, LocationWrapper> locationsMap = new TreeMap<>();
         TreeMap<Double, LocationWrapper> locationsMinDistanceMap = new TreeMap<>();
 
         for (SmLocation smLocation : locations) {
-
+            if (smLocation.getPower() == null) {
+                smLocation.setPower(Constants.DEFAULT_POWER_WATT);
+            }
             //calculating distance to location
             Double distance = GeoUtils.calculateDistance(vehicleLocation.getLatitude(), vehicleLocation.getLongitude(), smLocation.getLatitude(), smLocation.getLongitude());
 
@@ -229,10 +230,11 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
                 continue;
             }
 
-            long needMinEnergy = (long) (distance / Constants.KILLOMETER_PER_WATT);
-            double cost = (smResource.getCapacity() - (currentEnergy - needMinEnergy)) * smLocation.getPrice();
+            long needMinEnergy = (long) (distance * Constants.METER_PER_WATT);
+            double cost = (smResource.getCapacity() - (currentEnergy - needMinEnergy)) * smLocation.getPrice() / 1000;
             LocationWrapper locationWrapper = new LocationWrapper(smLocation, distance);
             locationWrapper.setPriceRate(smLocation.getPrice());
+            locationWrapper.setEnergy(needMinEnergy);
             locationsMap.put(cost, locationWrapper);
         }
 
@@ -249,6 +251,9 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         for (LocationWrapper locationWrapper : locationsMap.values()) {
             SmLocation location = locationWrapper.getSmLocation();
             stations.add(new LocationPoint(location.getIdLocation(), location.getDescription(), location.getName(), location.getLongitude(), location.getLatitude()));
+            if (stations.size() > 3) {
+                break;
+            }
         }
 
         if (stations.size() < 3) {
@@ -270,13 +275,20 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         schedulerInterval.setStations(stations);
         schedulerInterval.setPrice(preferredLocation.getPrice());
         schedulerInterval.setChargeRate(preferredLocation.getPower());
-
-        //calculating time which we need to reach location
+        schedulerInterval.setEnergy((smResource.getCapacity() - (currentEnergy - preferredLocationWrapper.getEnergy())));
+        //calculating time which we need to reach location with 30km speed in direction without road
         long timeToLocation = (long) ((3600D * preferredLocationWrapper.getDistance() / 30000D) * 1000D);
-        schedulerInterval.setStarttime(new Date(System.currentTimeMillis() + timeToLocation));
+        schedulerInterval.setStartTime(new Date(System.currentTimeMillis() + timeToLocation));
+        //in mills
+        schedulerInterval.setDuration((long) ((double) schedulerInterval.getEnergy() / (double) schedulerInterval.getChargeRate() * 3600_000D));
+        schedulerInterval.setCostOfCharging(preferredCost);
 
-        schedulerInterval.setDuration((long) (3600000 * preferredCost / preferredLocation.getPrice()));
-
+        ret.setInitialEnergy(currentEnergy);
+        ret.setResourceId(smResource.getIdResource());
+        ret.setAccountId(smResource.getAccountId());
+        ret.setTimeStart(schedulerInterval.getStartTime());
+        ret.setTimeStop(new Date(ret.getTimeStart().getTime() + schedulerInterval.getDuration()));
+       // ret.setSessionType(SmSessionType);
         return ret;
     }
 

@@ -100,6 +100,7 @@ create table Locations(
 	N_LONGITUDE numeric(3,7),
 	V_TIME_ZONE varchar(8),
 	DT_CREATED datetime,
+	V_EXTERNAL_LOCATION_ID varchar(32), -- will be used for moer
 	B_TOU_ENABLED numeric(1),
 	B_DELETED numeric(1)
 );
@@ -192,4 +193,14 @@ create table Schedules(
     FOREIGN KEY (LOCATION_ID)  REFERENCES Locations (ID_LOCATION),
     FOREIGN KEY (POLICY_ID)  REFERENCES Policies (ID_POLICY_ID),
     FOREIGN KEY (SESSION_ID)  REFERENCES Sessions (ID_SESSION)
+);
+
+drop table if exists  MarginalOperatingEmissionsRate;
+create table MarginalOperatingEmissionsRate(
+	ID_MOER INTEGER Primary key AUTOINCREMENT,
+	V_EXTERNAL_LOCATION_ID varchar(32),
+	DT_START datetime,
+	DT_STOP datetime,
+	DT_CREATED datetime,
+	B_DELETED numeric(1)
 );

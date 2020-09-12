@@ -3,16 +3,13 @@ package com.sm.client.services;
 import com.sm.client.model.eco.GridData;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.VehicleData;
-import com.sm.client.services.calcs.TimeScheduleService;
 import com.sm.client.services.calcs.TimeScheduleServiceImpl;
 import com.sm.client.services.optimization.EcoAndPriceOptimizationService;
 import com.sm.client.services.optimization.EcoOptimizationService;
 import com.sm.client.services.optimization.OptimizationServiceFactory;
 import com.sm.client.services.optimization.SimpleOptimizationService;
-import com.sm.dao.ScheduleDao;
 import com.sm.dao.ScheduleDaoImpl;
 import com.sm.model.*;
-import com.sm.model.cache.Coordinates;
 import com.smartcar.sdk.data.VehicleBattery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -22,7 +19,6 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,7 +27,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 
 import static org.mockito.Matchers.*;
@@ -120,7 +115,7 @@ public class CharingScheduleServiceTest {
 
         SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(), generateSmResource(PolicyType.ECO), "2020-09-02", "2020-09-03");
         System.out.println(schedulerData);
-        System.out.println(schedulerData.getIntervals().get(0).getStarttime());
+        System.out.println(schedulerData.getIntervals().get(0).getStartTime());
     }
 
     @Test
@@ -129,7 +124,7 @@ public class CharingScheduleServiceTest {
 
         SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(), generateSmResource(PolicyType.ECO_PRICE), "2020-09-02", "2020-09-03");
         System.out.println(schedulerData);
-        System.out.println(schedulerData.getIntervals().get(0).getStarttime());
+        System.out.println(schedulerData.getIntervals().get(0).getStartTime());
     }
 
     private GridData[] generateListGrid() throws ParseException {
@@ -154,7 +149,7 @@ public class CharingScheduleServiceTest {
         drEvent.setIdDrEvent(getId());
         drEvent.setResourceId(1L);
         drEvent.setStart(start * 60);
-        drEvent.setStart(stop * 60);
+        drEvent.setStop(stop * 60);
         return drEvent;
     }
 

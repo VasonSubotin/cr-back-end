@@ -7,6 +7,7 @@ public class LocationWrapper {
     private SmLocation smLocation;
     private Double distance;
     private Double priceRate; //
+    private long energy; // need energy
 
     public LocationWrapper(SmLocation smLocation, Double distance) {
         this.smLocation = smLocation;
@@ -36,5 +37,13 @@ public class LocationWrapper {
 
     public void setPriceRate(Double priceRate) {
         this.priceRate = priceRate;
+    }
+
+    public long getEnergy() {
+        return energy;
+    }
+
+    public void setEnergy(long energy) {
+        this.energy = energy;
     }
 }

@@ -40,6 +40,9 @@ public class SmLocation {
     @Column(name = "DT_CREATED")
     private Date dtCreated;
 
+    @Column(name = "V_EXTERNAL_LOCATION_ID")
+    private String externalLocationId;
+
     @Column(name = "B_TOU_ENABLED")
     private Boolean touEnabled;
 
@@ -132,6 +135,14 @@ public class SmLocation {
 
     public void setTouEnabled(Boolean touEnabled) {
         this.touEnabled = touEnabled;
+    }
+
+    public String getExternalLocationId() {
+        return externalLocationId;
+    }
+
+    public void setExternalLocationId(String externalLocationId) {
+        this.externalLocationId = externalLocationId;
     }
 
     public Boolean getDeleted() {
