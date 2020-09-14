@@ -92,7 +92,7 @@ public class BuLogicController {
         return schedulerService.calculateDrivingSchedule(resourceId);
     }
 
-    @RequestMapping(value = "/resources/{resourceId}/charingSchedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/resources/{resourceId}/chargingSchedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SchedulerData charingSchedule(
             @PathVariable("resourceId") long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,

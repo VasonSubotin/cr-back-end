@@ -59,6 +59,64 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
     @Override
     public SchedulerData calculate(Long accountId, VehicleData smData, SmResource smResource) throws SmException, IOException {
 
+        List<EventWrapper> eventsWrappers = getEvents();
+
+        SchedulerData ret = new SchedulerData();
+        List<SchedulerInterval> intervals = new ArrayList<>();
+        ret.setIntervals(intervals);
+
+        long currentEnergy = calculateInitialEnergy(eventsWrappers, smData, smResource);
+
+        //now looking for cheapest location in 300m radius
+        List<IntervalOfLocation> listForOptimization = prepareForCalculation(accountId, eventsWrappers, intervals);
+        SimpleOptimizationService.clculate(listForOptimization, currentEnergy, smResource.getCapacity());
+
+        for (IntervalOfLocation intervalOfLocation : listForOptimization) {
+            SchedulerInterval schedulerInterval = ((SchedulerInterval) intervalOfLocation.getRefObject());
+            schedulerInterval.setEnergy(intervalOfLocation.getCharge());
+            schedulerInterval.setCostOfCharging(intervalOfLocation.getSummaryPrice());
+        }
+        if (ret.getIntervals() != null && !ret.getIntervals().isEmpty()) {
+            ret.setTimeStart(ret.getIntervals().get(0).getStartTime());
+            SchedulerInterval schedulerIntervalLast = ret.getIntervals().get(ret.getIntervals().size() - 1);
+            ret.setTimeStop(new Date(schedulerIntervalLast.getStartTime().getTime() + schedulerIntervalLast.getDuration()));
+        }
+        ret.setInitialEnergy(currentEnergy);
+        ret.setAccountId(accountId);
+        ret.setResourceId(smResource.getIdResource());
+        ret.setPolicyId(smResource.getPolicyId());
+        ret.setCreatedTime(new Date());
+        return ret;
+    }
+
+    private long calculateInitialEnergy(List<EventWrapper> events, VehicleData smData, SmResource smResource) {
+
+        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity() / 100);
+        if (events == null || events.isEmpty()) {
+            return currentEnergy;
+        }
+        EventWrapper firstEvent = events.get(0);//first event
+
+        // current location
+        VehicleLocation vLocation = smData.getLocation().getData();
+        Double distance = GeoUtils.calculateDistance(vLocation.getLatitude(), vLocation.getLongitude(), firstEvent.getCoordinates().getLatitude(), firstEvent.getCoordinates().getLongitude());
+        // checking if we have time to make extra charge (at least 30 mins )
+        long timeInMilliSecToReachFirstLocation = (long) (distance * 3600_000D / 30_000D);
+        if (firstEvent.getStart().getTime() - System.currentTimeMillis() > timeInMilliSecToReachFirstLocation + 30 * 60_000) {
+            // will create extra event with current location to charge
+            EventWrapper eventWrapper = new EventWrapper(new Date(), new Date(firstEvent.getStart().getTime() - timeInMilliSecToReachFirstLocation),
+                    new Coordinates("Current location", firstEvent.getCoordinates().getLatitude(), firstEvent.getCoordinates().getLongitude()), "Initial charge");
+
+            events.add(0, eventWrapper);
+        }
+        long initialEnergy = currentEnergy - (long) (distance * Constants.METER_PER_WATT);
+        logger.info("Got initial energy {} " + (initialEnergy > 0 ? "" : " the negative value means we don't have enoth energy to reach the first location, so we will use initial value as 0"), initialEnergy);
+        return initialEnergy < 0 ? 0 : initialEnergy;
+
+    }
+
+    private List<EventWrapper> getEvents() throws SmException, IOException {
+
         Events events = googleService.getEventsForNext24hours();
         if (events == null || events.isEmpty()) {
             // no events found
@@ -90,7 +148,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
                             coordinates.getLatitude(),
                             coordinates.getLongitude()));
                 }
-                EventWrapper eventWrapper = new EventWrapper(startDate, stopDate, coordinates, event.getDescription());
+                EventWrapper eventWrapper = new EventWrapper(startDate, stopDate, coordinates, event.getSummary() + (event.getDescription() == null ? "" : ":" + event.getDescription()));
                 eventsWrappers.add(eventWrapper);
                 eventWrapperLast = eventWrapper;
 
@@ -98,15 +156,12 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
                 logger.error("Failed to process event {} ", event.toPrettyString());
             }
         }
+        return eventsWrappers;
+    }
 
-        SchedulerData ret = new SchedulerData();
-        List<SchedulerInterval> intervals = new ArrayList<>();
-        ret.setIntervals(intervals);
-
+    private List<IntervalOfLocation> prepareForCalculation(Long accountId, List<EventWrapper> eventsWrappers, List<SchedulerInterval> intervals) {
         List<IntervalOfLocation> listForOptimization = new ArrayList<>();
-        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity() / 100);
         Long needMinEnergy = minChargePerLocationInWatt;
-        //now looking for cheapest location in 300m radius
         for (EventWrapper eventsWrapper : eventsWrappers) {
 
             double latitudes[] = GeoUtils.calculateLatRange(eventsWrapper.getCoordinates().getLatitude(), 1000);
@@ -171,6 +226,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             for (Map.Entry<Double, List<LocationWrapper>> entry : mpLocation.entrySet()) {
                 for (LocationWrapper locationWrapper : entry.getValue()) {
                     if (stations.isEmpty()) {
+                        schedulerInterval.setChargeRate(locationWrapper.getSmLocation().getPower());
                         schedulerInterval.setPrice(locationWrapper.getSmLocation().getPrice());
                         listForOptimization.add(new IntervalOfLocation(0, needMinEnergy, locationWrapper.getPriceRate(), schedulerInterval));
                     }
@@ -187,14 +243,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
                 }
             }
         }
-        SimpleOptimizationService.clculate(listForOptimization, currentEnergy, smResource.getCapacity());
-        for (IntervalOfLocation intervalOfLocation : listForOptimization) {
-            SchedulerInterval schedulerInterval = ((SchedulerInterval) intervalOfLocation.getRefObject());
-            schedulerInterval.setEnergy(intervalOfLocation.getCharge());
-            schedulerInterval.setCostOfCharging(intervalOfLocation.getSummaryPrice());
-        }
-        ret.setInitialEnergy(currentEnergy);
-        return ret;
+        return listForOptimization;
     }
 
     @Override
@@ -288,7 +337,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         ret.setAccountId(smResource.getAccountId());
         ret.setTimeStart(schedulerInterval.getStartTime());
         ret.setTimeStop(new Date(ret.getTimeStart().getTime() + schedulerInterval.getDuration()));
-       // ret.setSessionType(SmSessionType);
+        // ret.setSessionType(SmSessionType);
         return ret;
     }
 
