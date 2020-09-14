@@ -6,14 +6,15 @@ import com.sm.client.model.smartcar.SchedulerData;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service("SimpleOptimizationService")
 public class SimpleOptimizationService extends AbstractOptimizationService {
 
     @Override
-    public SchedulerData optimize(String start,
-                                  String stop,
+    public SchedulerData optimize(Date start,
+                                  Date stop,
                                   long capacityInWt,
                                   long chargeLevelInWt,
                                   long rateInWt,

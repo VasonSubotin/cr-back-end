@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -59,8 +60,8 @@ public class EcoEffController {
             @RequestParam(name = "ba", required = false) String obrev,
             @RequestParam(name = "latitude", required = false) Double latitude,
             @RequestParam(name = "longitude", required = false) Double longitude,
-            @RequestParam(name = "starttime", required = false) String starttime,
-            @RequestParam(name = "endtime", required = false) String endtime,
+            @RequestParam(name = "starttime", required = false) Date starttime,
+            @RequestParam(name = "endtime", required = false) Date endtime,
             @RequestParam(name = "moerversion", required = false) String moerversion,
             @RequestParam(name = "style", required = false, defaultValue = "all") String style) throws Exception {
 

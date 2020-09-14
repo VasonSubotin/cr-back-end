@@ -137,25 +137,26 @@ public class EcoServiceImpl implements EcoService {
     public List<GridData> getEcoData(String obrev,
                                      Double latitude,
                                      Double longitude,
-                                     String starttime,
-                                     String endtime,
+                                     Date startTime,
+                                     Date endTime,
                                      String moerversion,
                                      String style) throws Exception {
         try {
-            return getEcoDataInternal(obrev, latitude, longitude, starttime, endtime, moerversion, style);
+            return getEcoDataInternal(obrev, latitude, longitude, startTime, endTime, moerversion, style);
         } catch (Exception ex) {
             logger.error("Failed to get location eco time watt by params obrev={}, latitude={}, longitude={} -- wil try again with default location CAISO_ZP26", obrev, latitude, longitude);
-            return getEcoDataInternal("CAISO_ZP26", latitude, longitude, starttime, endtime, moerversion, style);
+            return getEcoDataInternal("CAISO_ZP26", latitude, longitude, startTime, endTime, moerversion, style);
         }
     }
 
     private List<GridData> getEcoDataInternal(String obrev,
                                               Double latitude,
                                               Double longitude,
-                                              String starttime,
-                                              String endtime,
+                                              Date startTime,
+                                              Date endTime,
                                               String moerversion,
                                               String style) throws Exception {
+
         if ((latitude == null || longitude == null) && (obrev == null || obrev.isEmpty())) {
             throw new Exception("Both ba and  latitude/longitude are empty. You need to setup at least one of them");
         }
@@ -167,11 +168,12 @@ public class EcoServiceImpl implements EcoService {
         }
         builder.queryParam("style", style);
 
-        if (starttime != null) {
-            builder.queryParam("starttime", starttime);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        if (startTime != null) {
+            builder.queryParam("starttime", sdf.format(startTime));
         }
-        if (endtime != null) {
-            builder.queryParam("endtime", endtime);
+        if (endTime != null) {
+            builder.queryParam("endtime", sdf.format(endTime));
         }
         if (moerversion != null) {
             builder.queryParam("moerversion", moerversion);
@@ -241,20 +243,18 @@ public class EcoServiceImpl implements EcoService {
             String obrev,
             Double latitude,
             Double longitude,
-            String starttime,
-            String endtime,
+            Date startTime,
+            Date endTime,
             String moerversion,
             String style) throws Exception {
 
-        Date start = StringDateUtil.parseDate(starttime);
-        Date stop = StringDateUtil.parseDate(endtime);
 
         splitByGrid(mockCache);
         //ranging by interval
 
         List<GridData> ret = new ArrayList<>();
         for (GridData gd : mockCache) {
-            if (start.before(gd.getPointTime()) && stop.after(gd.getPointTime())) {
+            if (startTime.before(gd.getPointTime()) && endTime.after(gd.getPointTime())) {
                 ret.add(gd);
             }
         }

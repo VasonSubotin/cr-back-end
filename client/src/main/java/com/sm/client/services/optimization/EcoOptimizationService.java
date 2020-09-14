@@ -5,16 +5,13 @@ import com.sm.client.model.eco.GridData;
 import com.sm.client.model.smartcar.SchedulerData;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 @Service("EcoOptimizationService")
 public class EcoOptimizationService extends AbstractOptimizationService {
 
     @Override
-    public SchedulerData optimize(String start, String stop, long capacityInWt, long chargeLevelInWt, long rateInWt, String locationId, Long recourceId) throws Exception {
+    public SchedulerData optimize(Date start, Date stop, long capacityInWt, long chargeLevelInWt, long rateInWt, String locationId, Long recourceId) throws Exception {
 
         List<GridData> co2DataList = getData(start, stop, locationId, recourceId);
 

@@ -76,8 +76,8 @@ public class BuLogicController {
             @RequestParam(name = "ba", required = false) String locationId,
             @RequestParam(name = "capacity", required = false, defaultValue = "30000") Long capacity,
             @RequestParam(name = "charge", required = false, defaultValue = "15000") Long charge,
-            @RequestParam(name = "starttime", required = false) String starttime,
-            @RequestParam(name = "endtime", required = false) String endtime,
+            @RequestParam(name = "starttime", required = false) Date starttime,
+            @RequestParam(name = "endtime", required = false) Date endtime,
             @RequestParam(name = "rate", required = false, defaultValue = "6600") Long rate,
             @RequestParam(name = "policy", required = false, defaultValue = "ECO") PolicyType policyType) throws Exception {
 

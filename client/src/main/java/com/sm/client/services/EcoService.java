@@ -20,8 +20,8 @@ public interface EcoService {
     List<GridData> getEcoData(String obrev,
                               Double latitude,
                               Double longitude,
-                              String starttime,
-                              String endtime,
+                              Date startTime,
+                              Date endTime,
                               String moerversion,
                               String style) throws Exception;
 
@@ -32,8 +32,8 @@ public interface EcoService {
     List<GridData> getEcoDataMock(String obrev,
                                   Double latitude,
                                   Double longitude,
-                                  String starttime,
-                                  String endtime,
+                                  Date startTime,
+                                  Date endTime,
                                   String moerversion,
                                   String style) throws Exception;
 

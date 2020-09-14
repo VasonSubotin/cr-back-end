@@ -104,7 +104,7 @@ public class CharingScheduleServiceTest {
         timeOfUsage.setResourceId(1L);
         when(timeOfUsageService.getTimeOfUsageByResourceId(1L)).thenReturn(timeOfUsage);
 
-        SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(), generateSmResource(PolicyType.SIMPLE), "2020-09-02T05:00", "2020-09-03T05:00");
+        SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(), generateSmResource(PolicyType.SIMPLE), sdf.parse("2020-09-02T05:00:00"), sdf.parse("2020-09-03T05:00:00"));
         System.out.println(schedulerData);
     }
 
@@ -113,7 +113,7 @@ public class CharingScheduleServiceTest {
     public void testEco() throws Exception {
         timeScheduleService.setScheduleTransformService(new ScheduleTransformServiceImpl());
 
-        SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(), generateSmResource(PolicyType.ECO), "2020-09-02", "2020-09-03");
+        SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(), generateSmResource(PolicyType.ECO), sdf.parse("2020-09-02T00:00:00"), sdf.parse("2020-09-03T00:00:00"));
         System.out.println(schedulerData);
         System.out.println(schedulerData.getIntervals().get(0).getStartTime());
     }
@@ -122,7 +122,7 @@ public class CharingScheduleServiceTest {
     public void testEcoPrice() throws Exception {
         timeScheduleService.setScheduleTransformService(new ScheduleTransformServiceImpl());
 
-        SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(), generateSmResource(PolicyType.ECO_PRICE), "2020-09-02", "2020-09-03");
+        SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(), generateSmResource(PolicyType.ECO_PRICE), sdf.parse("2020-09-02T00:00:00"), sdf.parse("2020-09-03T00:00:00"));
         System.out.println(schedulerData);
         System.out.println(schedulerData.getIntervals().get(0).getStartTime());
     }

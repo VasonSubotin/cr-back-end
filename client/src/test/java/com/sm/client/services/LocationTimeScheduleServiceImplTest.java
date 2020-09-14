@@ -14,7 +14,9 @@ import com.sm.model.SmException;
 import com.sm.model.SmLocation;
 import com.sm.model.SmResource;
 import com.sm.model.cache.Coordinates;
+import com.smartcar.sdk.data.SmartcarResponse;
 import com.smartcar.sdk.data.VehicleBattery;
+import com.smartcar.sdk.data.VehicleLocation;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -202,12 +204,14 @@ public class LocationTimeScheduleServiceImplTest {
         smLocation.setName(name);
         smLocation.setLatitude(latitude);
         smLocation.setLongitude(longitude);
+        smLocation.setPower(6600l);
         return smLocation;
     }
 
     private VehicleData generateVehicleData() {
         VehicleData smData = new VehicleData();
         smData.setBattery(new VehicleBattery(100, 50));
+        smData.setLocation(new SmartcarResponse<>(new VehicleLocation(100,10)));
         smData.setVin("testVin1");
         return smData;
     }

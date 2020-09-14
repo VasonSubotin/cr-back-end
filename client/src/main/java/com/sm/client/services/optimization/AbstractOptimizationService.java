@@ -6,7 +6,6 @@ import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.model.to.EventInterval;
 import com.sm.client.services.EcoService;
 import com.sm.client.services.TimeOfUsageService;
-import com.sm.client.utils.StringDateUtil;
 import com.sm.client.utils.intervals.Interval;
 import com.sm.client.utils.intervals.IntervalTransformerUtils;
 import com.sm.client.utils.intervals.IntervalUtils;
@@ -40,8 +39,8 @@ public abstract class AbstractOptimizationService implements OptimizationService
      * @return list of elements which represents  CO2 info
      * @throws Exception
      */
-    protected List<GridData> getData(String start,
-                                     String stop,
+    protected List<GridData> getData(Date start,
+                                     Date stop,
                                      String locationId,
                                      Long resourceId) throws Exception {
         List<GridData> co2DataList = ecoService.getEcoData(locationId, null, null, start, stop, null, STYLE);
@@ -52,7 +51,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
         }
         SmTimeOfUsage timeOfUsage = timeOfUsageService.getTimeOfUsageByResourceId(resourceId);
         if (timeOfUsage != null) {
-            List<Interval> tousInterval = IntervalTransformerUtils.touToIntervals(timeOfUsage, StringDateUtil.parseDate(start));
+            List<Interval> tousInterval = IntervalTransformerUtils.touToIntervals(timeOfUsage, start);
             if (tousInterval != null && !tousInterval.isEmpty()) {
                 List<Interval> gridsInterval = IntervalTransformerUtils.gridDataListToIntervals(co2DataList);
                 // applying tous

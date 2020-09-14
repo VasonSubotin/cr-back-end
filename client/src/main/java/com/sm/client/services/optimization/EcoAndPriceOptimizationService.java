@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -18,8 +19,8 @@ public class EcoAndPriceOptimizationService extends EcoOptimizationService {
 
 
     @Override
-    protected List<GridData> getData(String start,
-                                     String stop,
+    protected List<GridData> getData(Date start,
+                                     Date stop,
                                      String locationId,
                                      Long resourceId) throws Exception {
         List<GridData> co2DataList = super.getData(start, stop, locationId, resourceId);

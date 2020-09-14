@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 public class TimeScheduleServiceImpl implements TimeScheduleService {
 
@@ -39,7 +41,7 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
     private ScheduleDao scheduleDao;
 
     @Override
-    public SchedulerData calculateSchedule(VehicleData smData, SmResource smResource, String starttime, String endtime) throws Exception {
+    public SchedulerData calculateSchedule(VehicleData smData, SmResource smResource, Date starttime, Date endtime) throws Exception {
 
         PolicyType policyType = PolicyType.getById(smResource.getPolicyId());
         if (policyType == null) {

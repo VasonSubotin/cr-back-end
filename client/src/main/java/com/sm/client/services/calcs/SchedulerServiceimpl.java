@@ -126,7 +126,7 @@ public class SchedulerServiceimpl implements SchedulerService {
 
     @Override
     public SchedulerData calculateCharingSchedule(Long resourceId) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         Pair<VehicleData, SmResource> pair = getSmDataAndSmResource(resourceId);
         VehicleData smData = pair.getKey();
@@ -136,16 +136,16 @@ public class SchedulerServiceimpl implements SchedulerService {
         // if plugined - generates Time scheduler
         //getting current event if any
         Event event = getCurrentEvent();
-        String startTime = null;
-        String endTime = null;
+        Date startTime = null;
+        Date endTime = null;
         if (event == null) {
             // no calendar is avilable
-            startTime = sdf.format(new Date());
-            endTime = sdf.format(new Date(System.currentTimeMillis() + StringDateUtil.DAY_IN_MILLS));
+            startTime = new Date();
+            endTime = new Date(System.currentTimeMillis() + StringDateUtil.DAY_IN_MILLS);
             logger.info("no current event is avilable - will use unlimited time range[{} - {}]", startTime, endTime);
         } else {
-            startTime = sdf.format(new Date(event.getStart().getDate().getValue()));
-            endTime = sdf.format(new Date(event.getEnd().getDate().getValue()));
+            startTime = new Date(event.getStart().getDate().getValue());
+            endTime = new Date(event.getEnd().getDate().getValue());
         }
         return timeScheduleService.calculateSchedule(smData, smResource, startTime, endTime);
     }
