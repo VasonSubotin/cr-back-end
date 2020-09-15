@@ -1,6 +1,7 @@
 package com.sm.model;
 
 public class Constants {
+    public static final long DAYS_LENGTH_IN_MILLS = 86400_000L;
     public static final String SMART_CAR_AUTH_TYPE = "SmartCarAuthorizationType";
     public static final String GOOGLE_AUTH_TYPE = "GoogleAuthorizationType";
     public static final long DEFAULT_POWER_WATT = 6600;

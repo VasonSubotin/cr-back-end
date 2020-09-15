@@ -34,9 +34,18 @@ public class RecourcesDaoImpl implements ResourcesDao {
     public SmResource getResourceByExternalIdAndAccountId(String vExternal, Long accountId) {
 
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmResource where (deleted=0 or deleted is null) and externalResourceId=:vExternal";
+
+        String hql = "FROM SmResource where (deleted=0 or deleted is null) and externalResourceId=:vExternal ";
+        if (accountId != null) {
+            hql += "and accountId=:accountId";
+        } else {
+            hql += "and accountId is null";
+        }
         Query query = session.createQuery(hql);
         query.setParameter("vExternal", vExternal);
+        if (accountId != null) {
+            query.setParameter("accountId", accountId);
+        }
         List<SmResource> result = query.getResultList();
 
         return (result == null || result.isEmpty()) ? null : result.iterator().next();

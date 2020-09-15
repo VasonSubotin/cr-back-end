@@ -6,6 +6,7 @@ import com.sm.client.model.eco.GridData;
 import com.sm.client.model.eco.LocationData;
 import com.sm.client.model.to.EventInterval;
 import com.sm.client.utils.StringDateUtil;
+import com.sm.model.Constants;
 import com.sm.model.SmDREvent;
 import com.sm.model.SmException;
 import org.apache.commons.codec.binary.Base64;
@@ -170,10 +171,14 @@ public class EcoServiceImpl implements EcoService {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         if (startTime != null) {
-            builder.queryParam("starttime", sdf.format(startTime));
+            // we will do request for the 7 days back
+            Date start = new Date(startTime.getTime() - 7 * Constants.DAYS_LENGTH_IN_MILLS);
+            builder.queryParam("starttime", sdf.format(start));
         }
         if (endTime != null) {
-            builder.queryParam("endtime", sdf.format(endTime));
+            // we will do request for the 7 days back
+            Date stop = new Date(endTime.getTime() - 7 * Constants.DAYS_LENGTH_IN_MILLS);
+            builder.queryParam("endtime", sdf.format(stop));
         }
         if (moerversion != null) {
             builder.queryParam("moerversion", moerversion);
@@ -186,7 +191,7 @@ public class EcoServiceImpl implements EcoService {
                 tries--;
                 ResponseEntity<GridData[]> result = ecoTemplate.exchange(builder.build().toUri(), HttpMethod.GET, new HttpEntity<>(buildBearerHttpHeader(currentToken)), GridData[].class);
                 List<GridData> records = Arrays.asList(result.getBody());
-                splitByGrid(records);
+                splitByGrid(records, 7 * Constants.DAYS_LENGTH_IN_MILLS);
                 return records;
             } catch (org.springframework.web.client.HttpClientErrorException.Forbidden ex) {
                 getToken();
@@ -232,7 +237,7 @@ public class EcoServiceImpl implements EcoService {
                     ret.add(eventInterval);
                 }
             }
-            startTime += (24 * 3600000);
+            startTime += (Constants.DAYS_LENGTH_IN_MILLS);
         }
 
         return ret;
@@ -249,7 +254,7 @@ public class EcoServiceImpl implements EcoService {
             String style) throws Exception {
 
 
-        splitByGrid(mockCache);
+        splitByGrid(mockCache, 0);
         //ranging by interval
 
         List<GridData> ret = new ArrayList<>();
@@ -261,10 +266,11 @@ public class EcoServiceImpl implements EcoService {
         return ret;
     }
 
-    private void splitByGrid(List<GridData> dataRecords) {
+    private void splitByGrid(List<GridData> dataRecords, long shift) {
         dataRecords.sort(Comparator.comparing(GridData::getPointTime));
         GridData lastGridData = null;
         for (GridData gridData : dataRecords) {
+            gridData.setPointTime(new Date(gridData.getPointTime().getTime() + shift));
             gridData.setStart(gridData.getPointTime().getTime());
             if (gridData.getFrequence() != null) {
                 gridData.setStop(gridData.getPointTime().getTime() + gridData.getFrequence() * 1000);

@@ -5,15 +5,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
+import com.sm.dao.ResourcesDao;
+import com.sm.model.SmResource;
 import com.sm.model.SmSchedules;
+import com.sm.ocpp.to.OCPPScheduleData;
+import com.sm.ocpp.to.OCPPScheduleEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ScheduleTransformServiceImpl implements ScheduleTransformService {
@@ -23,6 +26,8 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
+    @Autowired
+    private ResourcesDao resourcesDao;
 
     @Override
     public SmSchedules scheduleWebToSmSchedules(SchedulerData schedulerData) throws JsonProcessingException {
@@ -65,8 +70,24 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         schedulerData.setSchedulerId(smSchedules.getIdSchedule());
         schedulerData.setCreatedTime(smSchedules.getDtCreated());
         schedulerData.setInitialEnergy(smSchedules.getInitEnergy());
-        schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), new TypeReference<List<SchedulerInterval>>(){}));
+        schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), new TypeReference<List<SchedulerInterval>>() {
+        }));
 
         return schedulerData;
+    }
+
+    public OCPPScheduleData SchedulerDataToOCPPScheduleData(SchedulerData schedulerData, UUID uuid) {
+        SmResource smResource = resourcesDao.getResourceByIdAndAccountId(schedulerData.getResourceId(), schedulerData.getAccountId());
+        OCPPScheduleData ocppScheduleData = new OCPPScheduleData(uuid, schedulerData.getResourceId(), smResource.getExternalResourceId(), 7);
+
+        if (schedulerData.getIntervals() == null) {
+            return ocppScheduleData;
+        }
+        LinkedList<OCPPScheduleEvent> events = ocppScheduleData.getEvents();
+        for (SchedulerInterval schedulerInterval : schedulerData.getIntervals()) {
+            events.add(new OCPPScheduleEvent(schedulerInterval.getStartTime(), true));
+            events.add(new OCPPScheduleEvent(new Date(schedulerInterval.getStartTime().getTime() + schedulerInterval.getDuration()), false));
+        }
+        return ocppScheduleData;
     }
 }

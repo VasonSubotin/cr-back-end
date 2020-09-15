@@ -30,19 +30,23 @@ public class OCPPServer {
     private SmServerCoreEventHandler smServerCoreEventHandler;
 
     private IServerAPI server;
-    private ServerCoreProfile core;
+
+    @Autowired
+    private ScheduleQueue scheduleQueue;
 
     @PostConstruct
     public void init() {
+        ServerCoreProfile core = new ServerCoreProfile(smServerCoreEventHandler);
+        scheduleQueue.setCore(core);
         JSONConfiguration configuration = JSONConfiguration.get();
         configuration.setParameter(JSONConfiguration.REUSE_ADDR_PARAMETER, true);
         //configuration.setParameter(JSONConfiguration.)
         switch (type) {
             case JSON:
-                this.server = new JSONServer(new ServerCoreProfile(smServerCoreEventHandler), configuration);
+                this.server = new JSONServer(core, configuration);
                 break;
             case SOAP:
-                this.server = new SOAPServer(new ServerCoreProfile(smServerCoreEventHandler));
+                this.server = new SOAPServer(core);
                 break;
             default:
                 logger.error("***** Unknown OCPP server type[{}] - can't start OCPP server! *****", type);
@@ -52,14 +56,14 @@ public class OCPPServer {
 
             @Override
             public void newSession(UUID sessionIndex, SessionInformation information) {
-
+                scheduleQueue.addSession(sessionIndex, information);
                 // sessionIndex is used to send messages.
                 System.out.println("New session " + sessionIndex + ": " + information.getIdentifier());
             }
 
             @Override
             public void lostSession(UUID sessionIndex) {
-
+                scheduleQueue.removeSession(sessionIndex);
                 System.out.println("Session " + sessionIndex + " lost connection");
             }
         });
@@ -67,6 +71,10 @@ public class OCPPServer {
 
     enum ServerType {
         JSON, SOAP
+    }
+
+    public IServerAPI getServer() {
+        return server;
     }
 }
 

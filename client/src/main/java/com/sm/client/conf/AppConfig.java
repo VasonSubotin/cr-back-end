@@ -8,10 +8,12 @@ import org.jasypt.iv.RandomIvGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableEncryptableProperties
-@ComponentScan(basePackages = {"com.sm.client","com.sm.dao","com.sm.ocpp"})
+@ComponentScan(basePackages = {"com.sm.client", "com.sm.dao", "com.sm.ocpp"})
+@EnableScheduling
 public class AppConfig {
 
     @Bean(name = "encryptConfig")
@@ -24,7 +26,7 @@ public class AppConfig {
         config.setPoolSize("1");
         config.setProviderName("SunJCE");
         config.setIvGenerator(new RandomIvGenerator());
-       // config.setSaltGeneratorClassName("org.jasypt.salt.RandomSaltGenerator");
+        // config.setSaltGeneratorClassName("org.jasypt.salt.RandomSaltGenerator");
         config.setStringOutputType("base64");
         encryptor.setConfig(config);
         return encryptor;
