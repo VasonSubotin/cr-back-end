@@ -70,9 +70,10 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         schedulerData.setSchedulerId(smSchedules.getIdSchedule());
         schedulerData.setCreatedTime(smSchedules.getDtCreated());
         schedulerData.setInitialEnergy(smSchedules.getInitEnergy());
-        schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), new TypeReference<List<SchedulerInterval>>() {
-        }));
-
+        if (smSchedules.getData() != null) {
+            schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), new TypeReference<List<SchedulerInterval>>() {
+            }));
+        }
         return schedulerData;
     }
 

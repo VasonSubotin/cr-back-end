@@ -27,7 +27,14 @@ public class RecourcesDaoImpl implements ResourcesDao {
 
     @Override
     public SmResource getResourceByIdAndAccountId(Long id, Long accountId) {
-        return sessionFactory.getCurrentSession().get(SmResource.class, id);
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmResource where (deleted=0 or deleted is null) and accountId=:accountId and idResource=:idResource";
+        Query query = session.createQuery(hql);
+        query.setParameter("accountId", accountId);
+        query.setParameter("idResource", id);
+        List<SmResource> result = query.getResultList();
+
+        return (result == null || result.isEmpty()) ? null : result.iterator().next();
     }
 
     @Override

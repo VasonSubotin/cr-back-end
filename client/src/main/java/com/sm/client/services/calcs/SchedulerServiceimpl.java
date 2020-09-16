@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -165,13 +166,30 @@ public class SchedulerServiceimpl implements SchedulerService {
             throw new SmException("*** Failed to get location of car for resource by external id[" + smResource.getExternalResourceId() + "] ****", HttpStatus.SC_NOT_FOUND);
         }
 
-        return new Pair<VehicleData,SmResource>(smData, smResource);
+        return new Pair<VehicleData, SmResource>(smData, smResource);
     }
 
     @Override
     public SchedulerData getLastSchdule(String login, Long resourceId) throws Exception {
         SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
         return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.getLastSmSchedulesByResourceId(resourceId, smUserSession.getAccountId()));
+    }
+
+    @Override
+    public List<SchedulerData> getSchduleHistory(String login, Long resourceId, Date start, Date stop) throws Exception {
+        if (start == null) {
+            start = new Date(0);
+        }
+        if (stop == null) {
+            stop = new Date();
+        }
+        SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+        List<SmSchedules> schedules = scheduleDao.getLastSmSchedulesByResourceId(resourceId, smUserSession.getAccountId(), start, stop);
+        List<SchedulerData> result = new ArrayList<>();
+        for (SmSchedules smSchedules : schedules) {
+            result.add(scheduleTransformService.smSchedulesToScheduleWeb(smSchedules));
+        }
+        return result;
     }
 
     @Override

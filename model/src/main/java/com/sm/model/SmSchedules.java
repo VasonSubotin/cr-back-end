@@ -51,6 +51,25 @@ public class SmSchedules {
     @Column(name = "BB_DATA")
     private byte[] data;
 
+    public SmSchedules() {
+    }
+
+    public SmSchedules(Long idSchedule, Long accountId, Long locationId, Long resourceId, Double carbonImpact, Double carbonSavings, Long initEnergy, Double financeSavings, Long sessionId, Long policyId, Date dtCreated, Date dtStart, Date dtStop) {
+        this.idSchedule = idSchedule;
+        this.accountId = accountId;
+        this.locationId = locationId;
+        this.resourceId = resourceId;
+        this.carbonImpact = carbonImpact;
+        this.carbonSavings = carbonSavings;
+        this.initEnergy = initEnergy;
+        this.financeSavings = financeSavings;
+        this.sessionId = sessionId;
+        this.policyId = policyId;
+        this.dtCreated = dtCreated;
+        this.dtStart = dtStart;
+        this.dtStop = dtStop;
+    }
+
     public Long getIdSchedule() {
         return idSchedule;
     }

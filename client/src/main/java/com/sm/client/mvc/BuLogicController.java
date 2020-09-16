@@ -16,6 +16,7 @@ import com.smartcar.sdk.SmartcarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -81,7 +82,7 @@ public class BuLogicController {
             @RequestParam(name = "rate", required = false, defaultValue = "6600") Long rate,
             @RequestParam(name = "policy", required = false, defaultValue = "ECO") PolicyType policyType) throws Exception {
 
-        return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId,null);
+        return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId, null);
     }
 
     @RequestMapping(value = "/resources/{resourceId}/drivingSchedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -106,6 +107,15 @@ public class BuLogicController {
             @PathVariable("resourceId") long resourceId) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
         return schedulerService.getLastSchdule(login, resourceId);
+    }
+
+    @RequestMapping(value = "/resources/{resourceId}/scheduleHistory", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<SchedulerData> getScheduleHistory(
+            @PathVariable("resourceId") long resourceId,
+            @RequestParam(name = "start", required = false) @DateTimeFormat(pattern="yyyy-MM-dd'T'HH:mm:ss") Date start,
+            @RequestParam(name = "stop", required = false) @DateTimeFormat(pattern="yyyy-MM-dd'T'HH:mm:ss") Date stop) throws Exception {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
+        return schedulerService.getSchduleHistory(login, resourceId, start, stop);
     }
 
     @RequestMapping(value = "/resources/{resourceId}/schedule", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -142,7 +152,6 @@ public class BuLogicController {
 //    ) throws Exception {
 //        return schedulerService.calculateSchedule(resourceId, true);
 //    }
-
 
 
     @RequestMapping(value = "/resources/{resourceId}/calculateGeo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

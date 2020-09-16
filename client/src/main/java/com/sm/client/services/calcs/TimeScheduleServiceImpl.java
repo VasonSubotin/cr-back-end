@@ -71,7 +71,7 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
         schedulerData.setAccountId(smResource.getAccountId());
         schedulerData.setResourceId(smResource.getIdResource());
         schedulerData.setPolicyId(smResource.getPolicyId());
-
+        schedulerData.setCreatedTime(new Date());
         return scheduleTransformService.smSchedulesToScheduleWeb(
                 scheduleDao.saveSmSchedules(
                         scheduleTransformService.scheduleWebToSmSchedules(schedulerData)));
