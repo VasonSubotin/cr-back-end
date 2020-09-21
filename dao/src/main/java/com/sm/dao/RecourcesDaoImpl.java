@@ -1,5 +1,6 @@
 package com.sm.dao;
 
+import com.sm.model.Constants;
 import com.sm.model.SmResource;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -61,20 +62,24 @@ public class RecourcesDaoImpl implements ResourcesDao {
     @Transactional(readOnly = true)
     @Override
     public SmResource saveResource(SmResource smResource, Long accountId) {
-        smResource.setAccountId(accountId);
-        smResource.setIdResource((Long) sessionFactory.getCurrentSession().save(smResource));
-        return smResource;
+        synchronized (Constants.class) {
+            smResource.setAccountId(accountId);
+            smResource.setIdResource((Long) sessionFactory.getCurrentSession().save(smResource));
+            return smResource;
+        }
     }
 
     @Override
     @Transactional
     public SmResource deleteResourceByIdAndAccountId(Long id, Long accountId) {
-        //sessionFactory.getCurrentSession().update("UPDATE SmResource set SmResource.deleted");
-        Query query = sessionFactory.getCurrentSession().createQuery("update SmResource set deleted = 1 where idResource = :id and accountId=:accountId");
-        query.setParameter("id", id);
-        query.setParameter("accountId", accountId);
-        query.executeUpdate();
-        return getResourceByIdAndAccountId(id, accountId);
+        synchronized (Constants.class) {
+            //sessionFactory.getCurrentSession().update("UPDATE SmResource set SmResource.deleted");
+            Query query = sessionFactory.getCurrentSession().createQuery("update SmResource set deleted = 1 where idResource = :id and accountId=:accountId");
+            query.setParameter("id", id);
+            query.setParameter("accountId", accountId);
+            query.executeUpdate();
+            return getResourceByIdAndAccountId(id, accountId);
+        }
     }
 
 

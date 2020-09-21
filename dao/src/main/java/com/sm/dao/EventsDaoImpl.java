@@ -1,5 +1,6 @@
 package com.sm.dao;
 
+import com.sm.model.Constants;
 import com.sm.model.SmEvent;
 import com.sm.model.SmSession;
 import org.hibernate.Session;
@@ -46,7 +47,9 @@ public class EventsDaoImpl implements EventsDao {
     @Transactional(readOnly = false)
     @Override
     public SmEvent saveEvent(SmEvent smEvent) {
-        smEvent.setIdEvent((Long) sessionFactory.getCurrentSession().save(smEvent));
-        return smEvent;
+        synchronized (Constants.class) {
+            smEvent.setIdEvent((Long) sessionFactory.getCurrentSession().save(smEvent));
+            return smEvent;
+        }
     }
 }

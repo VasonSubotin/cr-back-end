@@ -1,5 +1,6 @@
 package com.sm.dao;
 
+import com.sm.model.Constants;
 import com.sm.model.SmLocation;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -55,19 +56,22 @@ public class LocationDaoImpl implements LocationDao {
     @Transactional(readOnly = false)
     @Override
     public SmLocation saveLocation(SmLocation smLocation, Long accountId) {
-        smLocation.setIdLocation((Long) sessionFactory.getCurrentSession().save(smLocation));
-        smLocation.setAccountId(accountId);
-        return smLocation;
+        synchronized (Constants.class) {
+            smLocation.setIdLocation((Long) sessionFactory.getCurrentSession().save(smLocation));
+            smLocation.setAccountId(accountId);
+            return smLocation;
+        }
     }
 
     @Override
     @Transactional(readOnly = false)
     public SmLocation deleteLocationById(Long id, Long accountId) {
-
-        Query query = sessionFactory.getCurrentSession().createQuery("update SmLocation set deleted = 1 where idLocation = :id and accountId=:accountId");
-        query.setParameter("id", id);
-        query.setParameter("accountId", accountId);
-        query.executeUpdate();
-        return getLocationByIdAndAccountId(id, accountId);
+        synchronized (Constants.class) {
+            Query query = sessionFactory.getCurrentSession().createQuery("update SmLocation set deleted = 1 where idLocation = :id and accountId=:accountId");
+            query.setParameter("id", id);
+            query.setParameter("accountId", accountId);
+            query.executeUpdate();
+            return getLocationByIdAndAccountId(id, accountId);
+        }
     }
 }

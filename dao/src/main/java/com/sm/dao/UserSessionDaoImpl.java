@@ -1,5 +1,6 @@
 package com.sm.dao;
 
+import com.sm.model.Constants;
 import com.sm.model.SmUserSession;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -47,10 +48,13 @@ public class UserSessionDaoImpl implements UserSessionDao {
         return lst.isEmpty() ? null : lst.iterator().next();
     }
 
+    @Transactional(readOnly = false)
     @Override
     public SmUserSession saveSession(SmUserSession smUserSession) {
-        smUserSession.setIdUserSession((Long) sessionFactory.getCurrentSession().save(smUserSession));
-        return smUserSession;
+        synchronized (Constants.class) {
+            smUserSession.setIdUserSession((Long) sessionFactory.getCurrentSession().save(smUserSession));
+            return smUserSession;
+        }
     }
 
 }

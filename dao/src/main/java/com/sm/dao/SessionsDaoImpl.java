@@ -1,10 +1,7 @@
 package com.sm.dao;
 
 
-import com.sm.model.SmEvent;
-import com.sm.model.SmLocation;
-import com.sm.model.SmResource;
-import com.sm.model.SmSession;
+import com.sm.model.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -48,9 +45,11 @@ public class SessionsDaoImpl implements SessionsDao {
         return query.getResultList();
     }
 
+    @Transactional(readOnly = false)
     @Override
-    @javax.transaction.Transactional
     public void saveSession(SmSession session) {
-        sessionFactory.getCurrentSession().save(session);
+        synchronized (Constants.class) {
+            sessionFactory.getCurrentSession().save(session);
+        }
     }
 }

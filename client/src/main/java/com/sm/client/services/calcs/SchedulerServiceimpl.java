@@ -127,27 +127,23 @@ public class SchedulerServiceimpl implements SchedulerService {
 
     @Override
     public SchedulerData calculateCharingSchedule(Long resourceId) throws Exception {
-        //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         Pair<VehicleData, SmResource> pair = getSmDataAndSmResource(resourceId);
         VehicleData smData = pair.getKey();
         SmResource smResource = pair.getValue();
 
-        SchedulerData schedulerData = null;
-        // if plugined - generates Time scheduler
-        //getting current event if any
-        Event event = getCurrentEvent();
-        Date startTime = null;
+        Date startTime = new Date();
         Date endTime = null;
-        if (event == null) {
-            // no calendar is avilable
-            startTime = new Date();
-            endTime = new Date(System.currentTimeMillis() + StringDateUtil.DAY_IN_MILLS);
-            logger.info("no current event is avilable - will use unlimited time range[{} - {}]", startTime, endTime);
+
+        if (smResource.getnChargeByTime() != null) {
+            endTime = StringDateUtil.setTimeFromMinutesOfDay(startTime, smResource.getnChargeByTime());
+            if (endTime.before(startTime)) {
+                endTime = new Date(endTime.getTime() + StringDateUtil.DAY_IN_MILLS);
+            }
         } else {
-            startTime = new Date(event.getStart().getDate().getValue());
-            endTime = new Date(event.getEnd().getDate().getValue());
+            endTime = new Date(System.currentTimeMillis() + StringDateUtil.DAY_IN_MILLS);
         }
+        logger.info("no current event is avilable - will use unlimited time range[{} - {}]", startTime, endTime);
         return timeScheduleService.calculateSchedule(smData, smResource, startTime, endTime);
     }
 
@@ -223,15 +219,15 @@ public class SchedulerServiceimpl implements SchedulerService {
         return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.saveSmSchedules(exists));
     }
 
-    private Event getCurrentEvent() throws SmException {
-        try {
-            Events events = googleService.getEventsForPeriodInMills(System.currentTimeMillis() - 300000, 600000);
-            if (events.getItems() == null || events.getItems().isEmpty()) {
-                return null;
-            }
-            return events.getItems().get(0);
-        } catch (IOException e) {
-            throw new SmException(e.getMessage(), 500);
-        }
-    }
+//    private Event getCurrentEvent() throws SmException {
+//        try {
+//            Events events = googleService.getEventsForPeriodInMills(System.currentTimeMillis() - 300000, 600000);
+//            if (events.getItems() == null || events.getItems().isEmpty()) {
+//                return null;
+//            }
+//            return events.getItems().get(0);
+//        } catch (IOException e) {
+//            throw new SmException(e.getMessage(), 500);
+//        }
+//    }
 }

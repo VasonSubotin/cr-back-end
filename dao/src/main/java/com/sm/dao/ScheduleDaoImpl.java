@@ -1,5 +1,6 @@
 package com.sm.dao;
 
+import com.sm.model.Constants;
 import com.sm.model.SmSchedules;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -60,9 +61,11 @@ public class ScheduleDaoImpl implements ScheduleDao {
     @Transactional(readOnly = false)
     @Override
     public SmSchedules saveSmSchedules(SmSchedules smSchedules) {
-        Session session = sessionFactory.getCurrentSession();
-        smSchedules.setSessionId((Long) sessionFactory.getCurrentSession().save(smSchedules));
-        return smSchedules;
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            smSchedules.setSessionId((Long) sessionFactory.getCurrentSession().save(smSchedules));
+            return smSchedules;
+        }
     }
 
     public void setSessionFactory(SessionFactory sessionFactory) {

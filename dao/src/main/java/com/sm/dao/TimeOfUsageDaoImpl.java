@@ -1,6 +1,7 @@
 package com.sm.dao;
 
 
+import com.sm.model.Constants;
 import com.sm.model.SmTimeOfUsage;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -54,17 +55,20 @@ public class TimeOfUsageDaoImpl implements TimeOfUsageDao {
     @Transactional(readOnly = false)
     @Override
     public SmTimeOfUsage saveTimeOfUsage(SmTimeOfUsage smTimeOfUsage) {
-        smTimeOfUsage.setIdTou((Long) sessionFactory.getCurrentSession().save(smTimeOfUsage));
-        return smTimeOfUsage;
+        synchronized (Constants.class) {
+            smTimeOfUsage.setIdTou((Long) sessionFactory.getCurrentSession().save(smTimeOfUsage));
+            return smTimeOfUsage;
+        }
     }
 
     @Override
     @Transactional(readOnly = false)
     public SmTimeOfUsage deleteTimeOfUsageById(Long id) {
-
-        Query query = sessionFactory.getCurrentSession().createQuery("update SmTimeOfUsage set deleted = 1 where idTou = :id");
-        query.setParameter("id", id);
-        query.executeUpdate();
-        return getTimeOfUsageById(id);
+        synchronized (Constants.class) {
+            Query query = sessionFactory.getCurrentSession().createQuery("update SmTimeOfUsage set deleted = 1 where idTou = :id");
+            query.setParameter("id", id);
+            query.executeUpdate();
+            return getTimeOfUsageById(id);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.sm.dao;
 
+import com.sm.model.Constants;
 import com.sm.model.SmAccount;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -54,24 +55,29 @@ public class AccountsDaoImpl implements AccountsDao {
     @Transactional(readOnly = false)
     @Override
     public SmAccount saveAccount(SmAccount smAccount) {
-        smAccount.setIdAccount((Long) sessionFactory.getCurrentSession().save(smAccount));
-        return smAccount;
+        synchronized (Constants.class) {
+            smAccount.setIdAccount((Long) sessionFactory.getCurrentSession().save(smAccount));
+            return smAccount;
+        }
     }
 
     @Transactional(readOnly = false)
     @Override
     public SmAccount updateAccount(SmAccount smAccount) {
-        sessionFactory.getCurrentSession().update(smAccount);
-        return smAccount;
+        synchronized (Constants.class) {
+            sessionFactory.getCurrentSession().update(smAccount);
+            return smAccount;
+        }
     }
 
     @Override
     @Transactional(readOnly = false)
     public SmAccount deleteAccountById(Long id) {
-
-        Query query = sessionFactory.getCurrentSession().createQuery("update SmAccount set deleted = 1 where idAccount = :id");
-        query.setParameter("id", id);
-        query.executeUpdate();
-        return getAccountById(id);
+        synchronized (Constants.class) {
+            Query query = sessionFactory.getCurrentSession().createQuery("update SmAccount set deleted = 1 where idAccount = :id");
+            query.setParameter("id", id);
+            query.executeUpdate();
+            return getAccountById(id);
+        }
     }
 }

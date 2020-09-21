@@ -22,14 +22,14 @@ public class IntervalTransformerUtils {
         long start = StringDateUtil.setTimeFromMinutesOfDay(relativeDate, drEvent.getStart()).getTime();
         long stop = 0;
         if (drEvent.getStart() > drEvent.getStop()) {
-            stop = start + (24 * 60_000 + drEvent.getStop() - drEvent.getStart()) * 60_000;
+            stop = start + (24 * 60 + drEvent.getStop() - drEvent.getStart()) * 60_000;
         } else {
             stop = start + (drEvent.getStop() - drEvent.getStart()) * 60_000;
         }
 
         ret.add(new Interval(start, stop, drEvent));
         // just in case adding extra day
-        ret.add(new Interval(start + 24 * 60_000, stop + 24 * 60_000, drEvent));
+        ret.add(new Interval(start + 24 * 3600_000, stop + 24 * 3600_000, drEvent));
         return ret;
     }
 
@@ -49,7 +49,7 @@ public class IntervalTransformerUtils {
         long start = StringDateUtil.setTimeFromMinutesOfDay(relativeDate, smTimeOfUsage.getStart()).getTime();
         long stop = 0;
         if (smTimeOfUsage.getStart() > smTimeOfUsage.getStop()) {
-            stop = start + (24 * 60_000 + smTimeOfUsage.getStop() - smTimeOfUsage.getStart()) * 60_000;
+            stop = start + (24 * 60 + smTimeOfUsage.getStop() - smTimeOfUsage.getStart()) * 60_000;
         } else {
             stop = start + (smTimeOfUsage.getStop() - smTimeOfUsage.getStart()) * 60_000;
         }
