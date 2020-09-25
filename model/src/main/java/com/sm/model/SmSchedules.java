@@ -36,6 +36,10 @@ public class SmSchedules {
     @Column(name = "SESSION_ID")
     private Long sessionId;
 
+
+    @Column(name = "V_SCHEDULE_TYPE")
+    private SmScheduleType scheduleType;
+
     @Column(name = "POLICY_ID")
     private Long policyId;
 
@@ -54,7 +58,7 @@ public class SmSchedules {
     public SmSchedules() {
     }
 
-    public SmSchedules(Long idSchedule, Long accountId, Long locationId, Long resourceId, Double carbonImpact, Double carbonSavings, Long initEnergy, Double financeSavings, Long sessionId, Long policyId, Date dtCreated, Date dtStart, Date dtStop) {
+    public SmSchedules(Long idSchedule, Long accountId, Long locationId, Long resourceId, Double carbonImpact, Double carbonSavings, Long initEnergy, Double financeSavings, Long sessionId, Long policyId, Date dtCreated, Date dtStart, Date dtStop, SmScheduleType smScheduleType) {
         this.idSchedule = idSchedule;
         this.accountId = accountId;
         this.locationId = locationId;
@@ -68,6 +72,7 @@ public class SmSchedules {
         this.dtCreated = dtCreated;
         this.dtStart = dtStart;
         this.dtStop = dtStop;
+        this.scheduleType = smScheduleType;
     }
 
     public Long getIdSchedule() {
@@ -180,5 +185,13 @@ public class SmSchedules {
 
     public void setData(byte[] data) {
         this.data = data;
+    }
+
+    public SmScheduleType getScheduleType() {
+        return scheduleType;
+    }
+
+    public void setScheduleType(SmScheduleType scheduleType) {
+        this.scheduleType = scheduleType;
     }
 }

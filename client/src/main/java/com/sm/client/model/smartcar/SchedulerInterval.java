@@ -2,6 +2,7 @@ package com.sm.client.model.smartcar;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sm.model.SmScheduleType;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -38,7 +39,7 @@ public class SchedulerInterval implements Serializable {
 
     // type of interval , can be NCHR, CHR,DRV
     @JsonProperty("interval_type")
-    private IntervalType intervalType;
+    private SmScheduleType smScheduleType;
 
     @JsonProperty("co2_impact")
     private double co2Impact;
@@ -78,12 +79,12 @@ public class SchedulerInterval implements Serializable {
         this.primaryTrigger = primaryTrigger;
     }
 
-    public IntervalType getIntervalType() {
-        return intervalType;
+    public SmScheduleType getSmScheduleType() {
+        return smScheduleType;
     }
 
-    public void setIntervalType(IntervalType intervalType) {
-        this.intervalType = intervalType;
+    public void setSmScheduleType(SmScheduleType smScheduleType) {
+        this.smScheduleType = smScheduleType;
     }
 
     public double getCo2Impact() {
@@ -158,17 +159,4 @@ public class SchedulerInterval implements Serializable {
         this.economicSavings = economicSavings;
     }
 
-    public enum IntervalType {
-        DRV("Driving to the location"),
-        FLG("Flying to the location"),
-        NCHR("Connected to charge but not charging"),
-        CHR("Charging");
-
-
-        private String description;
-
-        IntervalType(String description) {
-            this.description = description;
-        }
-    }
 }

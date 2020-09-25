@@ -50,6 +50,7 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         smSchedules.setLocationId(schedulerData.getLocationId());
         smSchedules.setResourceId(schedulerData.getResourceId());
         smSchedules.setInitEnergy(schedulerData.getInitialEnergy());
+        smSchedules.setScheduleType(schedulerData.getScheduleType());
         smSchedules.setData(objectMapper.writeValueAsBytes(schedulerData.getIntervals()));
         return smSchedules;
     }
@@ -70,6 +71,7 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         schedulerData.setSchedulerId(smSchedules.getIdSchedule());
         schedulerData.setCreatedTime(smSchedules.getDtCreated());
         schedulerData.setInitialEnergy(smSchedules.getInitEnergy());
+        schedulerData.setScheduleType(smSchedules.getScheduleType());
         if (smSchedules.getData() != null) {
             schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), new TypeReference<List<SchedulerInterval>>() {
             }));

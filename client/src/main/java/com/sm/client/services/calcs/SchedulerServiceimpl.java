@@ -1,7 +1,5 @@
 package com.sm.client.services.calcs;
 
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.GoogleService;
@@ -19,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -166,13 +162,13 @@ public class SchedulerServiceimpl implements SchedulerService {
     }
 
     @Override
-    public SchedulerData getLastSchdule(String login, Long resourceId) throws Exception {
+    public SchedulerData getLastSchdule(String login, Long resourceId, SmScheduleType type) throws Exception {
         SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
-        return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.getLastSmSchedulesByResourceId(resourceId, smUserSession.getAccountId()));
+        return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.getLastSmSchedulesByResourceIdAndType(resourceId, smUserSession.getAccountId(), type));
     }
 
     @Override
-    public List<SchedulerData> getSchduleHistory(String login, Long resourceId, Date start, Date stop) throws Exception {
+    public List<SchedulerData> getSchduleHistory(String login, Long resourceId, Date start, Date stop, SmScheduleType type) throws Exception {
         if (start == null) {
             start = new Date(0);
         }
@@ -180,7 +176,7 @@ public class SchedulerServiceimpl implements SchedulerService {
             stop = new Date();
         }
         SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
-        List<SmSchedules> schedules = scheduleDao.getLastSmSchedulesByResourceId(resourceId, smUserSession.getAccountId(), start, stop);
+        List<SmSchedules> schedules = scheduleDao.getNoIntervalSmSchedulesByResourceIdAndDateBetween(resourceId, smUserSession.getAccountId(), start, stop, type);
         List<SchedulerData> result = new ArrayList<>();
         for (SmSchedules smSchedules : schedules) {
             result.add(scheduleTransformService.smSchedulesToScheduleWeb(smSchedules));
@@ -195,7 +191,7 @@ public class SchedulerServiceimpl implements SchedulerService {
             throw new SmException("You are trying to access wrong account !", HttpStatus.SC_FORBIDDEN);
         }
         SmSchedules newScheduler = scheduleTransformService.scheduleWebToSmSchedules(schedulerData);
-        SmSchedules exists = scheduleDao.getLastSmSchedulesByResourceId(schedulerData.getResourceId(), accountId);
+        SmSchedules exists = scheduleDao.getSmSchedulesById(schedulerData.getSchedulerId(), accountId);
         if (exists == null) {
             return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.saveSmSchedules(newScheduler));
         }

@@ -3,6 +3,7 @@ package com.sm.client.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sm.client.model.eco.GridData;
+import com.sm.model.SmScheduleType;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.model.to.EventInterval;
@@ -90,7 +91,7 @@ public class EcoAndPriceOptimizationServiceTest {
         interval1.setStartTime(start);
         interval1.setDuration(length);
         interval1.setCo2Impact(0.9);
-        interval1.setIntervalType(SchedulerInterval.IntervalType.DRV);
+        interval1.setSmScheduleType(SmScheduleType.DRV);
         interval1.setPrimaryTrigger("test-trigger");
         return interval1;
     }

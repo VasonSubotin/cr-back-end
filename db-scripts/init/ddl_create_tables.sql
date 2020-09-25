@@ -180,6 +180,7 @@ create table Schedules(
 	RESOURCE_ID INTEGER,
 	SESSION_ID INTEGER,
 	POLICY_ID INTEGER,
+	V_SCHEDULE_TYPE varchar(8),
 	DT_START datetime,
 	DT_STOP datetime,
     F_CARBON_IMPACT numeric(6,3),

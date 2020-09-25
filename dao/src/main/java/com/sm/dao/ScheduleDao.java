@@ -1,5 +1,6 @@
 package com.sm.dao;
 
+import com.sm.model.SmScheduleType;
 import com.sm.model.SmSchedules;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -7,11 +8,14 @@ import java.util.Date;
 import java.util.List;
 
 public interface ScheduleDao {
-    SmSchedules getSmSchedulesById(String scheduleId, String accountId);
+    SmSchedules getSmSchedulesById(Long scheduleId, Long accountId);
 
-    SmSchedules getLastSmSchedulesByResourceId(Long resourceId, Long accountId);
 
-    List<SmSchedules> getLastSmSchedulesByResourceId(Long resourceId, Long accountId, Date start, Date Stop);
+    SmSchedules getLastSmSchedulesByResourceIdAndType(Long resourceId, Long accountId, SmScheduleType type);
+
+    List<SmSchedules> getNoIntervalSmSchedulesByResourceIdAndDateBetween(Long resourceId, Long accountId, Date start, Date Stop, SmScheduleType type);
+
+    List<SmSchedules> getSmSchedulesByResourceIdAndDateBetweenAndType(Long resourceId, Long accountId, Date start, Date stop, SmScheduleType type);
 
     @Transactional(readOnly = false)
     SmSchedules saveSmSchedules(SmSchedules smSchedules);

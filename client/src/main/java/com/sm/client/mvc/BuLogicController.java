@@ -1,8 +1,8 @@
 package com.sm.client.mvc;
 
+import com.sm.model.SmScheduleType;
 import com.sm.client.services.calcs.LocationScheduleService;
 import com.sm.client.services.calcs.SchedulerService;
-import com.sm.client.services.calcs.TimeScheduleService;
 import com.sm.client.services.SecurityService;
 import com.sm.model.PolicyType;
 import com.sm.client.model.smartcar.SchedulerData;
@@ -24,9 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
-
-import static com.sm.client.utils.StringDateUtil.getBeginningOfDay;
-import static com.sm.client.utils.StringDateUtil.getEndOfDay;
 
 @RestController
 public class BuLogicController {
@@ -58,14 +55,14 @@ public class BuLogicController {
         schedulerInterval1.setDuration(4505);
         schedulerInterval1.setChargeRate(5000);
         schedulerInterval1.setPrimaryTrigger("text");
-        schedulerInterval1.setIntervalType(SchedulerInterval.IntervalType.CHR);
+        schedulerInterval1.setSmScheduleType(SmScheduleType.CHR);
         schedulerInterval1.setCo2Impact(125);
 
         SchedulerInterval schedulerInterval2 = new SchedulerInterval();
         schedulerInterval2.setDuration(4506);
         schedulerInterval2.setChargeRate(4700);
         schedulerInterval2.setPrimaryTrigger("text2");
-        schedulerInterval2.setIntervalType(SchedulerInterval.IntervalType.CHR);
+        schedulerInterval2.setSmScheduleType(SmScheduleType.CHR);
         schedulerInterval2.setCo2Impact(121);
         schedulerData.setIntervals(Arrays.asList(schedulerInterval1, schedulerInterval1));
 
@@ -104,18 +101,20 @@ public class BuLogicController {
 
     @RequestMapping(value = "/resources/{resourceId}/schedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public SchedulerData getScheduler(
-            @PathVariable("resourceId") long resourceId) throws Exception {
+            @PathVariable("resourceId") long resourceId,
+            @RequestParam(name = "type", required = false) SmScheduleType type) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        return schedulerService.getLastSchdule(login, resourceId);
+        return schedulerService.getLastSchdule(login, resourceId, type);
     }
 
     @RequestMapping(value = "/resources/{resourceId}/scheduleHistory", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<SchedulerData> getScheduleHistory(
             @PathVariable("resourceId") long resourceId,
-            @RequestParam(name = "start", required = false) @DateTimeFormat(pattern="yyyy-MM-dd'T'HH:mm:ss") Date start,
-            @RequestParam(name = "stop", required = false) @DateTimeFormat(pattern="yyyy-MM-dd'T'HH:mm:ss") Date stop) throws Exception {
+            @RequestParam(name = "start", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date start,
+            @RequestParam(name = "stop", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date stop,
+            @RequestParam(name = "type", required = false) SmScheduleType type) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        return schedulerService.getSchduleHistory(login, resourceId, start, stop);
+        return schedulerService.getSchduleHistory(login, resourceId, start, stop, type);
     }
 
     @RequestMapping(value = "/resources/{resourceId}/schedule", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)

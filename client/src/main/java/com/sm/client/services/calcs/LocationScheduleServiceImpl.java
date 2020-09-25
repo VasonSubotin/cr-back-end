@@ -3,10 +3,7 @@ package com.sm.client.services.calcs;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
-import com.sm.client.model.smartcar.LocationPoint;
-import com.sm.client.model.smartcar.SchedulerData;
-import com.sm.client.model.smartcar.SchedulerInterval;
-import com.sm.client.model.smartcar.VehicleData;
+import com.sm.client.model.smartcar.*;
 import com.sm.client.services.GoogleLocationService;
 import com.sm.client.services.GoogleService;
 import com.sm.client.services.SmartCarService;
@@ -86,6 +83,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         ret.setResourceId(smResource.getIdResource());
         ret.setPolicyId(smResource.getPolicyId());
         ret.setCreatedTime(new Date());
+        ret.setScheduleType(SmScheduleType.DRV);
         return ret;
     }
 
@@ -209,7 +207,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             intervals.add(schedulerInterval);
             schedulerInterval.setStartTime(eventsWrapper.getStart());
             schedulerInterval.setDuration(eventsWrapper.getStop().getTime() - eventsWrapper.getStart().getTime());
-            schedulerInterval.setIntervalType(SchedulerInterval.IntervalType.DRV);
+            schedulerInterval.setSmScheduleType(SmScheduleType.DRV);
 
             schedulerInterval.setEventLocation(new LocationPoint(
                     null,
@@ -319,7 +317,8 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         SchedulerInterval schedulerInterval = new SchedulerInterval();
         ret.setIntervals(Arrays.asList(schedulerInterval));
 
-        schedulerInterval.setIntervalType(SchedulerInterval.IntervalType.DRV);
+        schedulerInterval.setSmScheduleType(SmScheduleType.DRV);
+        ret.setScheduleType(SmScheduleType.DRV);
 
         schedulerInterval.setStations(stations);
         schedulerInterval.setPrice(preferredLocation.getPrice());

@@ -1,6 +1,7 @@
 package com.sm.client.services.optimization;
 
 import com.sm.client.model.eco.GridData;
+import com.sm.model.SmScheduleType;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.model.to.EventInterval;
@@ -169,7 +170,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
             current.setDuration(current.getDuration() + gridData.getStop() - gridData.getStart());
             double curImpact = (gridData.getStop() - gridData.getStart()) / 3600000D * gridData.getValue();
             current.setCo2Impact(current.getCo2Impact() + curImpact);
-            current.setIntervalType(SchedulerInterval.IntervalType.CHR);
+            current.setSmScheduleType(SmScheduleType.CHR);
             coImpactSummary += curImpact;
             lastGridData = gridData;
         }

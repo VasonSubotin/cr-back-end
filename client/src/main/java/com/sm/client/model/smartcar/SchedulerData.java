@@ -2,6 +2,7 @@ package com.sm.client.model.smartcar;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sm.model.SmScheduleType;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,6 +35,9 @@ public class SchedulerData implements Serializable {
     // can be flying, driving, changing
     @JsonProperty("session_type")
     private String sessionType;
+
+    @JsonProperty("schedule_type")
+    private SmScheduleType scheduleType;
 
     @JsonProperty("co2_impact")
     private double co2Impact;
@@ -177,5 +181,13 @@ public class SchedulerData implements Serializable {
 
     public void setInitialEnergy(Long initialEnergy) {
         this.initialEnergy = initialEnergy;
+    }
+
+    public SmScheduleType getScheduleType() {
+        return scheduleType;
+    }
+
+    public void setScheduleType(SmScheduleType scheduleType) {
+        this.scheduleType = scheduleType;
     }
 }
