@@ -106,7 +106,12 @@ public class ResourcesController {
     }
 
     @RequestMapping(value = "/resources/stateInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<SmResourceState> getRecourseState(HttpServletRequest request, HttpServletResponse response) throws SmException {
+    public List<SmResourceState> getRecoursesState(HttpServletRequest request, HttpServletResponse response) throws SmException {
+        return smartCarService.getResourceState(securityService.getAccount().getLogin());
+    }
+
+    @RequestMapping(value = "/resources/{resource_id}/stateInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<SmResourceState> getRecourseState(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") long resourceId) throws SmException {
         return smartCarService.getResourceState(securityService.getAccount().getLogin());
     }
 }

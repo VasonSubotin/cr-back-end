@@ -170,6 +170,30 @@ public class SmartCarService {
         return ret;
     }
 
+    public SmResourceState getResourceState(String login, Long resourceId) throws SmException {
+        SmUserSession userSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+
+        if (userSession == null) {
+            throw new SmException("No active smart car session found for user " + login, HttpStatus.SC_FORBIDDEN);
+        }
+
+        SmResource resource = resourcesDao.getResourceByIdAndAccountId(resourceId, userSession.getAccountId());
+
+        try {
+            SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
+            for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
+                Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
+                if (resource.getExternalResourceId().equals(vehicle.vin())) {
+                    return new SmResourceState(getSingleData(vehicle, vehicle.vin()), resource);
+                }
+            }
+        } catch (SmartcarException e) {
+            logger.error(e.getMessage(), e);
+            throw new SmException(e.getMessage(), HttpStatus.SC_EXPECTATION_FAILED);
+        }
+        return  new SmResourceState(null, resource);
+    }
+
     private VehicleData getSingleData(Vehicle vehicle, String vin) {
         VehicleData vehicleData = new VehicleData();
         try {
