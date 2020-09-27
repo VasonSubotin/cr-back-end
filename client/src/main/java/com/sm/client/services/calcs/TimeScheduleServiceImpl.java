@@ -2,6 +2,7 @@ package com.sm.client.services.calcs;
 
 import com.sm.client.model.eco.LocationData;
 import com.sm.client.model.smartcar.SchedulerData;
+import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.EcoService;
 import com.sm.client.services.ScheduleTransformService;
@@ -77,6 +78,8 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
                 scheduleDao.saveSmSchedules(
                         scheduleTransformService.scheduleWebToSmSchedules(schedulerData)));
     }
+
+
 
     public void setOptimizationServiceFactory(OptimizationServiceFactory optimizationServiceFactory) {
         this.optimizationServiceFactory = optimizationServiceFactory;

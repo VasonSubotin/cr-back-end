@@ -1,6 +1,7 @@
 package com.sm.client.services.optimization;
 
 import com.sm.client.model.eco.GridData;
+import com.sm.model.SmResource;
 import com.sm.model.SmScheduleType;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
@@ -204,5 +205,13 @@ public abstract class AbstractOptimizationService implements OptimizationService
 
     public void setTimeOfUsageService(TimeOfUsageService timeOfUsageService) {
         this.timeOfUsageService = timeOfUsageService;
+    }
+
+    protected void setEndSoc(SchedulerData schedulerData, long capacity) {
+        long energy = schedulerData.getInitialEnergy();
+        for (SchedulerInterval interval : schedulerData.getIntervals()) {
+            energy += interval.getEnergy();
+        }
+        schedulerData.setEndSoc(100.0 * energy / (double) capacity);
     }
 }

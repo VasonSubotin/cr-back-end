@@ -68,10 +68,12 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         List<IntervalOfLocation> listForOptimization = prepareForCalculation(accountId, eventsWrappers, intervals);
         SimpleOptimizationService.clculate(listForOptimization, currentEnergy, smResource.getCapacity());
 
+        long endEnergy = currentEnergy;
         for (IntervalOfLocation intervalOfLocation : listForOptimization) {
             SchedulerInterval schedulerInterval = ((SchedulerInterval) intervalOfLocation.getRefObject());
             schedulerInterval.setEnergy(intervalOfLocation.getCharge());
             schedulerInterval.setCostOfCharging(intervalOfLocation.getSummaryPrice());
+            endEnergy = endEnergy + intervalOfLocation.getCharge() - intervalOfLocation.getNeedEnergy();
         }
         if (ret.getIntervals() != null && !ret.getIntervals().isEmpty()) {
             ret.setTimeStart(ret.getIntervals().get(0).getStartTime());
@@ -84,6 +86,9 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         ret.setPolicyId(smResource.getPolicyId());
         ret.setCreatedTime(new Date());
         ret.setScheduleType(SmScheduleType.DRV);
+        if (smResource.getCapacity() != null && smResource.getCapacity() > 0) {
+            ret.setEndSoc(100.0 * endEnergy / (double) smResource.getCapacity());
+        }
         return ret;
     }
 

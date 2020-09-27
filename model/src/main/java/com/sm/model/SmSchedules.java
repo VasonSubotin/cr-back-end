@@ -30,6 +30,9 @@ public class SmSchedules {
     @Column(name = "N_INIT_ENERGY")
     private Long initEnergy;
 
+    @Column(name = "F_END_SOC")
+    private Double endSoc;
+
     @Column(name = "F_FINANCE_SAVINGS")
     private Double financeSavings;
 
@@ -193,5 +196,13 @@ public class SmSchedules {
 
     public void setScheduleType(SmScheduleType scheduleType) {
         this.scheduleType = scheduleType;
+    }
+
+    public Double getEndSoc() {
+        return endSoc;
+    }
+
+    public void setEndSoc(Double endSoc) {
+        this.endSoc = endSoc;
     }
 }

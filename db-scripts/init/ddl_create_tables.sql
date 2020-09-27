@@ -187,6 +187,7 @@ create table Schedules(
 	F_CARBON_SAVINGS numeric(6,3),
 	F_FINANCE_SAVINGS numeric(6,3),
 	N_INIT_ENERGY numeric(6),
+	F_END_SOC numeric(3,2),
 	BB_DATA blob,
 	DT_CREATED datetime,
     FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT),

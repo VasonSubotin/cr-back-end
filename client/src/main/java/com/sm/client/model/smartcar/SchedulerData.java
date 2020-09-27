@@ -29,8 +29,11 @@ public class SchedulerData implements Serializable {
     @JsonProperty("location_id")
     private Long locationId;
 
-    @JsonProperty("initial_energy ")
+    @JsonProperty("initial_energy")
     private Long initialEnergy;
+
+    @JsonProperty("end_soc")
+    private Double endSoc;
 
     // can be flying, driving, changing
     @JsonProperty("session_type")
@@ -189,5 +192,13 @@ public class SchedulerData implements Serializable {
 
     public void setScheduleType(SmScheduleType scheduleType) {
         this.scheduleType = scheduleType;
+    }
+
+    public Double getEndSoc() {
+        return endSoc;
+    }
+
+    public void setEndSoc(Double endSoc) {
+        this.endSoc = endSoc;
     }
 }
