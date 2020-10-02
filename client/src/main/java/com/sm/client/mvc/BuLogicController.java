@@ -1,5 +1,7 @@
 package com.sm.client.mvc;
 
+import com.sm.model.ServiceResult;
+import com.sm.model.SmException;
 import com.sm.model.SmScheduleType;
 import com.sm.client.services.calcs.LocationScheduleService;
 import com.sm.client.services.calcs.SchedulerService;
@@ -17,7 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,33 +73,41 @@ public class BuLogicController {
         return schedulerData;
     }
 
-    @RequestMapping(value = "/getSchedulerOld", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SchedulerData getSchedulerOld(
-            @RequestParam(name = "ba", required = false) String locationId,
-            @RequestParam(name = "capacity", required = false, defaultValue = "30000") Long capacity,
-            @RequestParam(name = "charge", required = false, defaultValue = "15000") Long charge,
-            @RequestParam(name = "starttime", required = false) Date starttime,
-            @RequestParam(name = "endtime", required = false) Date endtime,
-            @RequestParam(name = "rate", required = false, defaultValue = "6600") Long rate,
-            @RequestParam(name = "policy", required = false, defaultValue = "ECO") PolicyType policyType) throws Exception {
-
-        return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId, null);
-    }
+//    @RequestMapping(value = "/getSchedulerOld", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public SchedulerData getSchedulerOld(
+//            @RequestParam(name = "ba", required = false) String locationId,
+//            @RequestParam(name = "capacity", required = false, defaultValue = "30000") Long capacity,
+//            @RequestParam(name = "charge", required = false, defaultValue = "15000") Long charge,
+//            @RequestParam(name = "starttime", required = false) Date starttime,
+//            @RequestParam(name = "endtime", required = false) Date endtime,
+//            @RequestParam(name = "rate", required = false, defaultValue = "6600") Long rate,
+//            @RequestParam(name = "policy", required = false, defaultValue = "ECO") PolicyType policyType) throws Exception {
+//
+//        return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId, null);
+//    }
 
     @RequestMapping(value = "/resources/{resourceId}/drivingSchedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SchedulerData drivingSchedule(
+    public ResponseEntity<?> drivingSchedule(
             @PathVariable("resourceId") long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
-        return schedulerService.calculateDrivingSchedule(resourceId);
+        try {
+            return new ResponseEntity(schedulerService.calculateDrivingSchedule(resourceId), HttpStatus.OK);
+        } catch (SmException smEx) {
+            return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources/" + resourceId + "/drivingSchedule"), HttpStatus.resolve(smEx.getCode()));
+        }
     }
 
     @RequestMapping(value = "/resources/{resourceId}/chargingSchedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SchedulerData charingSchedule(
+    public ResponseEntity<?> charingSchedule(
             @PathVariable("resourceId") long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime) throws Exception {
-        return schedulerService.calculateCharingSchedule(resourceId);
+        try {
+            return new ResponseEntity(schedulerService.calculateCharingSchedule(resourceId), HttpStatus.OK);
+        } catch (SmException smEx) {
+            return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources/" + resourceId + "/chargingSchedule"), HttpStatus.resolve(smEx.getCode()));
+        }
     }
 
 
@@ -154,11 +166,15 @@ public class BuLogicController {
 
 
     @RequestMapping(value = "/resources/{resourceId}/calculateGeo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SchedulerData calculateGeo(
+    public ResponseEntity<?> calculateGeo(
             @PathVariable("resourceId") long resourceId,
             @RequestParam(name = "starttime", required = false) String starttime,
             @RequestParam(name = "endtime", required = false) String endtime
     ) throws Exception {
-        return schedulerService.calculateDrivingScheduleGeo(resourceId);
+        try {
+            return new ResponseEntity<>(schedulerService.calculateDrivingScheduleGeo(resourceId), HttpStatus.OK);
+        } catch (SmException smEx) {
+            return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources/" + resourceId + "/calculateGeo"), HttpStatus.resolve(smEx.getCode()));
+        }
     }
 }

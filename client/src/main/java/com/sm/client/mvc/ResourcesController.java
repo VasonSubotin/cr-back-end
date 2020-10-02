@@ -5,12 +5,14 @@ import com.sm.client.services.CommonService;
 import com.sm.client.services.SecurityService;
 import com.sm.client.services.SmartCarService;
 import com.sm.dao.ResourcesDao;
+import com.sm.model.ServiceResult;
 import com.sm.model.SmException;
 import com.sm.model.SmResource;
 import com.sm.model.web.RecourseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,22 +98,38 @@ public class ResourcesController {
 
 
     @RequestMapping(value = "/resources", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<SmResource> getUserResources(HttpServletRequest request) throws Exception {
-        return resourcesDao.getAllResourceByAccountId(securityService.getAccount().getIdAccount());
+    public ResponseEntity<?> getUserResources(HttpServletRequest request) throws Exception {
+        try {
+            return new ResponseEntity(resourcesDao.getAllResourceByAccountId(securityService.getAccount().getIdAccount()), HttpStatus.OK);
+        } catch (SmException smEx) {
+            return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources"), HttpStatus.resolve(smEx.getCode()));
+        }
     }
 
     @RequestMapping(value = "/resources/{resource_id}/resourceInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RecourseInfo getRecourseInfo(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") long resourceId) throws SmException {
-        return commonService.getRecourseInfo(securityService.getAccount().getIdAccount(), resourceId);
+    public ResponseEntity<?> getRecourseInfo(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") long resourceId) throws SmException {
+        try {
+            return new ResponseEntity(commonService.getRecourseInfo(securityService.getAccount().getIdAccount(), resourceId), HttpStatus.OK);
+        } catch (SmException smEx) {
+            return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources/" + resourceId + "/stateInfo"), HttpStatus.resolve(smEx.getCode()));
+        }
     }
 
     @RequestMapping(value = "/resources/stateInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<SmResourceState> getRecoursesState(HttpServletRequest request, HttpServletResponse response) throws SmException {
-        return smartCarService.getResourceState(securityService.getAccount().getLogin());
+    public ResponseEntity<?> getRecoursesState(HttpServletRequest request, HttpServletResponse response) throws SmException {
+        try {
+            return new ResponseEntity(smartCarService.getResourceState(securityService.getAccount().getLogin()), HttpStatus.OK);
+        } catch (SmException smEx) {
+            return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources/stateInfo"), HttpStatus.resolve(smEx.getCode()));
+        }
     }
 
     @RequestMapping(value = "/resources/{resource_id}/stateInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<SmResourceState> getRecourseState(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") long resourceId) throws SmException {
-        return smartCarService.getResourceState(securityService.getAccount().getLogin());
+    public ResponseEntity<?> getRecourseState(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") long resourceId) throws SmException {
+        try {
+            return new ResponseEntity(smartCarService.getResourceState(securityService.getAccount().getLogin(), resourceId), HttpStatus.OK);
+        } catch (SmException smEx) {
+            return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources/" + resourceId + "/stateInfo"), HttpStatus.resolve(smEx.getCode()));
+        }
     }
 }

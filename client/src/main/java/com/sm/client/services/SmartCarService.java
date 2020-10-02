@@ -20,8 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,23 @@ import java.util.stream.Collectors;
 public class SmartCarService {
 
     private Logger logger = LoggerFactory.getLogger(SmartCarService.class);
+
+    private AuthClient client;
+    // private String code;
+    // private String access;
+
+    @Value("${smartcar.clientId:#{null}}")
+    private String clientId;
+
+    @Value("${smartcar.clientSecret:#{null}}")
+    private String clientSecret;
+
+    @Value("${smartcar.redirectUrl:http://localhost:8080/smartCarToken}")
+    private String urlRedirect;
+
+    @Value("#{'${smartcar.permissions:required:read_vehicle_info,read_odometer,read_engine_oil,read_battery,read_charge,read_fuel,read_location,control_security,read_tires,read_vin}'.split(',')}")
+    private String permissions[];
+
 
     @Autowired
     private VehiclesCache vehiclesCache;
@@ -44,6 +63,22 @@ public class SmartCarService {
 
     @Value("${smartcar.testMode:false}")
     private boolean testMode = false;
+
+
+    @PostConstruct
+    public void init() {
+        this.client = new AuthClient(
+                clientId,
+                clientSecret,
+                urlRedirect,
+                permissions,
+                testMode
+        );
+    }
+
+    public AuthClient getClient() {
+        return client;
+    }
 
     public void refreshCarData(String login) throws SmException, SmartcarException {
         refreshCarData(login, null);
@@ -121,7 +156,12 @@ public class SmartCarService {
 
     public VehicleData getVehicleData(SmUserSession userSession, SmResource smResource) throws SmException {
         try {
-            SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
+            Pair<SmUserSession, SmartcarResponse<VehicleIds>> p = getVehicleIds(userSession);
+            userSession = p.getKey();
+            if (userSession == null) {
+                throw new SmException("No active smart car session found for login " + SecurityContextHolder.getContext().getAuthentication().getName(), HttpStatus.SC_FORBIDDEN);
+            }
+            SmartcarResponse<VehicleIds> vehicleIdResponse = p.getValue(); //AuthClient.getVehicleIds(userSession.getToken());
             for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
                 Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
                 String vId = vehicle.vin();
@@ -134,6 +174,21 @@ public class SmartCarService {
             throw new SmException(e.getMessage(), HttpStatus.SC_EXPECTATION_FAILED);
         }
         return null;
+    }
+
+    private Pair<SmUserSession, SmartcarResponse<VehicleIds>> getVehicleIds(SmUserSession userSession) throws SmartcarException, SmException {
+        try {
+            return new Pair<>(userSession, AuthClient.getVehicleIds(userSession.getToken()));
+        } catch (SmartcarException e) {
+            //
+            if (e.getMessage().contains("expired")) {
+                //refreshing tokens
+                Auth auth = client.exchangeRefreshToken(userSession.getRefreshToken());
+                userSession = securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
+                return new Pair<>(userSession, AuthClient.getVehicleIds(userSession.getToken()));
+            }
+        }
+        return new Pair<>(userSession, null);
     }
 
     public List<SmResourceState> getResourceState(String login) throws SmException {
@@ -180,7 +235,9 @@ public class SmartCarService {
         SmResource resource = resourcesDao.getResourceByIdAndAccountId(resourceId, userSession.getAccountId());
 
         try {
-            SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
+            Pair<SmUserSession, SmartcarResponse<VehicleIds>> p = getVehicleIds(userSession);
+            userSession = p.getKey();
+            SmartcarResponse<VehicleIds> vehicleIdResponse = p.getValue(); //AuthClient.getVehicleIds(userSession.getToken());
             for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
                 Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
                 if (resource.getExternalResourceId().equals(vehicle.vin())) {
@@ -191,7 +248,7 @@ public class SmartCarService {
             logger.error(e.getMessage(), e);
             throw new SmException(e.getMessage(), HttpStatus.SC_EXPECTATION_FAILED);
         }
-        return  new SmResourceState(null, resource);
+        return new SmResourceState(null, resource);
     }
 
     private VehicleData getSingleData(Vehicle vehicle, String vin) {

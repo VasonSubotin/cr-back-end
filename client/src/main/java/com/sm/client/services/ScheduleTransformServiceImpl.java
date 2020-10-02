@@ -58,6 +58,9 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
 
     @Override
     public SchedulerData smSchedulesToScheduleWeb(SmSchedules smSchedules) throws IOException {
+        if (smSchedules == null) {
+            return null;
+        }
         SchedulerData schedulerData = new SchedulerData();
         schedulerData.setCo2_savings(smSchedules.getCarbonSavings());
         schedulerData.setCo2Impact(smSchedules.getCarbonImpact());

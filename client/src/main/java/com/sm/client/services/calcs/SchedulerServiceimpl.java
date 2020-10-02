@@ -15,6 +15,7 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -145,7 +146,9 @@ public class SchedulerServiceimpl implements SchedulerService {
 
     private Pair<VehicleData, SmResource> getSmDataAndSmResource(Long resourceId) throws SmException {
         SmUserSession smUserSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
-
+        if (smUserSession == null) {
+            throw new SmException("No active smart car session found for login " + SecurityContextHolder.getContext().getAuthentication().getName(), HttpStatus.SC_FORBIDDEN);
+        }
         //trying to get current state of resources
         SmResource smResource = resourcesDao.getResourceByIdAndAccountId(resourceId, smUserSession.getAccountId());
         if (smResource == null) {

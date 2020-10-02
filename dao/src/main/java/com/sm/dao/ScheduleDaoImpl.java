@@ -42,7 +42,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         query.setParameter("resourceId", resourceId);
-        query.setParameter("scheduleType", type);
+        query.setParameter("type", type);
         query.setMaxResults(1);
         List<SmSchedules> smSchedulesList = query.getResultList();
         return (smSchedulesList == null || smSchedulesList.isEmpty()) ? null : smSchedulesList.iterator().next();

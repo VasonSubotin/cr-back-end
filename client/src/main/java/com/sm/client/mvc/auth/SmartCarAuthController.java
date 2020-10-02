@@ -37,24 +37,6 @@ import java.util.List;
 public class SmartCarAuthController {
     private static final Logger logger = LoggerFactory.getLogger(SmartCarAuthController.class);
 
-    private AuthClient client;
-    // private String code;
-    // private String access;
-
-    @Value("${smartcar.clientId:#{null}}")
-    private String clientId;
-
-    @Value("${smartcar.clientSecret:#{null}}")
-    private String clientSecret;
-
-    @Value("${smartcar.redirectUrl:http://localhost:8080/smartCarToken}")
-    private String urlRedirect;
-
-    @Value("#{'${smartcar.permissions:required:read_vehicle_info,read_odometer,read_engine_oil,read_battery,read_charge,read_fuel,read_location,control_security,read_tires,read_vin}'.split(',')}")
-    private String permissions[];
-
-    @Value("${smartcar.testMode:false}")
-    private boolean testMode = false;
 
     @Autowired
     private SecurityService securityService;
@@ -62,16 +44,6 @@ public class SmartCarAuthController {
     @Autowired
     private SmartCarService smartCarService;
 
-    @PostConstruct
-    public void init() {
-        this.client = new AuthClient(
-                clientId,
-                clientSecret,
-                urlRedirect,
-                permissions,
-                testMode
-        );
-    }
 
 
     @RequestMapping(value = "/smartCarLogin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -79,7 +51,7 @@ public class SmartCarAuthController {
                         HttpServletResponse response) {
 
         logger.info("----------------------call /login -------------------");
-        String link = client.authUrlBuilder().setApprovalPrompt(true).build();
+        String link = smartCarService.getClient().authUrlBuilder().setApprovalPrompt(true).build();
         response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
         response.setHeader("Location", link);
         return "ok";
@@ -96,7 +68,7 @@ public class SmartCarAuthController {
     @RequestMapping(value = "/smartCarSession", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> startSession(@RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) throws SmartcarException {
 
-        Auth auth = client.exchangeCode(code);
+        Auth auth = smartCarService.getClient().exchangeCode(code);
         try {
             SmUserSession smUserSession = securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
             smartCarService.refreshCarData(securityService.getAccount().getLogin());
