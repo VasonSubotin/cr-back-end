@@ -14,7 +14,7 @@ import com.smartcar.sdk.SmartcarException;
 import com.smartcar.sdk.Vehicle;
 import com.smartcar.sdk.data.*;
 
-import javafx.util.Pair;
+
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

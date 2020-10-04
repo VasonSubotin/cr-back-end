@@ -2,7 +2,9 @@ package com.sm.client.mvc.auth;
 
 import com.sm.client.model.AuthResponse;
 import com.sm.client.services.GoogleService;
+import com.sm.client.services.SecurityService;
 import com.sm.client.utils.JwtTokenUtil;
+import com.sm.model.Constants;
 import com.sm.model.ServiceResult;
 import com.sm.model.SmException;
 import org.slf4j.Logger;
@@ -31,6 +33,8 @@ public class GoogleAuthController {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
+    @Autowired
+    private SecurityService securityService;
 
     @RequestMapping(value = "/googleReLogin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> googleReLogin(HttpServletRequest request,
@@ -44,7 +48,7 @@ public class GoogleAuthController {
     public ResponseEntity<?> googleLogin(HttpServletRequest request,
                                          HttpServletResponse response) throws Exception {
         logger.info("----------------------call/googleLogin -------------------");
-       return googleService.redirectToGoogle();
+        return googleService.redirectToGoogle();
     }
 
     @RequestMapping(value = "/googleToken", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -82,7 +86,8 @@ public class GoogleAuthController {
     @RequestMapping(value = "/getCalendarEvent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getCalendarEvent(HttpServletRequest request, HttpServletResponse response, String code) throws Exception {
         logger.info("----------------------call/getCalendarEvent -------------------");
-        return googleService.getCalendar().events().list("primary").setMaxResults(10).execute().toString();
+
+        return googleService.getCalendar(securityService.getActiveSession(Constants.GOOGLE_AUTH_TYPE)).events().list("primary").setMaxResults(10).execute().toString();
     }
 
 

@@ -2,10 +2,12 @@ package com.sm.client.services;
 
 import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.googleapis.auth.oauth2.*;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.CalendarRequest;
 import com.google.api.services.calendar.model.Events;
 import com.sm.client.utils.JwtTokenUtil;
 
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -123,21 +126,38 @@ public class GoogleService {
         return authorizationCodeTokenRequest.execute();
     }
 
-    public Calendar getCalendar() throws SmException {
+    public Calendar getCalendar( SmUserSession smUserSession ) throws SmException {
         Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
-        SmUserSession smUserSession = securityService.getActiveSession(Constants.GOOGLE_AUTH_TYPE);
+
         credential.setAccessToken(smUserSession.getToken());
         return new Calendar.Builder(authorizationCodeFlow.getTransport(), authorizationCodeFlow.getJsonFactory(), credential).build();
     }
 
-    public Events getEvents(int maxResult) throws SmException, IOException {
-        return getCalendar().events().list("primary").setMaxResults(maxResult).execute();
-    }
+//    public Events getEvents(int maxResult) throws SmException, IOException {
+//        SmUserSession smUserSession = securityService.getActiveSession(Constants.GOOGLE_AUTH_TYPE);
+//        if (smUserSession == null) {
+//            throw new SmException("No active google session found for login " + SecurityContextHolder.getContext().getAuthentication().getName(), org.apache.http.HttpStatus.SC_FORBIDDEN);
+//        }
+//        return getCalendar(smUserSession).events().list("primary").setMaxResults(maxResult).execute();
+//    }
 
     public Events getEventsForPeriodInMills(Long from, long timeRangeInMills) throws SmException, IOException {
         long current = from == null ? System.currentTimeMillis() : from;
         long end = current + timeRangeInMills;
-        return getCalendar().events().list("primary").setTimeMin(new DateTime(current)).setTimeMax(new DateTime(end)).execute();
+
+        SmUserSession smUserSession = securityService.getActiveSession(Constants.GOOGLE_AUTH_TYPE);
+        if (smUserSession == null) {
+            throw new SmException("No active google session found for login " + SecurityContextHolder.getContext().getAuthentication().getName(), org.apache.http.HttpStatus.SC_FORBIDDEN);
+        }
+
+        try {
+            return getCalendar(smUserSession).events().list("primary").setTimeMin(new DateTime(current)).setTimeMax(new DateTime(end)).execute();
+        } catch (GoogleJsonResponseException ex) {
+            // need to refresh token
+            TokenResponse tokenResponse = refreshToken(smUserSession.getRefreshToken());
+            smUserSession = securityService.saveCurrentSession(Constants.GOOGLE_AUTH_TYPE, tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(), tokenResponse.getExpiresInSeconds() * 1000L);
+            return getCalendar(smUserSession).events().list("primary").setTimeMin(new DateTime(current)).setTimeMax(new DateTime(end)).execute();
+        }
     }
 
     private final long time24hours = 24 * 3600 * 1000;
