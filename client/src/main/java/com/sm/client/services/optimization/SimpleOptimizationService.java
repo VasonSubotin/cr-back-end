@@ -39,7 +39,6 @@ public class SimpleOptimizationService extends AbstractOptimizationService {
 
         SchedulerData schedulerData = calculateSchedulerData(co2DataList, optimizedDataList, rateInWt, timeInMinsNeed);
         schedulerData.setInitialEnergy(chargeLevelInWt);
-        setEndSoc(schedulerData,chargeLevelInWt);
         return schedulerData;
     }
 

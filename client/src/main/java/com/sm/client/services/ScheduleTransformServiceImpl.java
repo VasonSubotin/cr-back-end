@@ -52,6 +52,7 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         smSchedules.setInitEnergy(schedulerData.getInitialEnergy());
         smSchedules.setScheduleType(schedulerData.getScheduleType());
         smSchedules.setEndSoc(schedulerData.getEndSoc());
+        smSchedules.setCapacity(schedulerData.getCapacity());
         smSchedules.setData(objectMapper.writeValueAsBytes(schedulerData.getIntervals()));
         return smSchedules;
     }
@@ -77,10 +78,20 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         schedulerData.setInitialEnergy(smSchedules.getInitEnergy());
         schedulerData.setScheduleType(smSchedules.getScheduleType());
         schedulerData.setEndSoc(smSchedules.getEndSoc());
+        schedulerData.setCapacity(smSchedules.getCapacity());
         if (smSchedules.getData() != null) {
             schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), new TypeReference<List<SchedulerInterval>>() {
             }));
+            double totalCost = 0;
+            long totalEnergy = 0;
+            for (SchedulerInterval schedulerInterval : schedulerData.getIntervals()) {
+                totalCost += schedulerInterval.getCostOfCharging();
+                totalEnergy += schedulerInterval.getEnergy();
+            }
+            schedulerData.setTotalCost(totalCost);
+            schedulerData.setTotalEnergy(totalEnergy);
         }
+
         return schedulerData;
     }
 

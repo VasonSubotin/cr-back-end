@@ -86,6 +86,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         ret.setPolicyId(smResource.getPolicyId());
         ret.setCreatedTime(new Date());
         ret.setScheduleType(SmScheduleType.DRV);
+        ret.setCapacity(smResource.getCapacity());
         if (smResource.getCapacity() != null && smResource.getCapacity() > 0) {
             ret.setEndSoc(100.0 * endEnergy / (double) smResource.getCapacity());
         }
@@ -340,6 +341,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         ret.setResourceId(smResource.getIdResource());
         ret.setAccountId(smResource.getAccountId());
         ret.setTimeStart(schedulerInterval.getStartTime());
+        ret.setCapacity(smResource.getCapacity());
         ret.setTimeStop(new Date(ret.getTimeStart().getTime() + schedulerInterval.getDuration()));
         // ret.setSessionType(SmSessionType);
         return ret;

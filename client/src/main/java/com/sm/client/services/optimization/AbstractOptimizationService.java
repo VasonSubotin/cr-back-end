@@ -172,6 +172,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
             double curImpact = (gridData.getStop() - gridData.getStart()) / 3600000D * gridData.getValue();
             current.setCo2Impact(current.getCo2Impact() + curImpact);
             current.setSmScheduleType(SmScheduleType.CHR);
+            current.setEnergy(current.getEnergy() + current.getChargeRate() * (gridData.getStop() - gridData.getStart())/3600000);
             coImpactSummary += curImpact;
             lastGridData = gridData;
         }
@@ -207,11 +208,5 @@ public abstract class AbstractOptimizationService implements OptimizationService
         this.timeOfUsageService = timeOfUsageService;
     }
 
-    protected void setEndSoc(SchedulerData schedulerData, long capacity) {
-        long energy = schedulerData.getInitialEnergy();
-        for (SchedulerInterval interval : schedulerData.getIntervals()) {
-            energy += interval.getEnergy();
-        }
-        schedulerData.setEndSoc(100.0 * energy / (double) capacity);
-    }
+
 }

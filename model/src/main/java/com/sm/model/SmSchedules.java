@@ -39,6 +39,8 @@ public class SmSchedules {
     @Column(name = "SESSION_ID")
     private Long sessionId;
 
+    @Column(name = "N_CAPACITY")
+    private Long capacity;
 
     @Column(name = "V_SCHEDULE_TYPE")
     private SmScheduleType scheduleType;
@@ -204,5 +206,13 @@ public class SmSchedules {
 
     public void setEndSoc(Double endSoc) {
         this.endSoc = endSoc;
+    }
+
+    public Long getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Long capacity) {
+        this.capacity = capacity;
     }
 }

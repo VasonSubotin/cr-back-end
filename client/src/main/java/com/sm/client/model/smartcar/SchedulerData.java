@@ -35,6 +35,15 @@ public class SchedulerData implements Serializable {
     @JsonProperty("end_soc")
     private Double endSoc;
 
+    @JsonProperty("capacity")
+    private Long capacity;
+
+    @JsonProperty("total_charge")
+    private Long totalEnergy;
+
+    @JsonProperty("total_cost")
+    private Double totalCost;
+
     // can be flying, driving, changing
     @JsonProperty("session_type")
     private String sessionType;
@@ -200,5 +209,29 @@ public class SchedulerData implements Serializable {
 
     public void setEndSoc(Double endSoc) {
         this.endSoc = endSoc;
+    }
+
+    public Long getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Long capacity) {
+        this.capacity = capacity;
+    }
+
+    public Long getTotalEnergy() {
+        return totalEnergy;
+    }
+
+    public void setTotalEnergy(Long totalEnergy) {
+        this.totalEnergy = totalEnergy;
+    }
+
+    public Double getTotalCost() {
+        return totalCost;
+    }
+
+    public void setTotalCost(Double totalCost) {
+        this.totalCost = totalCost;
     }
 }

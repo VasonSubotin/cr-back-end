@@ -74,12 +74,20 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
         schedulerData.setPolicyId(smResource.getPolicyId());
         schedulerData.setCreatedTime(new Date());
         schedulerData.setScheduleType(SmScheduleType.CHR);
+        schedulerData.setCapacity(smResource.getCapacity());
+        setEndSoc(schedulerData);
         return scheduleTransformService.smSchedulesToScheduleWeb(
                 scheduleDao.saveSmSchedules(
                         scheduleTransformService.scheduleWebToSmSchedules(schedulerData)));
     }
 
-
+    protected void setEndSoc(SchedulerData schedulerData) {
+        long energy = schedulerData.getInitialEnergy();
+        for (SchedulerInterval interval : schedulerData.getIntervals()) {
+            energy += interval.getEnergy();
+        }
+        schedulerData.setEndSoc(100.0 * energy / (double) schedulerData.getCapacity());
+    }
 
     public void setOptimizationServiceFactory(OptimizationServiceFactory optimizationServiceFactory) {
         this.optimizationServiceFactory = optimizationServiceFactory;
