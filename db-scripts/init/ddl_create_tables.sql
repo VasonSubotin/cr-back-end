@@ -35,6 +35,7 @@ create table Resources(
 	DT_UPDATED datetime,
 	DT_CREATED datetime,
 	B_DELETED numeric(1),
+	B_MOCK numeric(1),
 	FOREIGN KEY (RESOURCE_TYPE_ID)  REFERENCES ResourceTypes (ID_RESOURCE_TYPE )
 );
 

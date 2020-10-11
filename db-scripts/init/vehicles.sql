@@ -74,3 +74,4 @@ insert into vehicles(v_maker, v_model, n_year, n_batery, dt_created, b_deleted) 
 insert into vehicles(v_maker, v_model, n_year, n_batery, dt_created, b_deleted)  values ('Land Rover','LR4',2018,0,strftime('%s', 'now') * 1000,0);
 
 
+insert into vehicles(v_maker, v_model, n_year, n_batery, dt_created, b_deleted)  values ('Chevrolet','Bolt EV',2017,60000,strftime('%s', 'now') * 1000,0);

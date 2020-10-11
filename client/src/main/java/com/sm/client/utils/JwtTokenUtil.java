@@ -1,11 +1,15 @@
 package com.sm.client.utils;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.sm.model.SmException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -20,6 +24,12 @@ public class JwtTokenUtil implements Serializable {
 
     @Value("${jwt.secret}")
     private String secret;
+
+    @Value("${jwt.apple.secret}")
+    private String secretApple;
+
+    @Value("${jwt.origin:http://localhost:4200}")
+    private String origin;
 
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {
@@ -53,7 +63,7 @@ public class JwtTokenUtil implements Serializable {
         return doGenerateToken(claims, userDetails.getUsername());
     }
 
-        //while creating the token -
+    //while creating the token -
     //1. Define  claims of the token, like Issuer, Expiration, Subject, and the ID
     //2. Sign the JWT using the HS512 algorithm and secret key.
     //3. According to JWS Compact Serialization(https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-3.1)
@@ -69,4 +79,22 @@ public class JwtTokenUtil implements Serializable {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
+
+    public String generateHS256(LinkedHashMap<String, Object> header, LinkedHashMap<String, Object> payload) throws SmException {
+        try {
+            //fix format "exp"
+            for (Map.Entry<String, Object> entry : payload.entrySet()) {
+                if ("exp".equals(entry.getKey()) && entry.getValue() != null && entry.getValue() instanceof Double) {
+                    entry.setValue(new BigDecimal((Double) entry.getValue()).round(new MathContext(13)));
+                }
+            }
+            payload.put("origin", origin);
+
+            return Jwts.builder().setClaims(payload).setHeader(header)
+                    .signWith(SignatureAlgorithm.HS256, secretApple.getBytes()).compact();
+        } catch (Exception ex) {
+            throw new SmException(ex.getMessage(), 500);
+        }
+    }
+
 }

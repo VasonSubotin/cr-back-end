@@ -56,6 +56,9 @@ public class SmResource implements Serializable {
     @Column(name = "B_DELETED")
     private Boolean deleted;
 
+    @Column(name = "B_MOCK")
+    private Boolean mock;
+
     public Long getIdResource() {
         return idResource;
     }
@@ -166,5 +169,13 @@ public class SmResource implements Serializable {
 
     public void setnChargeByTime(Long nChargeByTime) {
         this.nChargeByTime = nChargeByTime;
+    }
+
+    public Boolean getMock() {
+        return mock;
+    }
+
+    public void setMock(Boolean mock) {
+        this.mock = mock;
     }
 }

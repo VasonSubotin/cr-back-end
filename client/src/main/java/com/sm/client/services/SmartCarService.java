@@ -86,6 +86,7 @@ public class SmartCarService {
 
     public void refreshCarData(String login, Map<String, VehicleLocation> locationMap) throws SmException, SmartcarException {
         //need to getResources from smartCar
+        List<SmResource> resources = resourcesDao.getAllResourceByAccountId(securityService.getAccount().getIdAccount());
 
         SmUserSession userSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
 
@@ -93,7 +94,7 @@ public class SmartCarService {
             throw new SmException("No active smart car session found for user " + login, HttpStatus.SC_FORBIDDEN);
         }
 
-        List<SmResource> resources = resourcesDao.getAllResourceByAccountId(userSession.getAccountId());
+
 
         SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
 

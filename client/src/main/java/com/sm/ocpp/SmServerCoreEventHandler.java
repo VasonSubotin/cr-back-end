@@ -7,6 +7,8 @@ import eu.chargetime.ocpp.model.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Map;
@@ -46,7 +48,9 @@ public class SmServerCoreEventHandler implements ServerCoreEventHandler {
         events.add(new OCPPScheduleEvent(new Date(System.currentTimeMillis() + 300_000 * (i++)), i % 2 == 0 ? true : false));
 
         mp.put(ocppScheduleData.getExtrenalId(), ocppScheduleData);
-        return new BootNotificationConfirmation();
+        ZonedDateTime curent = ZonedDateTime.now();
+        curent.withFixedOffsetZone();
+        return new BootNotificationConfirmation(curent.withFixedOffsetZone(),5000,RegistrationStatus.Accepted);
     }
 
     @Override

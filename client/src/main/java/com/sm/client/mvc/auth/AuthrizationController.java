@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import com.sm.client.model.AuthRequest;
 import com.sm.client.model.AuthResponse;
+import com.sm.client.model.JwtTokenRequest;
 import com.sm.client.services.UserDetailsServiceImpl;
 import com.sm.client.utils.JwtTokenUtil;
 import com.sm.model.ServiceResult;
@@ -74,4 +75,13 @@ public class AuthrizationController {
         }
     }
 
+    @RequestMapping(value = "/getJwtToken", method = RequestMethod.POST)
+    public ResponseEntity<?> getJwtToken(@RequestBody JwtTokenRequest jwtTokenRequest) throws Exception {
+        try {
+            return new ResponseEntity(jwtTokenUtil.generateHS256(jwtTokenRequest.getHeader(), jwtTokenRequest.getPayload()), HttpStatus.CREATED);
+        } catch (SmException ex) {
+            HttpStatus status = HttpStatus.valueOf(ex.getCode());
+            return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/getJwtToken"), status);
+        }
+    }
 }
