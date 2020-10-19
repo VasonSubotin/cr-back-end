@@ -1,16 +1,13 @@
 package com.sm.client.model.smartcar;
 
 import com.sm.model.SmResource;
-import com.sm.model.SmTiming;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class SmResourceState implements Serializable {
 
     private VehicleData smartCarInfo;
     private SmResource smResource;
-    private List<SmTiming> timers;
 
     public SmResourceState() {
 
@@ -35,14 +32,6 @@ public class SmResourceState implements Serializable {
 
     public void setSmResource(SmResource smResource) {
         this.smResource = smResource;
-    }
-
-    public List<SmTiming> getTimers() {
-        return timers;
-    }
-
-    public void setTimers(List<SmTiming> timers) {
-        this.timers = timers;
     }
 }
 

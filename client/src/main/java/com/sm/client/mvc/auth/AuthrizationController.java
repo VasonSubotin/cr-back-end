@@ -1,7 +1,6 @@
 package com.sm.client.mvc.auth;
 
 
-import java.util.Date;
 import java.util.Objects;
 
 import com.sm.client.model.AuthRequest;
@@ -13,9 +12,7 @@ import com.sm.model.ServiceResult;
 import com.sm.model.SmAccount;
 import com.sm.model.SmException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,7 +20,11 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -74,11 +75,10 @@ public class AuthrizationController {
         }
     }
 
-    @RequestMapping(value = "/getJwtToken", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getJwtToken(@RequestBody(required = false) JwtTokenRequest jwtTokenRequest,
-                                         @RequestParam(value = "expirationInSec", required = false)  Long expirationInSec) throws Exception {
+    @RequestMapping(value = "/getJwtToken", method = RequestMethod.POST)
+    public ResponseEntity<?> getJwtToken(@RequestBody JwtTokenRequest jwtTokenRequest) throws Exception {
         try {
-            return new ResponseEntity("{ \"token\":\"" + jwtTokenUtil.generateHS256(jwtTokenRequest, expirationInSec) + "\"}", HttpStatus.CREATED);
+            return new ResponseEntity(jwtTokenUtil.generateHS256(jwtTokenRequest.getHeader(), jwtTokenRequest.getPayload()), HttpStatus.CREATED);
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());
             return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/getJwtToken"), status);
