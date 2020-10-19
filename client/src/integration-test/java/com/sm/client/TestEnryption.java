@@ -15,17 +15,28 @@ import org.junit.Test;
 import java.util.Base64;
 
 public class TestEnryption {
+    //    {
+//        "iss": "8WZ9BH3AR3",
+//            "iat": 1602168405,
+//            "origin": "http://localhost:4200",
+//            "exp": 1619114078.719
+//    }
+//{
+//    "alg": "HS256",
+//        "kid": "F56BZ5WVSG",
+//        "typ": "JWT"
+//}
 
     @Test
     public void testEnc() {
-        String p = "enterpassword";
+        String p = "3gkfwnxertqfusd4pfsez@a";
         System.out.println(AlgorithmRegistry.getAllPBEAlgorithms()); //PBEWithMD5AndDES
 //        for(Object a:AlgorithmRegistry.getAllPBEAlgorithms()) {
 //            System.out.println("--------------------------------------------------------------");
 //            JasyptPBEStringEncryptionCLI.main(new String[]{"password=pass", "algorithm="+a, "input=513874746428-663v507o7i96n3p5vnm2l1e2tf2ldm09.apps.googleusercontent.com"}); //"algorithm=PBEWithMD5AndTripleDES",
 //        }
 
-        String s = "";
+        String s = "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgpKVoGYwpAjz48yek1R60dgCjJJBqaTng7wFjnRbwQnygCgYIKoZIzj0DAQehRANCAAS9CSHA9CNURciA9NAt8v60rGWza7N3CdBljaExVbyyaKXTC1kVth/ykUt++vf9bt/XyiNJEBWZrvZ7ufP0l9in";
         JasyptPBEStringEncryptionCLI.main(new String[]{"password=" + p, "ivGeneratorClassName=" + RandomIvGenerator.class.getName(),
                 "algorithm=PBEWITHSHA1ANDRC4_128",
                 "input=" + s}); //"algorithm=PBEWithMD5AndTripleDES",
@@ -35,6 +46,7 @@ public class TestEnryption {
         encryptor.setAlgorithm("PBEWITHSHA1ANDRC4_128");
         encryptor.setPassword(p);
         encryptor.setIvGenerator(new RandomIvGenerator());
+        System.out.println("+++"+encryptor.encrypt(s));
 
         System.out.println(encryptor.decrypt("zWL9gRiKzMEick+CwhXYtQA6g0dwe26Zpq5eZvGoShDZreGj0b1PMNhGI1ATdD6GUdwnDeRMsrAJfPZn43HE"));
     }
