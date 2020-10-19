@@ -3,16 +3,12 @@ package com.sm.client.utils;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.security.KeyFactory;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.google.api.client.util.Base64;
-import com.sm.client.model.JwtTokenRequest;
 import com.sm.model.SmException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,21 +27,6 @@ public class JwtTokenUtil implements Serializable {
 
     @Value("${jwt.apple.secret}")
     private String secretApple;
-
-    @Value("${jwt.apple.secret64}")
-    private String secretApple64;
-
-    @Value("${jwt.apple.alg:ES256}")
-    private String alg;
-
-    @Value("${jwt.apple.kid}")
-    private String kid;
-
-    @Value("${jwt.apple.typ:JWT}")
-    private String typ;
-
-    @Value("${jwt.apple.iss}")
-    private String iss;
 
     @Value("${jwt.origin:http://localhost:4200}")
     private String origin;
@@ -99,33 +80,8 @@ public class JwtTokenUtil implements Serializable {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-
-    public String generateHS256(JwtTokenRequest jwtTokenRequest, Long expiration) throws SmException {
+    public String generateHS256(LinkedHashMap<String, Object> header, LinkedHashMap<String, Object> payload) throws SmException {
         try {
-            LinkedHashMap<String, Object> header;
-            LinkedHashMap<String, Object> payload;
-            if (jwtTokenRequest == null || jwtTokenRequest.getHeader() == null) {
-                // need to create header and payload
-                header = new LinkedHashMap<>();
-                header.put("alg", alg);
-                header.put("kid", kid);
-                header.put("typ", typ);
-            } else {
-                header = jwtTokenRequest.getHeader();
-            }
-            if (jwtTokenRequest == null || jwtTokenRequest.getPayload() == null) {
-                payload = new LinkedHashMap<>();
-                payload.put("iss", iss);
-                payload.put("iat", System.currentTimeMillis() / 1000);
-                payload.put("origin", origin);
-                if (expiration == null) {
-                    payload.put("exp", ((double) System.currentTimeMillis() + 3600_000D) / 1000D);
-                } else {
-                    payload.put("exp", ((double) System.currentTimeMillis() + (double) expiration * 1000) / 1000D);
-                }
-            } else {
-                payload = jwtTokenRequest.getPayload();
-            }
             //fix format "exp"
             for (Map.Entry<String, Object> entry : payload.entrySet()) {
                 if ("exp".equals(entry.getKey()) && entry.getValue() != null && entry.getValue() instanceof Double) {
@@ -133,15 +89,9 @@ public class JwtTokenUtil implements Serializable {
                 }
             }
             payload.put("origin", origin);
-            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.valueOf(alg);
-            if (signatureAlgorithm.isEllipticCurve()) {
-               return Jwts.builder().setClaims(payload).setHeader(header)
-                        .signWith(signatureAlgorithm,
-                                KeyFactory.getInstance("EC").generatePrivate(
-                                        new PKCS8EncodedKeySpec(Base64.decodeBase64(secretApple64))) ).compact();
-            }
+
             return Jwts.builder().setClaims(payload).setHeader(header)
-                    .signWith(signatureAlgorithm, secretApple).compact();
+                    .signWith(SignatureAlgorithm.HS256, secretApple.getBytes()).compact();
         } catch (Exception ex) {
             throw new SmException(ex.getMessage(), 500);
         }
