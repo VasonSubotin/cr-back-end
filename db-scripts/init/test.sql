@@ -125,3 +125,81 @@ insert into Locations(F_PRICE, N_POWER,V_NAME,V_DESCRIPTION,N_LATITUDE, N_LONGIT
 values (0.20,7680,'Plaza Hermosa','715 Pier Ave Hermosa Beach, CA 90254',33.865960, -118.395379,'UTC-7',strftime('%s', 'now') * 1000,'NP15',1,0);
 insert into Locations(F_PRICE, N_POWER,V_NAME,V_DESCRIPTION,N_LATITUDE, N_LONGITUDE,V_TIME_ZONE,DT_CREATED, V_EXTERNAL_LOCATION_ID,B_TOU_ENABLED,B_DELETED)
 values (0.19,50000,'Hermosa Beach Supercharger','710 16th St., Hermosa Beach, CA, United States, 90254',33.865995, -118.395285,'UTC-7',strftime('%s', 'now') * 1000,'NP15',1,0);
+
+
+insert into Locations(
+     F_PRICE,
+     N_POWER,
+     V_NAME,
+     V_DESCRIPTION,
+     N_LATITUDE,
+     N_LONGITUDE,
+     V_TIME_ZONE,
+     DT_CREATED,
+     V_EXTERNAL_LOCATION_ID,
+     B_TOU_ENABLED,
+     B_DELETED)
+select  cost_price as NUMERIC(6,6)),
+    kilowatts*1000,
+     name,
+     address,
+     latitude,
+     longitude,
+     'UTC-7',
+     strftime('%s', 'now') * 1000,
+     'NP15',
+     1,
+     0
+ from mytable
+
+
+insert into Locations(
+     F_PRICE,
+     N_POWER,
+     V_NAME,
+     V_DESCRIPTION,
+     N_LATITUDE,
+     N_LONGITUDE,
+     V_TIME_ZONE,
+     DT_CREATED,
+     V_EXTERNAL_LOCATION_ID,
+     B_TOU_ENABLED,
+     B_DELETED)
+select  cost_price as NUMERIC(6,6)),
+    kilowatts*1000,
+     name,
+     address,
+     latitude,
+     longitude,
+     'UTC-7',
+     strftime('%s', 'now') * 1000,
+     'NP15',
+     1,
+     0
+ from mytable
+
+
+insert into Locations(
+     F_PRICE,
+     N_POWER,
+     V_NAME,
+     V_DESCRIPTION,
+     N_LATITUDE,
+     N_LONGITUDE,
+     V_TIME_ZONE,
+     DT_CREATED,
+     V_EXTERNAL_LOCATION_ID,
+     B_TOU_ENABLED,
+     B_DELETED)
+select  cost_price as NUMERIC(6,6)),
+    kilowatts*1000,
+     name,
+     address,
+     latitude,
+     longitude,
+     'UTC-7',
+     strftime('%s', 'now') * 1000,
+     'NP15',
+     1,
+     0
+ from mytable
