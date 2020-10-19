@@ -36,7 +36,7 @@ public class TestEnryption {
 //            JasyptPBEStringEncryptionCLI.main(new String[]{"password=pass", "algorithm="+a, "input=513874746428-663v507o7i96n3p5vnm2l1e2tf2ldm09.apps.googleusercontent.com"}); //"algorithm=PBEWithMD5AndTripleDES",
 //        }
 
-        String s = "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgpKVoGYwpAjz48yek1R60dgCjJJBqaTng7wFjnRbwQnygCgYIKoZIzj0DAQehRANCAAS9CSHA9CNURciA9NAt8v60rGWza7N3CdBljaExVbyyaKXTC1kVth/ykUt++vf9bt/XyiNJEBWZrvZ7ufP0l9in";
+        String s = "";
         JasyptPBEStringEncryptionCLI.main(new String[]{"password=" + p, "ivGeneratorClassName=" + RandomIvGenerator.class.getName(),
                 "algorithm=PBEWITHSHA1ANDRC4_128",
                 "input=" + s}); //"algorithm=PBEWithMD5AndTripleDES",
