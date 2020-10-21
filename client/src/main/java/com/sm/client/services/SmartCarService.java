@@ -191,6 +191,16 @@ public class SmartCarService {
         return new Pair<>(userSession, null);
     }
 
+    public boolean needInitUserSession() throws SmException {
+        try {
+            SmUserSession userSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
+            getVehicleIds(userSession);
+            return false;
+        } catch (SmartcarException ex) {
+            return true;
+        }
+    }
+
     public List<SmResourceState> getResourceState(String login) throws SmException {
         List<SmTiming> timers = new ArrayList<>();
         long start = System.currentTimeMillis();
@@ -280,6 +290,31 @@ public class SmartCarService {
         VehicleData vehicleData = new VehicleData();
         long start = System.currentTimeMillis();
         try {
+            BatchResponse batchResponse = vehicle.batch(new String[]{"/battery", "/location", "/charge", "/"});
+            if (testMode) {
+                vehicleData.setLocation(TestLocations.getTestCarLocationByVin(vin));
+            } else {
+                vehicleData.setLocation(batchResponse.location());
+            }
+            vehicleData.setVehicleInfo(batchResponse.info());// will be root /
+            vehicleData.setCharge(batchResponse.charge());
+            vehicleData.setBattery(batchResponse.battery().getData());
+
+        } catch (Exception ex) {
+            logger.error("Failed to get batch info for {} due to error : {} - will use default values", ex.getMessage(), ex);
+            vehicleData.setVehicleId(vehicle.getVehicleId());
+        } finally {
+            timers.add(new SmTiming("vehicle.batch() " + vin, System.currentTimeMillis() - start));
+        }
+        vehicleData.setVin(vin);
+        vehicleData.setVehicleId(vehicle.getVehicleId());
+        return vehicleData;
+    }
+
+    private VehicleData getSingleData2(Vehicle vehicle, String vin, List<SmTiming> timers) {
+        VehicleData vehicleData = new VehicleData();
+        long start = System.currentTimeMillis();
+        try {
             vehicleData.setBattery(vehicle.battery().getData());
         } catch (Exception ex) {
             logger.error("ailed to get battery info for {} due to error : {} - will use default value 50%", ex.getMessage(), ex);
@@ -293,7 +328,7 @@ public class SmartCarService {
             vehicleData.setVehicleInfo(vehicle.info());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-        }finally {
+        } finally {
             timers.add(new SmTiming("vehicle.info()  " + vin, System.currentTimeMillis() - start));
         }
 
@@ -312,7 +347,7 @@ public class SmartCarService {
             vehicleData.setCharge(vehicle.charge());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-        }finally{
+        } finally {
             timers.add(new SmTiming("vehicle.charge() " + vin, System.currentTimeMillis() - start));
         }
 
@@ -339,7 +374,7 @@ public class SmartCarService {
             vehicleData.setVin(vin);
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-        }finally{
+        } finally {
             timers.add(new SmTiming("vin " + vin, System.currentTimeMillis() - start));
         }
 
@@ -348,7 +383,7 @@ public class SmartCarService {
             vehicleData.setVehicleId(vehicle.getVehicleId());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-        }finally{
+        } finally {
             timers.add(new SmTiming("vehicle.getVehicleId() " + vin, System.currentTimeMillis() - start));
         }
 
@@ -361,7 +396,7 @@ public class SmartCarService {
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-        }finally{
+        } finally {
             timers.add(new SmTiming("vehicle.location() " + vin, System.currentTimeMillis() - start));
         }
 

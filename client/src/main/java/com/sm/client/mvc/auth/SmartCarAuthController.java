@@ -1,5 +1,6 @@
 package com.sm.client.mvc.auth;
 
+import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.UserData;
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.SecurityService;
@@ -21,16 +22,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -43,7 +43,6 @@ public class SmartCarAuthController {
 
     @Autowired
     private SmartCarService smartCarService;
-
 
 
     @RequestMapping(value = "/smartCarLogin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,6 +75,18 @@ public class SmartCarAuthController {
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());
             return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/authrized"), status);
+        }
+    }
+
+    @RequestMapping(value = "/needInitSmartCarSession", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> needInitSmartCarSession(HttpServletRequest request, HttpServletResponse response) {
+        try {
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("needInit", smartCarService.needInitUserSession());
+            return new ResponseEntity(res, HttpStatus.OK);
+        } catch (SmException ex) {
+            return new ResponseEntity(ex.getMessage(), HttpStatus.valueOf(ex.getCode()));
         }
     }
 

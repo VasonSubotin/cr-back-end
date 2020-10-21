@@ -126,7 +126,7 @@ public class GoogleService {
         return authorizationCodeTokenRequest.execute();
     }
 
-    public Calendar getCalendar( SmUserSession smUserSession ) throws SmException {
+    public Calendar getCalendar(SmUserSession smUserSession) throws SmException {
         Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
 
         credential.setAccessToken(smUserSession.getToken());
@@ -164,6 +164,17 @@ public class GoogleService {
 
     public Events getEventsForNext24hours() throws SmException, IOException {
         return getEventsForPeriodInMills(null, time24hours);
+    }
+
+    public boolean needInitGoogleSession() throws SmException {
+        try {
+            getEventsForPeriodInMills(null, 10);
+            return false;
+        } catch (GoogleJsonResponseException ex) {
+            return true;
+        } catch (IOException ex) {
+            throw new SmException(ex.getMessage(), 500);
+        }
     }
 
     public void stratSession(String code) throws SmException, IOException {

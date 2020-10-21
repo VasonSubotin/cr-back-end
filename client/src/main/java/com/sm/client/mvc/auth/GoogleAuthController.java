@@ -21,6 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class GoogleAuthController {
@@ -90,5 +92,16 @@ public class GoogleAuthController {
         return googleService.getCalendar(securityService.getActiveSession(Constants.GOOGLE_AUTH_TYPE)).events().list("primary").setMaxResults(10).execute().toString();
     }
 
+    @RequestMapping(value = "/needInitGoogleSession", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> needInitGoogleSession(HttpServletRequest request, HttpServletResponse response) {
+        try {
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("needInit", googleService.needInitGoogleSession());
+            return new ResponseEntity(res, HttpStatus.OK);
+        } catch (SmException ex) {
+            return new ResponseEntity(ex.getMessage(), HttpStatus.valueOf(ex.getCode()));
+        }
+    }
 
 }
