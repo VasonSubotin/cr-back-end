@@ -1,5 +1,6 @@
 package com.sm.client.services.optimization;
 
+import com.sm.model.Pair;
 import com.sm.model.PolicyType;
 import com.sm.client.model.eco.GridData;
 import com.sm.client.model.smartcar.SchedulerData;
@@ -13,7 +14,8 @@ public class EcoOptimizationService extends AbstractOptimizationService {
     @Override
     public SchedulerData optimize(Date start, Date stop, long capacityInWt, long chargeLevelInWt, long rateInWt, String locationId, Long recourceId) throws Exception {
 
-        List<GridData> co2DataList = getData(start, stop, locationId, recourceId);
+        Pair<List<GridData>, List<GridData>> p = getData(start, stop, locationId, recourceId);
+        List<GridData> co2DataList = p.getValue();
 
         List<GridData> co2DataListSorted = new ArrayList<>(co2DataList);
         co2DataListSorted.sort(gridDataValueComparator);
@@ -39,7 +41,7 @@ public class EcoOptimizationService extends AbstractOptimizationService {
         }
         SchedulerData schedulerData = calculateSchedulerData(co2DataList, timeSortedResult, rateInWt, timeInMinsNeed);
         schedulerData.setInitialEnergy(chargeLevelInWt);
-
+        schedulerData.setMoers(aggregateGridData(schedulerData.getIntervals(), p.getKey()));
         return schedulerData;
     }
 

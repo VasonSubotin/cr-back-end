@@ -1,6 +1,8 @@
 package com.sm.client.services.optimization;
 
 import com.sm.client.model.eco.GridData;
+import com.sm.client.model.eco.GridDataAggregated;
+import com.sm.model.Pair;
 import com.sm.model.SmResource;
 import com.sm.model.SmScheduleType;
 import com.sm.client.model.smartcar.SchedulerData;
@@ -17,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class AbstractOptimizationService implements OptimizationService {
 
@@ -41,16 +44,17 @@ public abstract class AbstractOptimizationService implements OptimizationService
      * @return list of elements which represents  CO2 info
      * @throws Exception
      */
-    protected List<GridData> getData(Date start,
-                                     Date stop,
-                                     String locationId,
-                                     Long resourceId) throws Exception {
+    protected Pair<List<GridData>, List<GridData>> getData(Date start,
+                                                           Date stop,
+                                                           String locationId,
+                                                           Long resourceId) throws Exception {
         List<GridData> co2DataList = ecoService.getEcoData(locationId, null, null, start, stop, null, STYLE);
 
         if (co2DataList == null || co2DataList.isEmpty()) {
             logger.error("No grid data found for the specified time range {} - {} and location {}", start, stop, locationId);
             throw new Exception("No grid data found for the specified time range " + start + " - " + stop + " and location " + locationId);
         }
+        List<GridData> co2DataListOriginal = cloneGridData(co2DataList);
         SmTimeOfUsage timeOfUsage = timeOfUsageService.getTimeOfUsageByResourceId(resourceId);
         if (timeOfUsage != null) {
             List<Interval> tousInterval = IntervalTransformerUtils.touToIntervals(timeOfUsage, start);
@@ -68,7 +72,81 @@ public abstract class AbstractOptimizationService implements OptimizationService
                 }
             }
         }
-        return co2DataList;
+        return new Pair<>(co2DataListOriginal, co2DataList);
+    }
+
+    protected List<GridData> cloneGridData(List<GridData> co2DataList) {
+        List<GridData> ret = new ArrayList<>();
+        GridData last = null;
+        for (GridData cd : co2DataList) {
+            if (last != null && cd.getStart() - last.getStart() > 300_000) {
+                //empty range need to add approximation
+                long n = (cd.getStart() - last.getStart()) / 300_000;
+                for (long i = 1; i < n; i++) {
+                    GridData cl = cloneGridData(cd);
+                    cl.setStart(last.getStart() + i * 300_000);
+                    cl.setStop(cl.getStart() + 300_000);
+                    cl.setValue(last.getValue() + (double) i * (cd.getValue() - last.getValue()) / (double) n);
+                    ret.add(cl);
+                }
+            }
+
+            ret.add(cloneGridData(cd));
+            last = cd;
+        }
+
+        return ret;
+    }
+
+    private GridData cloneGridData(GridData cd) {
+        GridData clone = new GridData();
+        clone.setPointTime(cd.getPointTime());
+        clone.setStop(cd.getStop());
+        clone.setStart(cd.getStart());
+        clone.setDatatype(cd.getDatatype());
+        clone.setLocationId(cd.getLocationId());
+        clone.setVersion(cd.getVersion());
+        clone.setMarket(cd.getMarket());
+        clone.setFrequence(cd.getFrequence());
+        clone.setValue(cd.getValue());
+        return clone;
+    }
+
+    protected GridDataAggregated aggregateGridData(List<SchedulerInterval> intervals, List<GridData> co2DataList) {
+        GridDataAggregated gridDataAggregated = new GridDataAggregated();
+        if (co2DataList == null || co2DataList.isEmpty() || intervals == null || intervals.isEmpty())
+            return gridDataAggregated;
+
+        GridData gridDataFirst = co2DataList.get(0);
+
+
+        gridDataAggregated.setDatatype(gridDataFirst.getDatatype());
+        gridDataAggregated.setFrequence(gridDataFirst.getFrequence());
+        gridDataAggregated.setLocationId(gridDataFirst.getLocationId());
+        gridDataAggregated.setMarket(gridDataFirst.getMarket());
+        gridDataAggregated.setPointTime(gridDataFirst.getPointTime());
+        gridDataAggregated.setVersion(gridDataFirst.getVersion());
+
+
+        SchedulerInterval intervalFirst = intervals.get(0);
+        SchedulerInterval intervalLast = intervals.get(intervals.size() - 1);
+
+        long start = (intervalFirst.getStartTime().getTime() / 300_000) * 300_000;
+        //calculating stop as nearest 5 min grid at the end
+        long stop = (intervalLast.getStartTime().getTime() + intervalLast.getDuration());
+
+        gridDataAggregated.setStop((1 + stop / 300_000) * 300_000);
+        gridDataAggregated.setStart(start);
+//        long last = 0l;
+//        for (GridData cd : co2DataList) {
+//            if (last > 0 && cd.getStart() - last > 300_000)
+//                System.out.println(last);
+//            last = cd.getStart();
+//        }
+        List<Double> lst = co2DataList.stream().filter(a -> (a.getStop() <= stop && a.getStart() >= start)).map(GridData::getValue).collect(Collectors.toList());
+        gridDataAggregated.setValues(lst.toArray(new Double[lst.size()]));
+
+        return gridDataAggregated;
     }
 
     /**
@@ -172,7 +250,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
             double curImpact = (gridData.getStop() - gridData.getStart()) / 3600000D * gridData.getValue();
             current.setCo2Impact(current.getCo2Impact() + curImpact);
             current.setSmScheduleType(SmScheduleType.CHR);
-            current.setEnergy(current.getEnergy() + current.getChargeRate() * (gridData.getStop() - gridData.getStart())/3600000);
+            current.setEnergy(current.getEnergy() + current.getChargeRate() * (gridData.getStop() - gridData.getStart()) / 3600000);
             coImpactSummary += curImpact;
             lastGridData = gridData;
         }

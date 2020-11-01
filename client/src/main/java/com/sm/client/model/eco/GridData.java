@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class GridData implements Serializable {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @JsonProperty("point_time")
     private Date pointTime;
 

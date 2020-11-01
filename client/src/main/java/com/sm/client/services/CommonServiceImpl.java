@@ -2,8 +2,10 @@ package com.sm.client.services;
 
 import com.sm.dao.ResourcesDao;
 import com.sm.dao.SessionsDao;
+import com.sm.dao.cache.SmartCarCacheDao;
 import com.sm.model.SmResource;
 import com.sm.model.SmSession;
+import com.sm.model.SmartCarCache;
 import com.sm.model.web.RecourseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,9 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private ResourcesDao resourcesDao;
+
+    @Autowired
+    private SmartCarCacheDao smartCarCacheDao;
 
 //    @Autowired
 //    private CommonDao commonDao;
@@ -52,6 +57,12 @@ public class CommonServiceImpl implements CommonService {
         }
 
         return recourseInfo;
+    }
+
+
+    @Override
+    public SmartCarCache getSmartCarCache(String vin) {
+        return smartCarCacheDao.getSmartCarCache(vin);
     }
 
 }

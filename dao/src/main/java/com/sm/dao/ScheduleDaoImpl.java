@@ -24,7 +24,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
     @Override
     public SmSchedules getSmSchedulesById(Long scheduleId, Long accountId) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmSchedules where scheduleId=:scheduleId and accountId=:accountId";
+        String hql = "FROM SmSchedules where idSchedule=:scheduleId and accountId=:accountId";
         Query query = session.createQuery(hql);
         query.setParameter("accountId", accountId);
         query.setParameter("scheduleId", scheduleId);

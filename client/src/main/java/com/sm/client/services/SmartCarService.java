@@ -1,6 +1,10 @@
 package com.sm.client.services;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.model.smartcar.SmResourceState;
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.cache.VehiclesCache;
@@ -8,6 +12,7 @@ import com.sm.client.utils.TestLocations;
 import com.sm.dao.AccountsDao;
 import com.sm.dao.ResourcesDao;
 
+import com.sm.dao.cache.SmartCarCacheDao;
 import com.sm.model.*;
 import com.smartcar.sdk.AuthClient;
 import com.smartcar.sdk.SmartcarException;
@@ -24,6 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,6 +54,7 @@ public class SmartCarService {
     @Value("#{'${smartcar.permissions:required:read_vehicle_info,read_odometer,read_engine_oil,read_battery,read_charge,read_fuel,read_location,control_security,read_tires,read_vin}'.split(',')}")
     private String permissions[];
 
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     private VehiclesCache vehiclesCache;
@@ -60,6 +67,10 @@ public class SmartCarService {
 
     @Autowired
     private ResourcesDao resourcesDao;
+
+    @Autowired
+    private SmartCarCacheDao smartCarCacheDao;
+
 
     @Value("${smartcar.testMode:false}")
     private boolean testMode = false;
@@ -201,6 +212,24 @@ public class SmartCarService {
         }
     }
 
+    private void saveSmartCarCache(VehicleData vehicleData, long timing) {
+        try {
+            SmartCarCache smartCarCache = smartCarCacheDao.getSmartCarCache(vehicleData.getVin());
+            if (smartCarCache != null) {
+                smartCarCache.setDtCreated(new Date());
+                smartCarCache.setExternalResourceId(vehicleData.getVin());
+                smartCarCache.setData(objectMapper.writeValueAsBytes(smartCarCache));
+                smartCarCache.setTiming(timing);
+            } else {
+                smartCarCache = createSmartCarCacheFromVehicleData(vehicleData, timing);
+            }
+
+            smartCarCacheDao.saveSmartCarCache(smartCarCache);
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+    }
+
     public List<SmResourceState> getResourceState(String login) throws SmException {
         List<SmTiming> timers = new ArrayList<>();
         long start = System.currentTimeMillis();
@@ -231,7 +260,9 @@ public class SmartCarService {
                 start = System.currentTimeMillis();
                 SmResource resource = resourceMap.get(vId);
                 if (resource != null) {
-                    ret.add(new SmResourceState(getSingleData(vehicle, vId, timers), resource));
+                    VehicleData vehicleData = getSingleData(vehicle, vId, timers);
+                    ret.add(new SmResourceState(vehicleData, resource));
+                    saveSmartCarCache(vehicleData, timers.isEmpty() ? null : timers.get(timers.size() - 1).getTime());
                     unUsedVins.remove(vId);
                 }
                 timers.add(new SmTiming("resourceMap.get  " + vId, System.currentTimeMillis() - start));
@@ -257,6 +288,28 @@ public class SmartCarService {
         return ret;
     }
 
+    public SmartCarCache createSmartCarCacheFromVehicleData(VehicleData vehicleData, long timing) throws JsonProcessingException {
+        SmartCarCache smartCarCache = new SmartCarCache();
+        smartCarCache.setDtCreated(new Date());
+        smartCarCache.setExternalResourceId(vehicleData.getVin());
+        smartCarCache.setData(objectMapper.writeValueAsBytes(smartCarCache));
+        smartCarCache.setTiming(timing);
+        return smartCarCache;
+    }
+
+    public VehicleData createVehicleDataFromSmartCarCache(SmartCarCache smartCarCache) {
+        if (smartCarCache == null) {
+            return null;
+        }
+        try {
+            return objectMapper.readValue(smartCarCache.getData(), new TypeReference<VehicleData>() {
+            });
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
     public SmResourceState getResourceState(String login, Long resourceId) throws SmException {
         SmUserSession userSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
 
@@ -274,8 +327,10 @@ public class SmartCarService {
                 Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
                 if (resource.getExternalResourceId().equals(vehicle.vin())) {
                     List<SmTiming> timers = new ArrayList<>();
-                    SmResourceState smResourceState = new SmResourceState(getSingleData(vehicle, vehicle.vin(), timers), resource);
+                    VehicleData vehicleData = getSingleData(vehicle, vehicle.vin(), timers);
+                    SmResourceState smResourceState = new SmResourceState(vehicleData, resource);
                     smResourceState.setTimers(timers);
+                    saveSmartCarCache(vehicleData, timers.isEmpty() ? null : timers.get(timers.size() - 1).getTime());
                     return smResourceState;
                 }
             }
@@ -287,6 +342,15 @@ public class SmartCarService {
     }
 
     private VehicleData getSingleData(Vehicle vehicle, String vin, List<SmTiming> timers) {
+        if (testMode) {
+            return getSingleDataNonBatch(vehicle, vin, timers);
+        } else {
+            return getSingleDataBatch(vehicle, vin, timers);
+        }
+    }
+
+
+    private VehicleData getSingleDataBatch(Vehicle vehicle, String vin, List<SmTiming> timers) {
         VehicleData vehicleData = new VehicleData();
         long start = System.currentTimeMillis();
         try {
@@ -311,7 +375,7 @@ public class SmartCarService {
         return vehicleData;
     }
 
-    private VehicleData getSingleData2(Vehicle vehicle, String vin, List<SmTiming> timers) {
+    private VehicleData getSingleDataNonBatch(Vehicle vehicle, String vin, List<SmTiming> timers) {
         VehicleData vehicleData = new VehicleData();
         long start = System.currentTimeMillis();
         try {

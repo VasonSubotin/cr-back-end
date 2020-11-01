@@ -2,6 +2,8 @@ package com.sm.client.model.smartcar;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sm.client.model.eco.GridData;
+import com.sm.client.model.eco.GridDataAggregated;
 import com.sm.model.SmScheduleType;
 
 import java.io.Serializable;
@@ -74,6 +76,8 @@ public class SchedulerData implements Serializable {
 
     @JsonProperty("intervals")
     private List<SchedulerInterval> intervals = new ArrayList<>();
+
+    private GridDataAggregated moers;
 
     public Long getResourceId() {
         return resourceId;
@@ -233,5 +237,13 @@ public class SchedulerData implements Serializable {
 
     public void setTotalCost(Double totalCost) {
         this.totalCost = totalCost;
+    }
+
+    public GridDataAggregated getMoers() {
+        return moers;
+    }
+
+    public void setMoers(GridDataAggregated moers) {
+        this.moers = moers;
     }
 }

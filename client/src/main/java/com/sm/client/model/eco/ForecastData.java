@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ForecastData implements Serializable {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ssZ")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
     @JsonProperty("generated_at")
     private Date generatedAt;
 

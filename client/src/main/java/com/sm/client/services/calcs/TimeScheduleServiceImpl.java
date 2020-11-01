@@ -1,5 +1,7 @@
 package com.sm.client.services.calcs;
 
+import com.sm.client.model.eco.GridData;
+import com.sm.client.model.eco.GridDataAggregated;
 import com.sm.client.model.eco.LocationData;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class TimeScheduleServiceImpl implements TimeScheduleService {
@@ -75,10 +78,13 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
         schedulerData.setCreatedTime(new Date());
         schedulerData.setScheduleType(SmScheduleType.CHR);
         schedulerData.setCapacity(smResource.getCapacity());
+        GridDataAggregated grid = schedulerData.getMoers();
         setEndSoc(schedulerData);
-        return scheduleTransformService.smSchedulesToScheduleWeb(
+        schedulerData = scheduleTransformService.smSchedulesToScheduleWeb(
                 scheduleDao.saveSmSchedules(
                         scheduleTransformService.scheduleWebToSmSchedules(schedulerData)));
+        schedulerData.setMoers(grid);
+        return schedulerData;
     }
 
     protected void setEndSoc(SchedulerData schedulerData) {

@@ -1,5 +1,6 @@
 package com.sm.client.services.optimization;
 
+import com.sm.model.Pair;
 import com.sm.model.PolicyType;
 import com.sm.client.model.eco.GridData;
 import com.sm.client.utils.StringDateUtil;
@@ -12,15 +13,15 @@ import java.util.List;
 public class PriceOptimizationService extends SimpleOptimizationService {
 
     @Override
-    protected List<GridData> getData(Date start,
-                                     Date stop,
-                                     String locationId,
-                                     Long resourceId) throws Exception {
-        List<GridData> co2DataList = super.getData(start, stop, locationId, resourceId);
+    protected Pair<List<GridData>, List<GridData>> getData(Date start,
+                                                           Date stop,
+                                                           String locationId,
+                                                           Long resourceId) throws Exception {
+        Pair<List<GridData>, List<GridData>> p = super.getData(start, stop, locationId, resourceId);
 
-
+        List<GridData> co2DataList = p.getValue();
         co2DataList = applyEvents(ecoService.getEventInterval(resourceId), co2DataList);
-        return co2DataList;
+        return new Pair(p.getKey(), co2DataList);
     }
 
     @Override

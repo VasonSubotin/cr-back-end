@@ -208,3 +208,12 @@ create table MarginalOperatingEmissionsRate(
 	DT_CREATED datetime,
 	B_DELETED numeric(1)
 );
+
+drop table if exists  SmartCarCaches;
+create table SmartCarCaches(
+	V_EXTERNAL_RESOURCE_ID varchar(32)  Primary key AUTOINCREMENT,
+	DT_CREATED datetime,
+	N_TIMING numeric(6),
+	BB_DATA blob
+);
+

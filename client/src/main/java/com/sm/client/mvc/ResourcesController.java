@@ -1,6 +1,7 @@
 package com.sm.client.mvc;
 
 import com.sm.client.model.smartcar.SmResourceState;
+import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.CommonService;
 import com.sm.client.services.SecurityService;
 import com.sm.client.services.SmartCarService;
@@ -8,6 +9,7 @@ import com.sm.dao.ResourcesDao;
 import com.sm.model.ServiceResult;
 import com.sm.model.SmException;
 import com.sm.model.SmResource;
+import com.sm.model.SmartCarCache;
 import com.sm.model.web.RecourseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,9 +38,18 @@ public class ResourcesController {
     private SmartCarService smartCarService;
 
     @RequestMapping(value = "/resources/{resource_id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SmResource getUserResourcesById(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") int resourceId) throws Exception {
+    public SmResourceState getUserResourcesById(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") int resourceId) throws Exception {
         response.setStatus(HttpStatus.OK.value());
-        return resourcesDao.getResourceByIdAndAccountId(new Long(resourceId), securityService.getAccount().getIdAccount());
+        SmResource smResource = resourcesDao.getResourceByIdAndAccountId(new Long(resourceId), securityService.getAccount().getIdAccount());
+
+        SmResourceState smResourceState = new SmResourceState();
+        if (smResource != null && smResource.getExternalResourceId() != null) {
+            SmartCarCache smartCarCache = commonService.getSmartCarCache(smResource.getExternalResourceId());
+            smResourceState.setSmartCarInfo(smartCarService.createVehicleDataFromSmartCarCache(smartCarCache));
+        }
+
+        smResourceState.setSmResource(smResource);
+        return smResourceState;
     }
 
     @RequestMapping(value = "/resources/{resource_id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)

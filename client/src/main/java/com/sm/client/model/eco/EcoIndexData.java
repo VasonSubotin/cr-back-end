@@ -18,7 +18,7 @@ public class EcoIndexData {
     @JsonProperty("moer")
     private Long moer;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss'Z'") // , timezone = "UTC"
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'") // , timezone = "UTC"
     @JsonProperty("point_time")
     private Date pointTime;
 
