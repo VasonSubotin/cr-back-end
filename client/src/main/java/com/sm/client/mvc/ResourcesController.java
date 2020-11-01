@@ -6,10 +6,7 @@ import com.sm.client.services.CommonService;
 import com.sm.client.services.SecurityService;
 import com.sm.client.services.SmartCarService;
 import com.sm.dao.ResourcesDao;
-import com.sm.model.ServiceResult;
-import com.sm.model.SmException;
-import com.sm.model.SmResource;
-import com.sm.model.SmartCarCache;
+import com.sm.model.*;
 import com.sm.model.web.RecourseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -46,6 +44,7 @@ public class ResourcesController {
         if (smResource != null && smResource.getExternalResourceId() != null) {
             SmartCarCache smartCarCache = commonService.getSmartCarCache(smResource.getExternalResourceId());
             smResourceState.setSmartCarInfo(smartCarService.createVehicleDataFromSmartCarCache(smartCarCache));
+            smResourceState.setTimers(Arrays.asList(new SmTiming("smartcar request", smartCarCache.getTiming())));
         }
 
         smResourceState.setSmResource(smResource);

@@ -9,6 +9,9 @@ public class VehicleInfo extends ApiData {
   private String model;
   private int year;
 
+  public VehicleInfo() {
+  }
+
   /**
    * Initializes a new instance of VehicleInfo
    *

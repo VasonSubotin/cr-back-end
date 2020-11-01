@@ -6,6 +6,9 @@ package com.smartcar.sdk.data;
 public class VehicleOil extends ApiData {
   private double lifeRemaining;
 
+  public VehicleOil() {
+  }
+
   /**
    * Initializes a new instance of VehicleOil
    *

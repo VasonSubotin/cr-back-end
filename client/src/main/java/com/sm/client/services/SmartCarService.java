@@ -1,9 +1,11 @@
 package com.sm.client.services;
 
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.model.smartcar.SmResourceState;
 import com.sm.client.model.smartcar.VehicleData;
@@ -85,6 +87,8 @@ public class SmartCarService {
                 permissions,
                 testMode
         );
+       objectMapper
+                .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES));
     }
 
     public AuthClient getClient() {
@@ -218,7 +222,7 @@ public class SmartCarService {
             if (smartCarCache != null) {
                 smartCarCache.setDtCreated(new Date());
                 smartCarCache.setExternalResourceId(vehicleData.getVin());
-                smartCarCache.setData(objectMapper.writeValueAsBytes(smartCarCache));
+                smartCarCache.setData(objectMapper.writeValueAsBytes(vehicleData));
                 smartCarCache.setTiming(timing);
             } else {
                 smartCarCache = createSmartCarCacheFromVehicleData(vehicleData, timing);
@@ -292,7 +296,7 @@ public class SmartCarService {
         SmartCarCache smartCarCache = new SmartCarCache();
         smartCarCache.setDtCreated(new Date());
         smartCarCache.setExternalResourceId(vehicleData.getVin());
-        smartCarCache.setData(objectMapper.writeValueAsBytes(smartCarCache));
+        smartCarCache.setData(objectMapper.writeValueAsBytes(vehicleData));
         smartCarCache.setTiming(timing);
         return smartCarCache;
     }

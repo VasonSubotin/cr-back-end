@@ -7,6 +7,9 @@ public class VehicleCharge extends ApiData {
   private String state;
   private boolean isPluggedIn;
 
+  public VehicleCharge() {
+  }
+
   /**
    * Initializes a new instance of the VehicleCharge
    *

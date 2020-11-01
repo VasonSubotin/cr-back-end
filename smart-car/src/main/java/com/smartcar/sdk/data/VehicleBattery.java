@@ -7,6 +7,9 @@ public class VehicleBattery extends ApiData {
   private double range;
   private double percentRemaining;
 
+  public VehicleBattery() {
+  }
+
   /**
    * Initializes a new instance of the VehicleBattery
    *

@@ -19,6 +19,8 @@ public class VehicleData implements Serializable {
 
     private SmartcarResponse<VehicleLocation> location;
 
+    public VehicleData() {
+    }
 
     public VehicleInfo getVehicleInfo() {
         return vehicleInfo;

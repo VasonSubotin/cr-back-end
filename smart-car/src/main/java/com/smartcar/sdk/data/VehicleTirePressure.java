@@ -9,6 +9,9 @@ public class VehicleTirePressure extends ApiData {
     private double backLeft;
     private double backRight;
 
+    public VehicleTirePressure() {
+    }
+
     /**
      * Initializes a new instance of the VehicleTirePressure
      *

@@ -6,6 +6,9 @@ package com.smartcar.sdk.data;
 public class VehicleOdometer extends ApiData {
   private double distance;
 
+  public VehicleOdometer() {
+  }
+
   /**
    * Initializes a new instance of the VehicleOdometer
    *

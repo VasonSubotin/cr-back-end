@@ -8,6 +8,9 @@ public class VehicleFuel extends ApiData {
   private double percentRemaining;
   private double amountRemaining;
 
+  public VehicleFuel() {
+  }
+
   /**
    * Initializes a new instance of the VehicleFuel
    *

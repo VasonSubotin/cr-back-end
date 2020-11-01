@@ -7,6 +7,9 @@ public class VehicleLocation extends ApiData {
   private double latitude;
   private double longitude;
 
+  public VehicleLocation() {
+  }
+
   /**
    * Initializes a new instance of VehicleLocation
    *

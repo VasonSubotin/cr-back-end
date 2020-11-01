@@ -12,6 +12,9 @@ public class SmartcarResponse<T extends ApiData> extends ApiData {
   private String requestId;
   private ResponsePaging paging;
 
+  public SmartcarResponse() {
+  }
+
   /**
    * Initializes an instance of SmartcarResponse
    *
