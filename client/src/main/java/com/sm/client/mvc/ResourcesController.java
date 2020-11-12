@@ -3,6 +3,7 @@ package com.sm.client.mvc;
 import com.sm.client.model.smartcar.SmResourceState;
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.CommonService;
+import com.sm.client.services.ResourceService;
 import com.sm.client.services.SecurityService;
 import com.sm.client.services.SmartCarService;
 import com.sm.dao.ResourcesDao;
@@ -35,20 +36,13 @@ public class ResourcesController {
     @Autowired
     private SmartCarService smartCarService;
 
+    @Autowired
+    private ResourceService resourceService;
+
     @RequestMapping(value = "/resources/{resource_id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public SmResourceState getUserResourcesById(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") int resourceId) throws Exception {
+    public SmResourceState getUserResourcesById(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") long resourceId) throws Exception {
         response.setStatus(HttpStatus.OK.value());
-        SmResource smResource = resourcesDao.getResourceByIdAndAccountId(new Long(resourceId), securityService.getAccount().getIdAccount());
-
-        SmResourceState smResourceState = new SmResourceState();
-        if (smResource != null && smResource.getExternalResourceId() != null) {
-            SmartCarCache smartCarCache = commonService.getSmartCarCache(smResource.getExternalResourceId());
-            smResourceState.setSmartCarInfo(smartCarService.createVehicleDataFromSmartCarCache(smartCarCache));
-            smResourceState.setTimers(Arrays.asList(new SmTiming("smartcar request", smartCarCache.getTiming())));
-        }
-
-        smResourceState.setSmResource(smResource);
-        return smResourceState;
+        return resourceService.getResourceState(resourceId);
     }
 
     @RequestMapping(value = "/resources/{resource_id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -106,11 +100,22 @@ public class ResourcesController {
         return resourcesDao.saveResource(smResourceExists, accountId);
     }
 
+//
+//    @RequestMapping(value = "/resources", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<?> getUserResources(HttpServletRequest request) throws Exception {
+//        try {
+//            return new ResponseEntity(resourcesDao.getAllResourceByAccountId(securityService.getAccount().getIdAccount()), HttpStatus.OK);
+//        } catch (SmException smEx) {
+//            return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources"), HttpStatus.resolve(smEx.getCode()));
+//        }
+//    }
+
 
     @RequestMapping(value = "/resources", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getUserResources(HttpServletRequest request) throws Exception {
         try {
-            return new ResponseEntity(resourcesDao.getAllResourceByAccountId(securityService.getAccount().getIdAccount()), HttpStatus.OK);
+            // return new ResponseEntity(resourcesDao.getAllResourceByAccountId(securityService.getAccount().getIdAccount()), HttpStatus.OK);
+            return new ResponseEntity(resourceService.getResourceStates(), HttpStatus.OK);
         } catch (SmException smEx) {
             return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources"), HttpStatus.resolve(smEx.getCode()));
         }

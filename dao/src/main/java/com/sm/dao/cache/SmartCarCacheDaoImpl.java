@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 @Transactional(readOnly = true)
@@ -30,6 +31,15 @@ public class SmartCarCacheDaoImpl implements SmartCarCacheDao {
         return ret.isEmpty() ? null : (SmartCarCache) ret.get(0);
     }
 
+
+    @Override
+    public List<SmartCarCache> getSmartCarCacheIn(Collection<String> externalResourceIds) {
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmartCarCache where externalResourceId IN (:externalResourceIds)";
+        Query query = session.createQuery(hql);
+        query.setParameter("externalResourceIds", externalResourceIds);
+        return query.getResultList();
+    }
 
     @Transactional(readOnly = false)
     @Override

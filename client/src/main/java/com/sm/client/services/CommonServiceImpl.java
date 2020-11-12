@@ -10,6 +10,9 @@ import com.sm.model.web.RecourseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.List;
+
 @Service
 public class CommonServiceImpl implements CommonService {
 
@@ -65,4 +68,8 @@ public class CommonServiceImpl implements CommonService {
         return smartCarCacheDao.getSmartCarCache(vin);
     }
 
+    @Override
+    public List<SmartCarCache> getSmartCarCacheIn(Collection<String> vins) {
+        return smartCarCacheDao.getSmartCarCacheIn(vins);
+    }
 }

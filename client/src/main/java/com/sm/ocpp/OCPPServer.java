@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class OCPPServer {
@@ -26,6 +29,15 @@ public class OCPPServer {
     @Value("${sm.ocpp.server.port:80}")
     private int port;
 
+    @Value("${sm.ocpp.server.auth.enable:false}")
+    private boolean authEnable;
+
+    //@Value("#{${sm.ocpp.server.auth.creds : {dGVzdDoxMjM0NTY3OA==: '1', key2: '2'}}}")
+    @Value("#{'${sm.ocpp.server.auth.creds:dGVzdDoxMjM0NTY3OA==}'.split(',')}")
+    private List<String> lCreds;
+
+    private Map<String, Object> credentials;
+
     @Autowired
     private SmServerCoreEventHandler smServerCoreEventHandler;
 
@@ -36,6 +48,7 @@ public class OCPPServer {
 
     @PostConstruct
     public void init() {
+        credentials = lCreds == null || lCreds.isEmpty() ? null : lCreds.stream().collect(Collectors.toMap(a -> a.split(":")[0], a -> a));
         ServerCoreProfile core = new ServerCoreProfile(smServerCoreEventHandler);
         scheduleQueue.setCore(core);
         JSONConfiguration configuration = JSONConfiguration.get();
@@ -43,7 +56,7 @@ public class OCPPServer {
         //configuration.setParameter(JSONConfiguration.)
         switch (type) {
             case JSON:
-                this.server = new JSONServer(core, configuration);
+                this.server = new SMOCPServer(core, configuration, authEnable ? credentials : null);
                 break;
             case SOAP:
                 this.server = new SOAPServer(core);
