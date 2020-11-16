@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -33,54 +35,100 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public SmUserSession getActiveSession(String sessionType) throws SmException {
-        return userSessionDao.getLastSessionsByType(getAccount().getIdAccount(), sessionType);
+    public List<SmUserSession> getActiveSession(String sessionType) throws SmException {
+        return userSessionDao.getSessionsByType(getAccount().getIdAccount(), sessionType);
     }
 
     @Override
-    public SmUserSession getActiveSessionByLogin(String sessionType, String login) throws SmException {
+    public SmUserSession getActiveSession(String sessionType, Long resourceId) throws SmException {
+        return userSessionDao.getSessionsByTypeAndRecourceId(getAccount().getIdAccount(), sessionType, resourceId);
+    }
+
+    @Override
+    public SmUserSession getActiveSessionByLogin(String sessionType, String login, Long resourceId) throws SmException {
         SmAccount smAccount = accountsDao.getAccountByLogin(login);
-        return userSessionDao.getLastSessionsByType(smAccount.getIdAccount(), sessionType);
-    }
-
-    //method to optimize sessions
-    private void fixCLoseSession() {
-        List<SmUserSession> smUserSessions = userSessionDao.getAllSessions();
-
-        //checking sessions
-        for (SmUserSession smUserSession : smUserSessions) {
-            //checking expiration
-            if (smUserSession.getDtCreated() == null || smUserSession.getDtCreated().getTime() + smUserSession.getTtl() < System.currentTimeMillis()) {
-                //session has been exipred or does not have date - we need to close it
-                smUserSession.setClosed(true);
-                userSessionDao.saveSession(smUserSession);
-            }
-        }
+        return userSessionDao.getSessionsByTypeAndRecourceId(smAccount.getIdAccount(), sessionType, resourceId);
     }
 
     @Override
-    public SmUserSession saveCurrentSession(String sessionType, String token, String refreshToken, long ttl) throws SmException {
-        //checking the last session
-        SmUserSession existsSession = getActiveSession(sessionType);
-        if (refreshToken == null && existsSession != null) {
-            refreshToken = existsSession.getRefreshToken();
-        }
-        return saveSession(sessionType, token, refreshToken, ttl, getAccount().getIdAccount());
+    public List<SmUserSession> getActiveSessionByLogin(String sessionType, String login) throws SmException {
+        SmAccount smAccount = accountsDao.getAccountByLogin(login);
+        return userSessionDao.getSessionsByType(smAccount.getIdAccount(), sessionType);
     }
+
+//    //method to optimize sessions
+//    private void fixCLoseSession() {
+//        List<SmUserSession> smUserSessions = userSessionDao.getAllSessions();
+//
+//        //checking sessions
+//        for (SmUserSession smUserSession : smUserSessions) {
+//            //checking expiration
+//            if (smUserSession.getDtCreated() == null || smUserSession.getDtCreated().getTime() + smUserSession.getTtl() < System.currentTimeMillis()) {
+//                //session has been exipred or does not have date - we need to close it
+//                smUserSession.setClosed(true);
+//                userSessionDao.saveSession(smUserSession);
+//            }
+//        }
+//    }
+
+    @Override
+    public SmUserSession updateCurrentSession(String oldToken, String sessionType, String token, String refreshToken, long ttl) throws SmException {
+        //checking the last session
+        Long accountId = getAccount().getIdAccount();
+        List<SmUserSession> existsSessions = userSessionDao.getSessionsByToken(accountId, oldToken);
+        if (refreshToken == null && existsSessions != null && !existsSessions.isEmpty()) {
+            refreshToken = existsSessions.iterator().next().getRefreshToken();
+        }
+
+        SmUserSession ret = new SmUserSession();
+        // return saveSession(sessionType, token, refreshToken, ttl, getAccount().getIdAccount());
+        for (SmUserSession smUserSession : existsSessions) {
+            smUserSession.setToken(token);
+            smUserSession.setRefreshToken(refreshToken);
+            smUserSession.setTtl(ttl);
+            userSessionDao.saveSession(smUserSession);
+            ret = smUserSession;
+        }
+
+        return ret;
+    }
+
+//    @Override
+//    public SmUserSession saveCurrentSession(String sessionType, String token, String refreshToken, long ttl) throws SmException {
+//        //checking the last session
+//        Long accountId = getAccount().getIdAccount();
+//        List<SmUserSession> existsSessions = userSessionDao.getActiveSessions(accountId);
+//        if (refreshToken == null && existsSessions != null && !existsSessions.isEmpty()) {
+//            refreshToken = existsSessions.iterator().next().getRefreshToken();
+//        }
+//
+//        SmUserSession ret = new SmUserSession();
+//        // return saveSession(sessionType, token, refreshToken, ttl, getAccount().getIdAccount());
+//        for (SmUserSession smUserSession : existsSessions) {
+//            smUserSession.setToken(token);
+//            smUserSession.setRefreshToken(refreshToken);
+//            smUserSession.setTtl(ttl);
+//            userSessionDao.saveSession(smUserSession);
+//            ret = smUserSession;
+//        }
+//
+//        return ret;
+//    }
 
     @Override
     public SmUserSession saveCurrentSessionByLogin(String sessionType, String token, String refreshToken, long ttl, String login) throws SmException {
         //checking the last session
         SmAccount smAccount = accountsDao.getAccountByLogin(login);
-        SmUserSession existsSession =  userSessionDao.getLastSessionsByType(smAccount.getIdAccount(), sessionType);
+        List<SmUserSession> existsSessions = userSessionDao.getSessionsByType(smAccount.getIdAccount(), sessionType);
 
-        if (refreshToken == null && existsSession != null) {
-            refreshToken = existsSession.getRefreshToken();
+        if (refreshToken == null && existsSessions != null && !existsSessions.isEmpty()) {
+            refreshToken = existsSessions.get(0).getRefreshToken();
         }
         return saveSession(sessionType, token, refreshToken, ttl, smAccount.getIdAccount());
     }
 
     private SmUserSession saveSession(String sessionType, String token, String refreshToken, long ttl, Long idAccount) {
+       // userSessionDao.getLastSessionsByType()
         //we need to find the last one and close
         SmUserSession smUserSession = new SmUserSession();
         smUserSession.setClosed(false);
@@ -91,5 +139,18 @@ public class SecurityServiceImpl implements SecurityService {
         smUserSession.setTtl(ttl);
         smUserSession.setDtCreated(new Date());
         return userSessionDao.saveSession(smUserSession);
+    }
+
+    @Override
+    public SmUserSession createSmUserSession(String sessionType, String token, String refreshToken, long ttl, Long idAccount) {
+        SmUserSession smUserSession = new SmUserSession();
+        smUserSession.setClosed(false);
+        smUserSession.setAccountId(idAccount);
+        smUserSession.setToken(token);
+        smUserSession.setRefreshToken(refreshToken);
+        smUserSession.setSessionType(sessionType);
+        smUserSession.setTtl(ttl);
+        smUserSession.setDtCreated(new Date());
+        return smUserSession;
     }
 }

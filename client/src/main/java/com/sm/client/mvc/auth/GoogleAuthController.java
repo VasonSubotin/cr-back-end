@@ -89,7 +89,7 @@ public class GoogleAuthController {
     public String getCalendarEvent(HttpServletRequest request, HttpServletResponse response, String code) throws Exception {
         logger.info("----------------------call/getCalendarEvent -------------------");
 
-        return googleService.getCalendar(securityService.getActiveSession(Constants.GOOGLE_AUTH_TYPE)).events().list("primary").setMaxResults(10).execute().toString();
+        return googleService.getCalendar(securityService.getActiveSession(Constants.GOOGLE_AUTH_TYPE).get(0)).events().list("primary").setMaxResults(10).execute().toString();
     }
 
     @RequestMapping(value = "/needInitGoogleSession", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -36,9 +36,11 @@ public class ResourceServiceImpl implements ResourceService {
         if (smResource != null && smResource.getExternalResourceId() != null) {
             SmartCarCache smartCarCache = commonService.getSmartCarCache(smResource.getExternalResourceId());
             smResourceState.setSmartCarInfo(smartCarService.createVehicleDataFromSmartCarCache(smartCarCache));
-            smResourceState.setTimers(Arrays.asList(new SmTiming("smartcar request", smartCarCache.getTiming())));
-        } else {
-            smResourceState.setSmartCarInfo(new VehicleData());
+            if (smartCarCache != null) {
+                smResourceState.setTimers(Arrays.asList(new SmTiming("smartcar request", smartCarCache.getTiming())));
+            }else{
+                smResourceState.setSmartCarInfo(new VehicleData());
+            }
         }
 
         smResourceState.setSmResource(smResource);

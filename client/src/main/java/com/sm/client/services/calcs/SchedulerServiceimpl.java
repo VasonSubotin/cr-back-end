@@ -145,7 +145,7 @@ public class SchedulerServiceimpl implements SchedulerService {
     }
 
     private Pair<VehicleData, SmResource> getSmDataAndSmResource(Long resourceId) throws SmException {
-        SmUserSession smUserSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
+        SmUserSession smUserSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE, resourceId);
         if (smUserSession == null) {
             throw new SmException("No active smart car session found for login " + SecurityContextHolder.getContext().getAuthentication().getName(), HttpStatus.SC_FORBIDDEN);
         }
@@ -166,7 +166,7 @@ public class SchedulerServiceimpl implements SchedulerService {
 
     @Override
     public SchedulerData getLastSchdule(String login, Long resourceId, SmScheduleType type) throws Exception {
-        SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+        SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login, resourceId);
         return scheduleTransformService.smSchedulesToScheduleWeb(scheduleDao.getLastSmSchedulesByResourceIdAndType(resourceId, smUserSession.getAccountId(), type));
     }
 
@@ -178,7 +178,7 @@ public class SchedulerServiceimpl implements SchedulerService {
         if (stop == null) {
             stop = new Date();
         }
-        SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+        SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login, resourceId);
         List<SmSchedules> schedules = scheduleDao.getNoIntervalSmSchedulesByResourceIdAndDateBetween(resourceId, smUserSession.getAccountId(), start, stop, type);
         List<SchedulerData> result = new ArrayList<>();
         for (SmSchedules smSchedules : schedules) {

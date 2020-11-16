@@ -28,6 +28,8 @@ public class SmUserSession implements Serializable {
     @Column(name = "N_TTL")
     private Long ttl;
 
+    @Column(name = "RESOURCE_ID")
+    private Long resourceId;
 
     @Column(name = "DT_CREATED")
     private Date dtCreated;
@@ -73,6 +75,14 @@ public class SmUserSession implements Serializable {
 
     public void setTtl(Long ttl) {
         this.ttl = ttl;
+    }
+
+    public Long getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
     }
 
     public Date getDtCreated() {

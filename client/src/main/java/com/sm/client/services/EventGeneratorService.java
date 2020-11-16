@@ -50,7 +50,8 @@ public class EventGeneratorService {
 
     public void generateEvent(Long accountId) throws SmartcarException {
 
-        SmUserSession smUserSession = userSessionDao.getLastSessionsByType(accountId, Constants.SMART_CAR_AUTH_TYPE);
+        List<SmUserSession> smUserSessions = userSessionDao.getSessionsByType(accountId, Constants.SMART_CAR_AUTH_TYPE);
+        SmUserSession smUserSession = smUserSessions.get(0);
         String token = smUserSession.getToken();
 
         SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(token);

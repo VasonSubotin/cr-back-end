@@ -81,10 +81,12 @@ create table UserSessions(
 	ACCOUNT_ID INTEGER,
 	V_TOKEN varchar(512),
 	V_REFRESH_TOKEN varchar(512),
+	RESOURCE_ID INTEGER,
     V_SESSION_TYPE varchar(32),
     N_TTL numeric(10),
 	DT_CREATED datetime,
 	B_CLOSED numeric(1),
+	FOREIGN KEY (RESOURCE_ID)  REFERENCES Resources (ID_RESOURCE ),
 	FOREIGN KEY (ACCOUNT_ID)  REFERENCES Accounts (ID_ACCOUNT)
 );
 

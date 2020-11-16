@@ -69,8 +69,9 @@ public class SmartCarAuthController {
 
         Auth auth = smartCarService.getClient().exchangeCode(code);
         try {
-            SmUserSession smUserSession = securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
-            smartCarService.refreshCarData(securityService.getAccount().getLogin());
+            // SmUserSession smUserSession = securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
+            SmUserSession smUserSession =  securityService.createSmUserSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000, securityService.getAccount().getIdAccount());
+            smartCarService.refreshCarData(smUserSession);
             return new ResponseEntity(HttpStatus.OK);
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());
@@ -79,11 +80,11 @@ public class SmartCarAuthController {
     }
 
     @RequestMapping(value = "/needInitSmartCarSession", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> needInitSmartCarSession(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> needInitSmartCarSession(@RequestParam(value = "resourceId", required = false) Long resourceId, HttpServletRequest request, HttpServletResponse response) {
         try {
 
             Map<String, Object> res = new HashMap<>();
-            res.put("needInit", smartCarService.needInitUserSession());
+            res.put("needInit", smartCarService.needInitUserSession(resourceId));
             return new ResponseEntity(res, HttpStatus.OK);
         } catch (SmException ex) {
             return new ResponseEntity(ex.getMessage(), HttpStatus.valueOf(ex.getCode()));
@@ -94,13 +95,13 @@ public class SmartCarAuthController {
     public UserData getData(HttpServletRequest request, HttpServletResponse response, @RequestParam(value = "access", required = false) String access, HttpServletResponse responser) throws SmartcarException, SmException {
         if (access == null) {
             //looking into table
-            SmUserSession userSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
+            List<SmUserSession> userSessions = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
             //if expired or closed
-            if (userSession == null || userSession.getClosed()) {
+            if (userSessions == null || userSessions.isEmpty() || userSessions.get(0).getClosed()) {
                 login(request, response);
                 return null;
             }
-            access = userSession.getToken();
+            access = userSessions.get(0).getToken();
         }
         UserData userData = new UserData();
         List<VehicleData> vehiclesList = new ArrayList<>();

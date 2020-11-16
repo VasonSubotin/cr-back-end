@@ -6,22 +6,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.client.model.smartcar.SmResourceState;
 import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.cache.VehiclesCache;
 import com.sm.client.utils.TestLocations;
 import com.sm.dao.AccountsDao;
 import com.sm.dao.ResourcesDao;
-
+import com.sm.dao.UserSessionDao;
 import com.sm.dao.cache.SmartCarCacheDao;
 import com.sm.model.*;
 import com.smartcar.sdk.AuthClient;
 import com.smartcar.sdk.SmartcarException;
 import com.smartcar.sdk.Vehicle;
 import com.smartcar.sdk.data.*;
-
-
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +70,8 @@ public class SmartCarService {
     @Autowired
     private SmartCarCacheDao smartCarCacheDao;
 
+    @Autowired
+    private UserSessionDao userSessionDao;
 
     @Value("${smartcar.testMode:false}")
     private boolean testMode = false;
@@ -87,7 +86,7 @@ public class SmartCarService {
                 permissions,
                 testMode
         );
-       objectMapper
+        objectMapper
                 .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES));
     }
 
@@ -95,20 +94,13 @@ public class SmartCarService {
         return client;
     }
 
-    public void refreshCarData(String login) throws SmException, SmartcarException {
-        refreshCarData(login, null);
+    public void refreshCarData(SmUserSession smUserSession) throws SmException, SmartcarException {
+        refreshCarData(smUserSession, null);
     }
 
-    public void refreshCarData(String login, Map<String, VehicleLocation> locationMap) throws SmException, SmartcarException {
+    public void refreshCarData(SmUserSession userSession, Map<String, VehicleLocation> locationMap) throws SmException, SmartcarException {
         //need to getResources from smartCar
         List<SmResource> resources = resourcesDao.getAllResourceByAccountId(securityService.getAccount().getIdAccount());
-
-        SmUserSession userSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
-
-        if (userSession == null) {
-            throw new SmException("No active smart car session found for user " + login, HttpStatus.SC_FORBIDDEN);
-        }
-
 
         SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
 
@@ -166,6 +158,10 @@ public class SmartCarService {
             smResource.setDtUpdated(new Date());
             setBattery(smResource);
             resourcesDao.saveResource(smResource, userSession.getAccountId());
+            SmUserSession userSessionClone = securityService.createSmUserSession(userSession.getSessionType(), userSession.getToken(), userSession.getRefreshToken(), userSession.getTtl(), userSession.getAccountId());
+            userSessionClone.setResourceId(smResource.getIdResource());
+            userSessionDao.deleteSession(smResource.getAccountId(), smResource.getIdResource(), userSession.getSessionType());
+            userSessionDao.saveSession(userSessionClone);
         }
     }
 
@@ -199,16 +195,16 @@ public class SmartCarService {
             if (e.getMessage().contains("expired")) {
                 //refreshing tokens
                 Auth auth = client.exchangeRefreshToken(userSession.getRefreshToken());
-                userSession = securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
+                userSession = securityService.updateCurrentSession(userSession.getToken(), Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
                 return new Pair<>(userSession, AuthClient.getVehicleIds(userSession.getToken()));
             }
         }
         return new Pair<>(userSession, null);
     }
 
-    public boolean needInitUserSession() throws SmException {
+    public boolean needInitUserSession(Long resourceId) throws SmException {
         try {
-            SmUserSession userSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
+            SmUserSession userSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE, resourceId);
             getVehicleIds(userSession);
             return false;
         } catch (SmartcarException ex) {
@@ -237,57 +233,61 @@ public class SmartCarService {
     public List<SmResourceState> getResourceState(String login) throws SmException {
         List<SmTiming> timers = new ArrayList<>();
         long start = System.currentTimeMillis();
-        SmUserSession userSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+        Collection<SmUserSession> userSessions = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
         timers.add(new SmTiming("getActiveSessionByLogin", System.currentTimeMillis() - start));
 
-        if (userSession == null) {
+        if (userSessions == null || userSessions.isEmpty()) {
             throw new SmException("No active smart car session found for user " + login, HttpStatus.SC_FORBIDDEN);
         }
+        Long accountId = userSessions.iterator().next().getAccountId();
+        List<SmResourceState> ret = new ArrayList<>();
         start = System.currentTimeMillis();
-        List<SmResource> resources = resourcesDao.getAllResourceByAccountId(userSession.getAccountId());
+        List<SmResource> resources = resourcesDao.getAllResourceByAccountId(accountId);
         timers.add(new SmTiming("getAllResourceByAccountId", System.currentTimeMillis() - start));
         Map<String, SmResource> resourceMap = resources.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a, (n, o) -> n));
 
-        List<SmResourceState> ret = new ArrayList<>();
-        Set<String> unUsedVins = new HashSet<>(resourceMap.keySet());
-        try {
-            start = System.currentTimeMillis();
-            SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
-            timers.add(new SmTiming("getVehicleIds", System.currentTimeMillis() - start));
-            for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
-                start = System.currentTimeMillis();
-                Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
-                timers.add(new SmTiming("new Vehicle " + vehicleId, System.currentTimeMillis() - start));
-                start = System.currentTimeMillis();
-                String vId = vehicle.vin();
-                timers.add(new SmTiming("get vin " + vId, System.currentTimeMillis() - start));
-                start = System.currentTimeMillis();
-                SmResource resource = resourceMap.get(vId);
-                if (resource != null) {
-                    VehicleData vehicleData = getSingleData(vehicle, vId, timers);
-                    ret.add(new SmResourceState(vehicleData, resource));
-                    saveSmartCarCache(vehicleData, timers.isEmpty() ? null : timers.get(timers.size() - 1).getTime());
-                    unUsedVins.remove(vId);
-                }
-                timers.add(new SmTiming("resourceMap.get  " + vId, System.currentTimeMillis() - start));
-            }
-            start = System.currentTimeMillis();
-            for (String vId : unUsedVins) {
-                SmResource resource = resourceMap.get(vId);
-                ret.add(new SmResourceState(null, resource));
-            }
-            timers.add(new SmTiming("resourceMap.get  ", System.currentTimeMillis() - start));
-            if (!ret.isEmpty()) {
-                ret.get(0).setTimers(timers);
-            } else {
-                SmResourceState rs = new SmResourceState(null, null);
-                rs.setTimers(timers);
-                ret.add(rs);
-            }
 
-        } catch (SmartcarException e) {
-            logger.error(e.getMessage(), e);
-            throw new SmException(e.getMessage(), HttpStatus.SC_EXPECTATION_FAILED);
+        Set<String> unUsedVins = new HashSet<>(resourceMap.keySet());
+        for (SmUserSession userSession : userSessions) {
+            try {
+                start = System.currentTimeMillis();
+                SmartcarResponse<VehicleIds> vehicleIdResponse = AuthClient.getVehicleIds(userSession.getToken());
+                timers.add(new SmTiming("getVehicleIds", System.currentTimeMillis() - start));
+                for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
+                    start = System.currentTimeMillis();
+                    Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
+                    timers.add(new SmTiming("new Vehicle " + vehicleId, System.currentTimeMillis() - start));
+                    start = System.currentTimeMillis();
+                    String vId = vehicle.vin();
+                    timers.add(new SmTiming("get vin " + vId, System.currentTimeMillis() - start));
+                    start = System.currentTimeMillis();
+                    SmResource resource = resourceMap.get(vId);
+                    if (resource != null) {
+                        VehicleData vehicleData = getSingleData(vehicle, vId, timers);
+                        ret.add(new SmResourceState(vehicleData, resource));
+                        saveSmartCarCache(vehicleData, timers.isEmpty() ? null : timers.get(timers.size() - 1).getTime());
+                        unUsedVins.remove(vId);
+                    }
+                    timers.add(new SmTiming("resourceMap.get  " + vId, System.currentTimeMillis() - start));
+                }
+                start = System.currentTimeMillis();
+                for (String vId : unUsedVins) {
+                    SmResource resource = resourceMap.get(vId);
+                    ret.add(new SmResourceState(null, resource));
+                }
+                timers.add(new SmTiming("resourceMap.get  ", System.currentTimeMillis() - start));
+                if (!ret.isEmpty()) {
+                    ret.get(0).setTimers(timers);
+                } else {
+                    SmResourceState rs = new SmResourceState(null, null);
+                    rs.setTimers(timers);
+                    ret.add(rs);
+                }
+
+            } catch (SmartcarException e) {
+                logger.error(e.getMessage(), e);
+                throw new SmException(e.getMessage(), HttpStatus.SC_EXPECTATION_FAILED);
+            }
         }
         return ret;
     }
@@ -315,7 +315,7 @@ public class SmartCarService {
     }
 
     public SmResourceState getResourceState(String login, Long resourceId) throws SmException {
-        SmUserSession userSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+        SmUserSession userSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login, resourceId);
 
         if (userSession == null) {
             throw new SmException("No active smart car session found for user " + login, HttpStatus.SC_FORBIDDEN);
