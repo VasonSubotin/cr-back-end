@@ -95,7 +95,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
 
     private long calculateInitialEnergy(List<EventWrapper> events, VehicleData smData, SmResource smResource) {
 
-        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity() / 100);
+        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity());
         if (events == null || events.isEmpty()) {
             return currentEnergy;
         }
@@ -265,7 +265,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         }
 
 
-        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity() / 100);
+        long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity());
 
         TreeMap<Double, LocationWrapper> locationsMap = new TreeMap<>();
         TreeMap<Double, LocationWrapper> locationsMinDistanceMap = new TreeMap<>();

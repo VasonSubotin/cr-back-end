@@ -68,7 +68,7 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
                 starttime,
                 endtime,
                 smResource.getCapacity(),
-                (long) (smResource.getCapacity().doubleValue() * (100D - smData.getBattery().getPercentRemaining()) / 100D),
+                (long) (smResource.getCapacity().doubleValue() * smData.getBattery().getPercentRemaining()),
                 rate,
                 locationAbrv,
                 smResource.getIdResource());
