@@ -66,8 +66,12 @@ public class AuthrizationController {
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public ResponseEntity<?> signup(@RequestBody SmAccount authenticationRequest) throws Exception {
         try {
+            String password = authenticationRequest.getPassword();
             userDetailsService.registerUser(authenticationRequest);
-            return new ResponseEntity(HttpStatus.CREATED);
+            SmAccount authRequest = new SmAccount();
+            authRequest.setPassword(password);
+            authRequest.setLogin(authenticationRequest.getLogin());
+            return createAuthenticationToken(authRequest);
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());
             return new ResponseEntity(new ServiceResult(ex.getCode(), status.getReasonPhrase(), ex.getMessage(), "/signup"), status);
@@ -76,7 +80,7 @@ public class AuthrizationController {
 
     @RequestMapping(value = "/getJwtToken", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getJwtToken(@RequestBody(required = false) JwtTokenRequest jwtTokenRequest,
-                                         @RequestParam(value = "expirationInSec", required = false)  Long expirationInSec) throws Exception {
+                                         @RequestParam(value = "expirationInSec", required = false) Long expirationInSec) throws Exception {
         try {
             return new ResponseEntity("{ \"token\":\"" + jwtTokenUtil.generateHS256(jwtTokenRequest, expirationInSec) + "\"}", HttpStatus.CREATED);
         } catch (SmException ex) {

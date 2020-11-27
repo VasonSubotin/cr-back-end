@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Transactional(readOnly = true)
 @Component
 public class RecourcesDaoImpl implements ResourcesDao {
 
@@ -59,7 +60,7 @@ public class RecourcesDaoImpl implements ResourcesDao {
         return (result == null || result.isEmpty()) ? null : result.iterator().next();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     @Override
     public SmResource saveResource(SmResource smResource, Long accountId) {
         synchronized (Constants.class) {

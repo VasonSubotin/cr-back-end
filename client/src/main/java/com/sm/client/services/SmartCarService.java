@@ -204,7 +204,21 @@ public class SmartCarService {
 
     public boolean needInitUserSession(Long resourceId) throws SmException {
         try {
+            //old mode
+            if (resourceId == null) {
+                List<SmUserSession> userSessions = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
+                if (!userSessions.isEmpty()) {
+                    getVehicleIds(userSessions.get(0));
+                    return false;
+                }
+                return true;
+            }
+
+            //new mode
             SmUserSession userSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE, resourceId);
+            if (userSession == null) {
+                return true;
+            }
             getVehicleIds(userSession);
             return false;
         } catch (SmartcarException ex) {
