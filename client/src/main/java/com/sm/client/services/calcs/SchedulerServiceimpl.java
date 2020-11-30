@@ -178,8 +178,8 @@ public class SchedulerServiceimpl implements SchedulerService {
         if (stop == null) {
             stop = new Date();
         }
-        SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login, resourceId);
-        List<SmSchedules> schedules = scheduleDao.getNoIntervalSmSchedulesByResourceIdAndDateBetween(resourceId, smUserSession.getAccountId(), start, stop, type);
+        //SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login, resourceId);
+        List<SmSchedules> schedules = scheduleDao.getNoIntervalSmSchedulesByResourceIdAndDateBetween(resourceId, securityService.getAccount().getIdAccount(), start, stop, type);
         List<SchedulerData> result = new ArrayList<>();
         for (SmSchedules smSchedules : schedules) {
             result.add(scheduleTransformService.smSchedulesToScheduleWeb(smSchedules));

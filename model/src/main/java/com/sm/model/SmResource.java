@@ -1,5 +1,6 @@
 package com.sm.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -58,6 +59,10 @@ public class SmResource implements Serializable {
 
     @Column(name = "B_MOCK")
     private Boolean mock;
+
+    @JsonInclude()
+    @Transient
+    private String imagePath;
 
     public Long getIdResource() {
         return idResource;
@@ -177,5 +182,13 @@ public class SmResource implements Serializable {
 
     public void setMock(Boolean mock) {
         this.mock = mock;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 }

@@ -129,6 +129,15 @@ public class BuLogicController {
         return schedulerService.getSchduleHistory(login, resourceId, start, stop, type);
     }
 
+    @RequestMapping(value = "/resources/scheduleHistory", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<SchedulerData> getScheduleHistory(
+            @RequestParam(name = "start", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date start,
+            @RequestParam(name = "stop", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date stop,
+            @RequestParam(name = "type", required = false) SmScheduleType type) throws Exception {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
+        return schedulerService.getSchduleHistory(login,null , start, stop, type);
+    }
+
     @RequestMapping(value = "/resources/{resourceId}/schedule", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public SchedulerData saveScheduler(
             @RequestBody SchedulerData schedulerData) throws Exception {
@@ -175,6 +184,8 @@ public class BuLogicController {
             return new ResponseEntity<>(schedulerService.calculateDrivingScheduleGeo(resourceId), HttpStatus.OK);
         } catch (SmException smEx) {
             return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources/" + resourceId + "/calculateGeo"), HttpStatus.resolve(smEx.getCode()));
+        } catch (Exception ex) {
+            return new ResponseEntity(new ServiceResult(500, HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), ex.getMessage(), "/resources/" + resourceId + "/calculateGeo"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

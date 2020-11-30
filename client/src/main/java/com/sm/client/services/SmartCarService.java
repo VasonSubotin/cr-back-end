@@ -204,16 +204,6 @@ public class SmartCarService {
 
     public boolean needInitUserSession(Long resourceId) throws SmException {
         try {
-            //old mode
-            if (resourceId == null) {
-                List<SmUserSession> userSessions = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
-                if (!userSessions.isEmpty()) {
-                    getVehicleIds(userSessions.get(0));
-                    return false;
-                }
-                return true;
-            }
-
             //new mode
             SmUserSession userSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE, resourceId);
             if (userSession == null) {
@@ -225,6 +215,45 @@ public class SmartCarService {
             return true;
         }
     }
+
+    public Map<Long, Boolean> needInitUserSessions() throws SmException {
+
+        //new mode
+        Map<Long, Boolean> ret = new HashMap<>();
+        List<SmUserSession> lstSessions = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE);
+        //SmUserSession userSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE, resourceId);
+        List<SmResource> lstResources = resourcesDao.getAllResourceByAccountId(securityService.getAccount().getIdAccount());
+        Set<Long> uniqResources = lstResources.stream().map(SmResource::getIdResource).collect(Collectors.toSet());
+        if (lstSessions == null) {
+            for (Long ressourceId : uniqResources) {
+                ret.put(ressourceId, true);
+            }
+            return ret;
+        }
+
+        Map<String, Boolean> tokens = new HashMap<>();
+        for (SmUserSession smUserSession : lstSessions) {
+            if (!uniqResources.contains(smUserSession.getResourceId())) {
+                continue;
+            }
+            Boolean status = tokens.get(smUserSession.getToken());
+            if (status == null) {
+                try {
+                    getVehicleIds(smUserSession);
+                    ret.put(smUserSession.getResourceId(), false);
+                    tokens.put(smUserSession.getToken(), false);
+                } catch (SmartcarException ex) {
+                    ret.put(smUserSession.getResourceId(), true);
+                    tokens.put(smUserSession.getToken(), true);
+                }
+            } else {
+                ret.put(smUserSession.getResourceId(), status);
+            }
+        }
+
+        return ret;
+    }
+
 
     private void saveSmartCarCache(VehicleData vehicleData, long timing) {
         try {
@@ -284,25 +313,26 @@ public class SmartCarService {
                     }
                     timers.add(new SmTiming("resourceMap.get  " + vId, System.currentTimeMillis() - start));
                 }
-                start = System.currentTimeMillis();
-                for (String vId : unUsedVins) {
-                    SmResource resource = resourceMap.get(vId);
-                    ret.add(new SmResourceState(null, resource));
-                }
-                timers.add(new SmTiming("resourceMap.get  ", System.currentTimeMillis() - start));
-                if (!ret.isEmpty()) {
-                    ret.get(0).setTimers(timers);
-                } else {
-                    SmResourceState rs = new SmResourceState(null, null);
-                    rs.setTimers(timers);
-                    ret.add(rs);
-                }
-
             } catch (SmartcarException e) {
                 logger.error(e.getMessage(), e);
                 throw new SmException(e.getMessage(), HttpStatus.SC_EXPECTATION_FAILED);
             }
         }
+
+        start = System.currentTimeMillis();
+        for (String vId : unUsedVins) {
+            SmResource resource = resourceMap.get(vId);
+            ret.add(new SmResourceState(null, resource));
+        }
+        timers.add(new SmTiming("resourceMap.get  ", System.currentTimeMillis() - start));
+        if (!ret.isEmpty()) {
+            ret.get(0).setTimers(timers);
+        } else {
+            SmResourceState rs = new SmResourceState(null, null);
+            rs.setTimers(timers);
+            ret.add(rs);
+        }
+
         return ret;
     }
 
@@ -359,7 +389,7 @@ public class SmartCarService {
         return new SmResourceState(null, resource);
     }
 
-    private VehicleData getSingleData(Vehicle vehicle, String vin, List<SmTiming> timers) {
+    private VehicleData getSingleData(Vehicle vehicle, String vin, List<SmTiming> timers) throws SmException {
         if (testMode) {
             return getSingleDataNonBatch(vehicle, vin, timers);
         } else {
@@ -368,7 +398,7 @@ public class SmartCarService {
     }
 
 
-    private VehicleData getSingleDataBatch(Vehicle vehicle, String vin, List<SmTiming> timers) {
+    private VehicleData getSingleDataBatch(Vehicle vehicle, String vin, List<SmTiming> timers) throws SmException {
         VehicleData vehicleData = new VehicleData();
         long start = System.currentTimeMillis();
         try {
@@ -383,8 +413,9 @@ public class SmartCarService {
             vehicleData.setBattery(batchResponse.battery().getData());
 
         } catch (Exception ex) {
-            logger.error("Failed to get batch info for {} due to error : {} - will use default values", ex.getMessage(), ex);
-            vehicleData.setVehicleId(vehicle.getVehicleId());
+            logger.error("Failed to get batch info for {} due to error : {} - will use default values", vin, ex.getMessage(), ex);
+            //vehicleData.setVehicleId(vehicle.getVehicleId());
+            throw new SmException(ex.getMessage(), ex, 500);
         } finally {
             timers.add(new SmTiming("vehicle.batch() " + vin, System.currentTimeMillis() - start));
         }
@@ -414,15 +445,6 @@ public class SmartCarService {
             timers.add(new SmTiming("vehicle.info()  " + vin, System.currentTimeMillis() - start));
         }
 
-//        try {
-//            start = System.currentTimeMillis();
-//            vehicleData.setOdometer(vehicle.odometer());
-//        } catch (Exception ex) {
-//            logger.error(ex.getMessage(), ex);
-//        }finally{
-//            timers.add(new SmTiming("vehicle.odometer()  " + vin, System.currentTimeMillis() - start));
-//        }
-
 
         try {
             start = System.currentTimeMillis();
@@ -433,23 +455,6 @@ public class SmartCarService {
             timers.add(new SmTiming("vehicle.charge() " + vin, System.currentTimeMillis() - start));
         }
 
-//        try {
-//            start = System.currentTimeMillis();
-//            vehicleData.setFuel(vehicle.fuel());
-//        } catch (Exception ex) {
-//            logger.error(ex.getMessage(), ex);
-//        }finally{
-//            timers.add(new SmTiming("vehicle.fuel() " + vin, System.currentTimeMillis() - start));
-//        }
-
-//        try {
-//            start = System.currentTimeMillis();
-//            vehicleData.setOil(vehicle.oil());
-//        } catch (Exception ex) {
-//            logger.error(ex.getMessage(), ex);
-//        }finally{
-//            timers.add(new SmTiming("vehicle.oil() " + vin, System.currentTimeMillis() - start));
-//        }
 
         try {
             start = System.currentTimeMillis();
@@ -482,14 +487,6 @@ public class SmartCarService {
             timers.add(new SmTiming("vehicle.location() " + vin, System.currentTimeMillis() - start));
         }
 
-//        try {
-//            start = System.currentTimeMillis();
-//            vehicleData.setTirePressure(vehicle.tirePressure());
-//        } catch (Exception ex) {
-//            logger.error(ex.getMessage(), ex);
-//        }finally{
-//            timers.add(new SmTiming("vehicle.tirePressure() " + vin, System.currentTimeMillis() - start));
-//        }
         return vehicleData;
     }
 

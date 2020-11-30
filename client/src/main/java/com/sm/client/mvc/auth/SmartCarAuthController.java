@@ -70,7 +70,7 @@ public class SmartCarAuthController {
         Auth auth = smartCarService.getClient().exchangeCode(code);
         try {
             // SmUserSession smUserSession = securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
-            SmUserSession smUserSession =  securityService.createSmUserSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000, securityService.getAccount().getIdAccount());
+            SmUserSession smUserSession = securityService.createSmUserSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000, securityService.getAccount().getIdAccount());
             smartCarService.refreshCarData(smUserSession);
             return new ResponseEntity(HttpStatus.OK);
         } catch (SmException ex) {
@@ -82,10 +82,13 @@ public class SmartCarAuthController {
     @RequestMapping(value = "/needInitSmartCarSession", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> needInitSmartCarSession(@RequestParam(value = "resourceId", required = false) Long resourceId, HttpServletRequest request, HttpServletResponse response) {
         try {
-
-            Map<String, Object> res = new HashMap<>();
-            res.put("needInit", smartCarService.needInitUserSession(resourceId));
-            return new ResponseEntity(res, HttpStatus.OK);
+            if (resourceId != null) {
+                Map<String, Object> res = new HashMap<>();
+                res.put("needInit", smartCarService.needInitUserSession(resourceId));
+                return new ResponseEntity(res, HttpStatus.OK);
+            } else {
+                return new ResponseEntity(smartCarService.needInitUserSessions(), HttpStatus.OK);
+            }
         } catch (SmException ex) {
             return new ResponseEntity(ex.getMessage(), HttpStatus.valueOf(ex.getCode()));
         }

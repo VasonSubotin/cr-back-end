@@ -264,6 +264,13 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             throw new SmException("Can't find any location near point " + vehicleLocation.getLatitude() + "," + vehicleLocation.getLongitude() + " within 10 mills", HttpStatus.SC_NOT_FOUND);
         }
 
+        if (smResource.getCapacity() == null) {
+            throw new SmException("Can't find capacity for resourceId=" + smResource.getIdResource(), HttpStatus.SC_NOT_FOUND);
+        }
+
+        if (smData.getBattery() == null ) {
+            throw new SmException("Can't find Battery status for resourceId=" + smResource.getIdResource(), HttpStatus.SC_NOT_FOUND);
+        }
 
         long currentEnergy = (long) (smData.getBattery().getPercentRemaining() * (double) smResource.getCapacity());
 

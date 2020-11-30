@@ -27,4 +27,6 @@ public interface SecurityService {
     SmUserSession saveCurrentSessionByLogin(String sessionType, String token, String refreshToken, long ttl, String login) throws SmException;
 
     SmUserSession createSmUserSession(String sessionType, String token, String refreshToken, long ttl, Long idAccount);
+
+    void deleteSession(String sessionType, Long resourceId) throws SmException;
 }

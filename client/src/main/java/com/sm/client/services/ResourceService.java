@@ -9,4 +9,6 @@ public interface ResourceService {
     SmResourceState getResourceState(Long resourceId) throws SmException;
 
     List<SmResourceState> getResourceStates() throws SmException;
+
+    String getResourceImage(Long resourceId) throws SmException;
 }

@@ -51,7 +51,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
     @Override
     public List<SmSchedules> getNoIntervalSmSchedulesByResourceIdAndDateBetween(Long resourceId, Long accountId, Date start, Date stop, SmScheduleType type) {
         Session session = sessionFactory.getCurrentSession();
-        String hql = "select new com.sm.model.SmSchedules( s.idSchedule,s.accountId,s.locationId,s.resourceId,s.carbonImpact,s.carbonSavings,s.initEnergy,s.financeSavings,s.sessionId,s.policyId,s.dtCreated,s.dtStart,s.dtStop,s.scheduleType) FROM SmSchedules s where s.resourceId=:resourceId and s.accountId=:accountId and dtCreated between :start and :stop  and (s.scheduleType=:type  OR :type is null)  order by s.dtCreated desc"; //
+        String hql = "select new com.sm.model.SmSchedules( s.idSchedule,s.accountId,s.locationId,s.resourceId,s.carbonImpact,s.carbonSavings,s.initEnergy,s.financeSavings,s.sessionId,s.policyId,s.dtCreated,s.dtStart,s.dtStop,s.scheduleType) FROM SmSchedules s where (s.resourceId=:resourceId OR :resourceId is null) and s.accountId=:accountId and dtCreated between :start and :stop  and (s.scheduleType=:type  OR :type is null)  order by s.dtCreated desc"; //
         Query query = session.createQuery(hql);
 
         query.setParameter("accountId", accountId);

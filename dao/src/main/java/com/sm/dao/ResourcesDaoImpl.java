@@ -13,7 +13,7 @@ import java.util.List;
 
 @Transactional(readOnly = true)
 @Component
-public class RecourcesDaoImpl implements ResourcesDao {
+public class ResourcesDaoImpl implements ResourcesDao {
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -71,7 +71,7 @@ public class RecourcesDaoImpl implements ResourcesDao {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = false)
     public SmResource deleteResourceByIdAndAccountId(Long id, Long accountId) {
         synchronized (Constants.class) {
             //sessionFactory.getCurrentSession().update("UPDATE SmResource set SmResource.deleted");

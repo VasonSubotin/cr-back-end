@@ -8,13 +8,28 @@ import com.sm.model.SmResource;
 import com.sm.model.SmTiming;
 import com.sm.model.SmartCarCache;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class ResourceServiceImpl implements ResourceService {
+
+    @Value("${smartcar.resources.imagesPath:/}")
+    private String pathPrefix = "/";
+
+    @Value("${smartcar.resources.imagesExt:.jpg}")
+    private String imagesExt = ".jpg";
+
+    @Value("${smartcar.resources.imagesUrl:}")
+    private String imagesUrl = "";
+
+    @Value("${smartcar.resources.imagesGeneral:general}")
+    private String imagesGeneral = "general";
 
     @Autowired
     private ResourcesDao resourcesDao;
@@ -38,7 +53,7 @@ public class ResourceServiceImpl implements ResourceService {
             smResourceState.setSmartCarInfo(smartCarService.createVehicleDataFromSmartCarCache(smartCarCache));
             if (smartCarCache != null) {
                 smResourceState.setTimers(Arrays.asList(new SmTiming("smartcar request", smartCarCache.getTiming())));
-            }else{
+            } else {
                 smResourceState.setSmartCarInfo(new VehicleData());
             }
         }
@@ -59,6 +74,7 @@ public class ResourceServiceImpl implements ResourceService {
         if (smartCarCacheList != null && !smartCarCacheList.isEmpty()) {
             Map<String, SmartCarCache> smartCarCacheMap = smartCarCacheList.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a));
             for (SmResource smResource : smResources) {
+                smResource.setImagePath(getResourceImage(smResource.getIdResource()));
                 SmResourceState smResourceState = new SmResourceState(
                         smartCarService.createVehicleDataFromSmartCarCache(smartCarCacheMap.get(smResource.getExternalResourceId())),
                         smResource);
@@ -66,10 +82,28 @@ public class ResourceServiceImpl implements ResourceService {
             }
         } else {
             for (SmResource smResource : smResources) {
+                smResource.setImagePath(getResourceImage(smResource.getIdResource()));
                 smResourceStates.add(new SmResourceState(new VehicleData(), smResource));
             }
         }
 
         return smResourceStates;
+    }
+
+    @Override
+    public String getResourceImage(Long resourceId) throws SmException {
+        SmResource smResource = resourcesDao.getResourceByIdAndAccountId(resourceId, securityService.getAccount().getIdAccount());
+        if (smResource == null) {
+            return null;
+        }
+
+        if (!new File(pathPrefix + "/" + smResource.getVendor() + "/" + smResource.getModel() + imagesExt).exists()) {
+            // looking for vendor
+            if (!new File(pathPrefix + "/" + smResource.getVendor() + "/" + imagesGeneral + imagesExt).exists()) {
+                return imagesUrl + imagesGeneral + imagesExt;
+            }
+            return imagesUrl  + smResource.getVendor() + "/" + imagesGeneral + imagesExt;
+        }
+        return imagesUrl  + smResource.getVendor() + "/" + smResource.getModel() + imagesExt;
     }
 }

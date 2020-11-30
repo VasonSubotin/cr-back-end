@@ -46,9 +46,10 @@ public class ResourcesController {
     }
 
     @RequestMapping(value = "/resources/{resource_id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public void deleteUserResourcesById(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") int resourceId) throws Exception {
+    public void deleteUserResourcesById(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") long resourceId) throws Exception {
         response.setStatus(HttpStatus.NO_CONTENT.value());
-        resourcesDao.deleteResourceByIdAndAccountId(new Long(resourceId), securityService.getAccount().getIdAccount());
+        resourcesDao.deleteResourceByIdAndAccountId(resourceId, securityService.getAccount().getIdAccount());
+        securityService.deleteSession(Constants.SMART_CAR_AUTH_TYPE, resourceId);
     }
 
     @RequestMapping(value = "/resources", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -146,5 +147,10 @@ public class ResourcesController {
         } catch (SmException smEx) {
             return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources/" + resourceId + "/stateInfo"), HttpStatus.resolve(smEx.getCode()));
         }
+    }
+
+    @RequestMapping(value = "/resources/{resource_id}/getCarImage", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String getCarImage(HttpServletRequest request, @PathVariable("resource_id") long resourceId) throws Exception {
+        return resourceService.getResourceImage(resourceId);
     }
 }
