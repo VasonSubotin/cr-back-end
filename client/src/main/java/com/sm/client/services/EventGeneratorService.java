@@ -62,7 +62,7 @@ public class EventGeneratorService {
         Map<String, SmResource> resurcesMap = resources.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a, (n, o) -> n));
 
         //refreshing resources just in case
-        smartCarService.refresh(resources, vehicleIdResponse, smUserSession, null);
+        //smartCarService.refresh(resources, vehicleIdResponse, smUserSession, null);
 
         for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
             VehicleData vehicleData = new VehicleData();

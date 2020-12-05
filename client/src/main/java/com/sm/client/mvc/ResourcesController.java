@@ -6,6 +6,7 @@ import com.sm.client.services.CommonService;
 import com.sm.client.services.ResourceService;
 import com.sm.client.services.SecurityService;
 import com.sm.client.services.SmartCarService;
+import com.sm.client.services.cache.SmartCarCacheService;
 import com.sm.dao.ResourcesDao;
 import com.sm.model.*;
 import com.sm.model.web.RecourseInfo;
@@ -33,8 +34,11 @@ public class ResourcesController {
     @Autowired
     private CommonService commonService;
 
+//    @Autowired
+//    private SmartCarService smartCarService;
+
     @Autowired
-    private SmartCarService smartCarService;
+    private SmartCarCacheService smartCarCacheService;
 
     @Autowired
     private ResourceService resourceService;
@@ -134,7 +138,7 @@ public class ResourcesController {
     @RequestMapping(value = "/resources/stateInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getRecoursesState(HttpServletRequest request, HttpServletResponse response) throws SmException {
         try {
-            return new ResponseEntity(smartCarService.getResourceState(securityService.getAccount().getLogin()), HttpStatus.OK);
+            return new ResponseEntity(smartCarCacheService.getResourcesStatesByAccount(), HttpStatus.OK);
         } catch (SmException smEx) {
             return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources/stateInfo"), HttpStatus.resolve(smEx.getCode()));
         }
@@ -143,7 +147,7 @@ public class ResourcesController {
     @RequestMapping(value = "/resources/{resource_id}/stateInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getRecourseState(HttpServletRequest request, HttpServletResponse response, @PathVariable("resource_id") long resourceId) throws SmException {
         try {
-            return new ResponseEntity(smartCarService.getResourceState(securityService.getAccount().getLogin(), resourceId), HttpStatus.OK);
+            return new ResponseEntity(smartCarCacheService.getResourceState(resourceId), HttpStatus.OK);
         } catch (SmException smEx) {
             return new ResponseEntity(new ServiceResult(smEx.getCode(), HttpStatus.resolve(smEx.getCode()).getReasonPhrase(), smEx.getMessage(), "/resources/" + resourceId + "/stateInfo"), HttpStatus.resolve(smEx.getCode()));
         }

@@ -3,8 +3,10 @@ package com.sm.client.mvc.auth;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.UserData;
 import com.sm.client.model.smartcar.VehicleData;
+import com.sm.client.services.ResourceService;
 import com.sm.client.services.SecurityService;
 import com.sm.client.services.SmartCarService;
+import com.sm.client.services.cache.SmartCarCacheService;
 import com.sm.model.Constants;
 import com.sm.model.ServiceResult;
 import com.sm.model.SmException;
@@ -37,6 +39,8 @@ import java.util.Map;
 public class SmartCarAuthController {
     private static final Logger logger = LoggerFactory.getLogger(SmartCarAuthController.class);
 
+    @Autowired
+    private ResourceService resourceService;
 
     @Autowired
     private SecurityService securityService;
@@ -44,6 +48,8 @@ public class SmartCarAuthController {
     @Autowired
     private SmartCarService smartCarService;
 
+    @Autowired
+    private SmartCarCacheService smartCarCacheService;
 
     @RequestMapping(value = "/smartCarLogin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public String login(HttpServletRequest request,
@@ -71,7 +77,7 @@ public class SmartCarAuthController {
         try {
             // SmUserSession smUserSession = securityService.saveCurrentSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000);
             SmUserSession smUserSession = securityService.createSmUserSession(Constants.SMART_CAR_AUTH_TYPE, auth.getAccessToken(), auth.getRefreshToken(), 3600000, securityService.getAccount().getIdAccount());
-            smartCarService.refreshCarData(smUserSession);
+            resourceService.refreshCarData(smUserSession);
             return new ResponseEntity(HttpStatus.OK);
         } catch (SmException ex) {
             HttpStatus status = HttpStatus.valueOf(ex.getCode());

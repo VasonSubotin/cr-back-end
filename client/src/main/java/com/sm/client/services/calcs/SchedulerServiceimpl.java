@@ -6,6 +6,7 @@ import com.sm.client.services.GoogleService;
 import com.sm.client.services.ScheduleTransformService;
 import com.sm.client.services.SecurityService;
 import com.sm.client.services.SmartCarService;
+import com.sm.client.services.cache.SmartCarCacheService;
 import com.sm.client.utils.StringDateUtil;
 import com.sm.dao.ResourcesDao;
 import com.sm.dao.ScheduleDao;
@@ -27,8 +28,11 @@ public class SchedulerServiceimpl implements SchedulerService {
 
     private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceimpl.class);
 
+//    @Autowired
+//    private SmartCarService smartCarService;
+
     @Autowired
-    private SmartCarService smartCarService;
+    private SmartCarCacheService smartCarCacheService;
 
     @Autowired
     private ResourcesDao resourcesDao;
@@ -145,17 +149,14 @@ public class SchedulerServiceimpl implements SchedulerService {
     }
 
     private Pair<VehicleData, SmResource> getSmDataAndSmResource(Long resourceId) throws SmException {
-        SmUserSession smUserSession = securityService.getActiveSession(Constants.SMART_CAR_AUTH_TYPE, resourceId);
-        if (smUserSession == null) {
-            throw new SmException("No active smart car session found for login " + SecurityContextHolder.getContext().getAuthentication().getName(), HttpStatus.SC_FORBIDDEN);
-        }
+
         //trying to get current state of resources
-        SmResource smResource = resourcesDao.getResourceByIdAndAccountId(resourceId, smUserSession.getAccountId());
+        SmResource smResource = resourcesDao.getResourceByIdAndAccountId(resourceId, securityService.getAccount().getIdAccount());
         if (smResource == null) {
             throw new SmException("Can't find resource with id=" + resourceId, 404);
         }
         // first getting current state of car
-        VehicleData smData = smartCarService.getVehicleData(smUserSession, smResource);
+        VehicleData smData = smartCarCacheService.getVehicleData(smResource.getExternalResourceId());
         if (smData == null) {
             logger.error("*** Failed to get data of car for resource by external id[{}] ****", smResource.getExternalResourceId());
             throw new SmException("*** Failed to get location of car for resource by external id[" + smResource.getExternalResourceId() + "] ****", HttpStatus.SC_NOT_FOUND);
