@@ -56,6 +56,7 @@ create table TimeOfUsages(
 	N_START numeric(10),
 	N_STOP numeric(10),
 	DT_CREATED datetime,
+	B_ACTIVE numeric(1),
 	B_DELETED numeric(1),
 	FOREIGN KEY (LOCATION_ID)  REFERENCES Locations (ID_LOCATION ),
 	FOREIGN KEY (RESOURCE_ID)  REFERENCES Locations (ID_RESOURCE )

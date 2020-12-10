@@ -28,6 +28,9 @@ public class SmTimeOfUsage implements Serializable {
     @Column(name = "DT_CREATED")
     private Date dtCreated;
 
+    @Column(name = "B_ACTIVE")
+    private Boolean active;
+
     @Column(name = "B_DELETED")
     private Boolean deleted;
 
@@ -77,6 +80,14 @@ public class SmTimeOfUsage implements Serializable {
 
     public void setResourceId(Long resourceId) {
         this.resourceId = resourceId;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Long getLocationId() {
