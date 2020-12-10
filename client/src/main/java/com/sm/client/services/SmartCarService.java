@@ -188,12 +188,23 @@ public class SmartCarService {
             BatchResponse batchResponse = vehicle.batch(new String[]{"/battery", "/location", "/charge", "/"});
             if (testMode) {
                 vehicleData.setLocation(TestLocations.getTestCarLocationByVin(vin));
+                vehicleData.setVehicleInfo(batchResponse.info());// will be root /
+
+                VehicleCharge vehicleCharge = new VehicleCharge();
+                vehicleCharge.setIsPluggedIn(true);
+                vehicleCharge.setState("Charging");
+                vehicleData.setCharge(new SmartcarResponse(vehicleCharge));
+
+                VehicleBattery battery= new VehicleBattery();
+                battery.setPercentRemaining(0.5);
+                vehicleData.setBattery(battery);
             } else {
                 vehicleData.setLocation(batchResponse.location());
+                vehicleData.setVehicleInfo(batchResponse.info());// will be root /
+                vehicleData.setCharge(batchResponse.charge());
+                vehicleData.setBattery(batchResponse.battery().getData());
             }
-            vehicleData.setVehicleInfo(batchResponse.info());// will be root /
-            vehicleData.setCharge(batchResponse.charge());
-            vehicleData.setBattery(batchResponse.battery().getData());
+
 
         } catch (Exception ex) {
             logger.error("Failed to get batch info for {} due to error : {} - will use default values", vin, ex.getMessage(), ex);

@@ -8,6 +8,7 @@ import com.sm.client.model.AuthRequest;
 import com.sm.client.model.AuthResponse;
 import com.sm.client.model.JwtTokenRequest;
 import com.sm.client.services.UserDetailsServiceImpl;
+import com.sm.client.services.cache.SmartCarCacheService;
 import com.sm.client.utils.JwtTokenUtil;
 import com.sm.model.ServiceResult;
 import com.sm.model.SmAccount;
@@ -42,6 +43,9 @@ public class AuthrizationController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private SmartCarCacheService smartCarCacheService;
+
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody SmAccount authenticationRequest) throws Exception {
         authenticate(authenticationRequest.getLogin(), authenticationRequest.getPassword());
@@ -55,6 +59,8 @@ public class AuthrizationController {
     private void authenticate(String username, String password) throws Exception {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+            smartCarCacheService.refreshOnBackground(username);
+            smartCarCacheService.addLoginForUpdate(username);
         } catch (DisabledException e) {
             throw new Exception("User is disabled", e);
         } catch (BadCredentialsException e) {

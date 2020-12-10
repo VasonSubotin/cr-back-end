@@ -32,6 +32,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,35 +77,44 @@ public class SmartCarCacheService {
 
     public void refreshSmartCarCacheByLogin(String login) throws SmException {
         try {
-            List<SmTiming> timers = new ArrayList();
-            List<SmUserSession> userSessions = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
-            //for each session doing refresh
-            for (SmUserSession userSession : userSessions) {
-                Pair<SmUserSession, SmartcarResponse<VehicleIds>> p = smartCarService.getVehicleIds(userSession);
-                userSession = p.getKey();
-                if (userSession == null) {
-                    //if no session we just ignore it with log, but if there is session and we failed to get data then we throw exception
-                    logger.error("No active smart car session found for login " + SecurityContextHolder.getContext().getAuthentication().getName());
-                    continue;
+            synchronized (login.intern()) {
+                List<SmTiming> timers = new ArrayList();
+                List<SmUserSession> userSessions = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+                if (userSessions == null || userSessions.isEmpty()) {
+                    logger.info("-- Nothing to update for user {} - user does not have resources --", login);
+                    return;
                 }
-
-                SmartcarResponse<VehicleIds> vehicleIdResponse = p.getValue();
-                for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
-                    Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
-                    String vId = vehicle.vin();
-                    VehicleData vehicleData = smartCarService.getSingleDataBatch(vehicle, vId, timers);
-                    saveSmartCarCache(vehicleData, timers.isEmpty() ? null : timers.get(timers.size() - 1).getTime());
+                Set<String> uniqSessions = new HashSet<>();
+                //for each session doing refresh
+                for (SmUserSession userSession : userSessions) {
+                    Pair<SmUserSession, SmartcarResponse<VehicleIds>> p = smartCarService.getVehicleIds(userSession);
+                    userSession = p.getKey();
+                    if (userSession == null) {
+                        //if no session we just ignore it with log, but if there is session and we failed to get data then we throw exception
+                        logger.error("No active smart car session found for login " + SecurityContextHolder.getContext().getAuthentication().getName());
+                        continue;
+                    }
+                    if (!uniqSessions.add(userSession.getToken())) {
+                        continue;
+                    }
+                    SmartcarResponse<VehicleIds> vehicleIdResponse = p.getValue();
+                    for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
+                        Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
+                        String vId = vehicle.vin();
+                        VehicleData vehicleData = smartCarService.getSingleDataBatch(vehicle, vId, timers);
+                        saveSmartCarCache(vehicleData, timers.isEmpty() ? null : timers.get(timers.size() - 1).getTime());
+                    }
                 }
             }
-
         } catch (SmartcarException e) {
             throw new SmException(e.getMessage(), HttpStatus.SC_EXPECTATION_FAILED);
         }
     }
 
     public List<SmResourceState> getResourcesStatesByAccount() throws SmException {
-        Long accountId = securityService.getAccount().getIdAccount();
-        List<SmResource> resources = resourcesDao.getAllResourceByAccountId(accountId);
+        SmAccount account = securityService.getAccount();
+        addLoginForUpdate(account.getLogin());
+        List<SmResource> resources = resourcesDao.getAllResourceByAccountId(account.getIdAccount());
         Set<String> vins = resources.stream().map(SmResource::getExternalResourceId).collect(Collectors.toSet());
         List<SmartCarCache> smartCarCacheList = smartCarCacheDao.getSmartCarCacheIn(vins);
         Map<String, SmartCarCache> smartCarCacheMap = smartCarCacheList.stream().collect(Collectors.toMap(a -> a.getExternalResourceId(), a -> a));
@@ -123,8 +133,9 @@ public class SmartCarCacheService {
 
     public SmResourceState getResourceState(Long resourceId) throws SmException {
         try {
-            Long accountId = securityService.getAccount().getIdAccount();
-            SmResource resource = resourcesDao.getResourceByIdAndAccountId(resourceId, accountId);
+            SmAccount account = securityService.getAccount();
+            addLoginForUpdate(account.getLogin());
+            SmResource resource = resourcesDao.getResourceByIdAndAccountId(resourceId, account.getIdAccount());
             VehicleData vehicleData = createVehicleDataFromSmartCarCache(smartCarCacheDao.getSmartCarCache(resource.getExternalResourceId()));
             return new SmResourceState(vehicleData, resource);
         } catch (Exception e) {
@@ -240,7 +251,16 @@ public class SmartCarCacheService {
     }
 
     public void addLoginForUpdate(String login) {
-        needUpdateCache.put(login, new Date());
+        Date exists = needUpdateCache.get(login);
+        if (exists == null) {
+            needUpdateCache.put(login, new Date());
+        } else {
+            long factor = ((System.currentTimeMillis() - exists.getTime()) / 300_000L);
+            if (factor > 0) {
+                needUpdateCache.put(login, new Date(exists.getTime() + factor * 300_000));
+            }
+        }
+
         //need to check status of thread
     }
 
