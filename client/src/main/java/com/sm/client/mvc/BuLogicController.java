@@ -73,19 +73,6 @@ public class BuLogicController {
         return schedulerData;
     }
 
-//    @RequestMapping(value = "/getSchedulerOld", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public SchedulerData getSchedulerOld(
-//            @RequestParam(name = "ba", required = false) String locationId,
-//            @RequestParam(name = "capacity", required = false, defaultValue = "30000") Long capacity,
-//            @RequestParam(name = "charge", required = false, defaultValue = "15000") Long charge,
-//            @RequestParam(name = "starttime", required = false) Date starttime,
-//            @RequestParam(name = "endtime", required = false) Date endtime,
-//            @RequestParam(name = "rate", required = false, defaultValue = "6600") Long rate,
-//            @RequestParam(name = "policy", required = false, defaultValue = "ECO") PolicyType policyType) throws Exception {
-//
-//        return optimizationServiceFactory.getService(policyType).optimize(starttime, endtime, capacity, charge, rate, locationId, null);
-//    }
-
     @RequestMapping(value = "/resources/{resourceId}/drivingSchedule", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> drivingSchedule(
             @PathVariable("resourceId") long resourceId,
@@ -162,17 +149,6 @@ public class BuLogicController {
         }
         return Arrays.asList();
     }
-//    Implement  /resources/{resource_id}/DrivingSchedule
-//    Implement  /resources/{resource_id}/CharingSchedule
-//    @RequestMapping(value = "/resources/{resourceId}/calculateGeo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public SchedulerData calculateGeo(
-//            @PathVariable("resourceId") long resourceId,
-//            @RequestParam(name = "starttime", required = false) String starttime,
-//            @RequestParam(name = "endtime", required = false) String endtime
-//    ) throws Exception {
-//        return schedulerService.calculateSchedule(resourceId, true);
-//    }
-
 
     @RequestMapping(value = "/resources/{resourceId}/calculateGeo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> calculateGeo(

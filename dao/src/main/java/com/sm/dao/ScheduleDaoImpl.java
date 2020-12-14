@@ -9,12 +9,13 @@ import org.hibernate.query.Query;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
 @Component
 public class ScheduleDaoImpl implements ScheduleDao {
 
@@ -23,61 +24,69 @@ public class ScheduleDaoImpl implements ScheduleDao {
 
     @Override
     public SmSchedules getSmSchedulesById(Long scheduleId, Long accountId) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmSchedules where idSchedule=:scheduleId and accountId=:accountId";
-        Query query = session.createQuery(hql);
-        query.setParameter("accountId", accountId);
-        query.setParameter("scheduleId", scheduleId);
-        List<SmSchedules> smSchedulesList = query.getResultList();
-        return (smSchedulesList == null || smSchedulesList.isEmpty()) ? null : smSchedulesList.iterator().next();
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmSchedules where idSchedule=:scheduleId and accountId=:accountId";
+            Query query = session.createQuery(hql);
+            query.setParameter("accountId", accountId);
+            query.setParameter("scheduleId", scheduleId);
+            List<SmSchedules> smSchedulesList = query.getResultList();
+            return (smSchedulesList == null || smSchedulesList.isEmpty()) ? null : smSchedulesList.iterator().next();
+        }
     }
 
 
     @Override
     public SmSchedules getLastSmSchedulesByResourceIdAndType(Long resourceId, Long accountId, SmScheduleType type) {
-        Session session = sessionFactory.getCurrentSession();
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
 
-        String hql = "FROM SmSchedules where resourceId=:resourceId and accountId=:accountId and ( scheduleType=:type or :type is null) order by dtCreated desc";
+            String hql = "FROM SmSchedules where resourceId=:resourceId and accountId=:accountId and ( scheduleType=:type or :type is null) order by dtCreated desc";
 
-        Query query = session.createQuery(hql);
-        query.setParameter("accountId", accountId);
-        query.setParameter("resourceId", resourceId);
-        query.setParameter("type", type);
-        query.setMaxResults(1);
-        List<SmSchedules> smSchedulesList = query.getResultList();
-        return (smSchedulesList == null || smSchedulesList.isEmpty()) ? null : smSchedulesList.iterator().next();
+            Query query = session.createQuery(hql);
+            query.setParameter("accountId", accountId);
+            query.setParameter("resourceId", resourceId);
+            query.setParameter("type", type);
+            query.setMaxResults(1);
+            List<SmSchedules> smSchedulesList = query.getResultList();
+            return (smSchedulesList == null || smSchedulesList.isEmpty()) ? null : smSchedulesList.iterator().next();
+        }
     }
 
     @Override
     public List<SmSchedules> getNoIntervalSmSchedulesByResourceIdAndDateBetween(Long resourceId, Long accountId, Date start, Date stop, SmScheduleType type) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "select new com.sm.model.SmSchedules( s.idSchedule,s.accountId,s.locationId,s.resourceId,s.carbonImpact,s.carbonSavings,s.initEnergy,s.financeSavings,s.sessionId,s.policyId,s.dtCreated,s.dtStart,s.dtStop,s.scheduleType) FROM SmSchedules s where (s.resourceId=:resourceId OR :resourceId is null) and s.accountId=:accountId and dtCreated between :start and :stop  and (s.scheduleType=:type  OR :type is null)  order by s.dtCreated desc"; //
-        Query query = session.createQuery(hql);
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "select new com.sm.model.SmSchedules( s.idSchedule,s.accountId,s.locationId,s.resourceId,s.carbonImpact,s.carbonSavings,s.initEnergy,s.financeSavings,s.sessionId,s.policyId,s.dtCreated,s.dtStart,s.dtStop,s.scheduleType) FROM SmSchedules s where (s.resourceId=:resourceId OR :resourceId is null) and s.accountId=:accountId and dtCreated between :start and :stop  and (s.scheduleType=:type  OR :type is null)  order by s.dtCreated desc"; //
+            Query query = session.createQuery(hql);
 
-        query.setParameter("accountId", accountId);
-        query.setParameter("resourceId", resourceId);
-        query.setParameter("start", start);
-        query.setParameter("stop", stop);
-        query.setParameter("type", type);
+            query.setParameter("accountId", accountId);
+            query.setParameter("resourceId", resourceId);
+            query.setParameter("start", start);
+            query.setParameter("stop", stop);
+            query.setParameter("type", type);
 
-        return query.getResultList();
+            return query.getResultList();
+        }
     }
 
     @Override
     public List<SmSchedules> getSmSchedulesByResourceIdAndDateBetweenAndType(Long resourceId, Long accountId, Date start, Date stop, SmScheduleType type) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "select * FROM SmSchedules s where s.resourceId=:resourceId and s.accountId=:accountId and dtCreated between :start and :stop and (s.scheduleType=:type or :type is null) order by s.dtCreated desc"; //
-        Query query = session.createQuery(hql);
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "select * FROM SmSchedules s where s.resourceId=:resourceId and s.accountId=:accountId and dtCreated between :start and :stop and (s.scheduleType=:type or :type is null) order by s.dtCreated desc"; //
+            Query query = session.createQuery(hql);
 
-        query.setParameter("accountId", accountId);
-        query.setParameter("resourceId", resourceId);
-        query.setParameter("start", start);
-        query.setParameter("stop", stop);
-        query.setParameter("type", type);
-        return query.getResultList();
+            query.setParameter("accountId", accountId);
+            query.setParameter("resourceId", resourceId);
+            query.setParameter("start", start);
+            query.setParameter("stop", stop);
+            query.setParameter("type", type);
+            return query.getResultList();
+        }
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmSchedules saveSmSchedules(SmSchedules smSchedules) {
         synchronized (Constants.class) {

@@ -8,11 +8,12 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
 @Component
 public class TimeOfUsageDaoImpl implements TimeOfUsageDao {
 
@@ -21,18 +22,22 @@ public class TimeOfUsageDaoImpl implements TimeOfUsageDao {
 
     @Override
     public List<SmTimeOfUsage> getAllSmTimeOfUsages() {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmTimeOfUsage where deleted=0 or deleted is null";
-        return session.createQuery(hql).getResultList();
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmTimeOfUsage where deleted=0 or deleted is null";
+            return session.createQuery(hql).getResultList();
+        }
     }
 
     @Override
     public List<SmTimeOfUsage> getTimeOfUsagesByResourceIn(List<Long> resourceIds) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmTimeOfUsage where (deleted=0 or deleted is null) and resourceId in :resourceIds";
-        Query query = session.createQuery(hql);
-        query.setParameter("resourceIds", resourceIds);
-        return query.getResultList();
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmTimeOfUsage where (deleted=0 or deleted is null) and resourceId in :resourceIds";
+            Query query = session.createQuery(hql);
+            query.setParameter("resourceIds", resourceIds);
+            return query.getResultList();
+        }
     }
 
     @Override
@@ -42,17 +47,19 @@ public class TimeOfUsageDaoImpl implements TimeOfUsageDao {
 
     @Override
     public SmTimeOfUsage getTimeOfUsageByResourceId(Long resourceId) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmTimeOfUsage where (deleted=0 or deleted is null) and resourceId=:resourceId";
-        Query query = session.createQuery(hql);
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmTimeOfUsage where (deleted=0 or deleted is null) and resourceId=:resourceId";
+            Query query = session.createQuery(hql);
 
-        query.setParameter("resourceId", resourceId);
-        List results = query.getResultList();
+            query.setParameter("resourceId", resourceId);
+            List results = query.getResultList();
 
-        return results.isEmpty() ? null : (SmTimeOfUsage) results.get(0);
+            return results.isEmpty() ? null : (SmTimeOfUsage) results.get(0);
+        }
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmTimeOfUsage saveTimeOfUsage(SmTimeOfUsage smTimeOfUsage) {
         synchronized (Constants.class) {
@@ -62,7 +69,7 @@ public class TimeOfUsageDaoImpl implements TimeOfUsageDao {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public SmTimeOfUsage deleteTimeOfUsageById(Long id) {
         synchronized (Constants.class) {
             Query query = sessionFactory.getCurrentSession().createQuery("update SmTimeOfUsage set deleted = 1 where idTou = :id");

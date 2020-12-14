@@ -57,6 +57,7 @@ public class CommonServiceImpl implements CommonService {
             recourseInfo.setResourceTypeId(smResource.getResourceTypeId());
             recourseInfo.setDtCreated(smResource.getDtCreated());
             recourseInfo.setPolicyId(smResource.getPolicyId());
+            recourseInfo.setnChargeByTime(smResource.getnChargeByTime());
         }
 
         return recourseInfo;

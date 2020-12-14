@@ -60,7 +60,6 @@ public class AuthrizationController {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
             smartCarCacheService.refreshOnBackground(username);
-            smartCarCacheService.addLoginForUpdate(username);
         } catch (DisabledException e) {
             throw new Exception("User is disabled", e);
         } catch (BadCredentialsException e) {

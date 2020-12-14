@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class SchedulerServiceimpl implements SchedulerService {
@@ -179,11 +181,19 @@ public class SchedulerServiceimpl implements SchedulerService {
         if (stop == null) {
             stop = new Date();
         }
+        Long accountId = securityService.getAccount().getIdAccount();
         //SmUserSession smUserSession = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login, resourceId);
-        List<SmSchedules> schedules = scheduleDao.getNoIntervalSmSchedulesByResourceIdAndDateBetween(resourceId, securityService.getAccount().getIdAccount(), start, stop, type);
+        List<SmSchedules> schedules = scheduleDao.getNoIntervalSmSchedulesByResourceIdAndDateBetween(resourceId, accountId, start, stop, type);
+        Map<Long, SmResource> resourceMap = resourcesDao.getAllResourceByAccountId(accountId).stream().collect(Collectors.toMap(SmResource::getIdResource, a -> a));
         List<SchedulerData> result = new ArrayList<>();
         for (SmSchedules smSchedules : schedules) {
-            result.add(scheduleTransformService.smSchedulesToScheduleWeb(smSchedules));
+            SchedulerData schedulerData = scheduleTransformService.smSchedulesToScheduleWeb(smSchedules);
+            SmResource smResource = resourceMap.get(smSchedules.getResourceId());
+            if(smResource!=null){
+                schedulerData.setModel(smResource.getModel());
+                schedulerData.setVendor(smResource.getVendor());
+            }
+            result.add(schedulerData);
         }
         return result;
     }

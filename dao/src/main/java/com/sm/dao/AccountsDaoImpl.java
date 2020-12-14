@@ -7,12 +7,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
 
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
 @Component
 public class AccountsDaoImpl implements AccountsDao {
 
@@ -20,39 +21,51 @@ public class AccountsDaoImpl implements AccountsDao {
     private SessionFactory sessionFactory;
 
     @Override
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public List<SmAccount> getAllAccounts() {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmAccount where deleted=0 or deleted is null";
-        return session.createQuery(hql).getResultList();
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmAccount where deleted=0 or deleted is null";
+            return session.createQuery(hql).getResultList();
+        }
     }
 
     @Override
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public SmAccount getAccountByLogin(String login) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmAccount where (deleted=0 or deleted is null) and login=:login";
-        Query query = session.createQuery(hql);
-        query.setParameter("login", login);
-        List ret = query.getResultList();
-        return ret.isEmpty() ? null : (SmAccount) ret.get(0);
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmAccount where (deleted=0 or deleted is null) and login=:login";
+            Query query = session.createQuery(hql);
+            query.setParameter("login", login);
+            List ret = query.getResultList();
+            return ret.isEmpty() ? null : (SmAccount) ret.get(0);
+        }
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public SmAccount getAccountByLoginByAuthorizationType(String login, String authorizationType) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmAccount where (deleted=0 or deleted is null) and login=:login and accountType:accountType";
-        Query query = session.createQuery(hql);
-        query.setParameter("login", login);
-        query.setParameter("accountType", authorizationType);
-        List ret = query.getResultList();
-        return ret.isEmpty() ? null : (SmAccount) ret.get(0);
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmAccount where (deleted=0 or deleted is null) and login=:login and accountType:accountType";
+            Query query = session.createQuery(hql);
+            query.setParameter("login", login);
+            query.setParameter("accountType", authorizationType);
+            List ret = query.getResultList();
+            return ret.isEmpty() ? null : (SmAccount) ret.get(0);
+        }
     }
 
 
     @Override
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public SmAccount getAccountById(Long id) {
-        return sessionFactory.getCurrentSession().get(SmAccount.class, id);
+        synchronized (Constants.class) {
+            return sessionFactory.getCurrentSession().get(SmAccount.class, id);
+        }
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmAccount saveAccount(SmAccount smAccount) {
         synchronized (Constants.class) {
@@ -61,7 +74,7 @@ public class AccountsDaoImpl implements AccountsDao {
         }
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmAccount updateAccount(SmAccount smAccount) {
         synchronized (Constants.class) {
@@ -71,7 +84,7 @@ public class AccountsDaoImpl implements AccountsDao {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public SmAccount deleteAccountById(Long id) {
         synchronized (Constants.class) {
             Query query = sessionFactory.getCurrentSession().createQuery("update SmAccount set deleted = 1 where idAccount = :id");

@@ -7,11 +7,12 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
 @Component
 public class ResourcesDaoImpl implements ResourcesDao {
 
@@ -20,47 +21,52 @@ public class ResourcesDaoImpl implements ResourcesDao {
 
     @Override
     public List<SmResource> getAllResourceByAccountId(Long accountId) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmResource where (deleted=0 or deleted is null) and accountId=:accountId";
-        Query query = session.createQuery(hql);
-        query.setParameter("accountId", accountId);
-        return query.getResultList();
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmResource where (deleted=0 or deleted is null) and accountId=:accountId";
+            Query query = session.createQuery(hql);
+            query.setParameter("accountId", accountId);
+            return query.getResultList();
+        }
     }
 
     @Override
     public SmResource getResourceByIdAndAccountId(Long id, Long accountId) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmResource where (deleted=0 or deleted is null) and accountId=:accountId and idResource=:idResource";
-        Query query = session.createQuery(hql);
-        query.setParameter("accountId", accountId);
-        query.setParameter("idResource", id);
-        List<SmResource> result = query.getResultList();
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmResource where (deleted=0 or deleted is null) and accountId=:accountId and idResource=:idResource";
+            Query query = session.createQuery(hql);
+            query.setParameter("accountId", accountId);
+            query.setParameter("idResource", id);
+            List<SmResource> result = query.getResultList();
 
-        return (result == null || result.isEmpty()) ? null : result.iterator().next();
+            return (result == null || result.isEmpty()) ? null : result.iterator().next();
+        }
     }
 
     @Override
     public SmResource getResourceByExternalIdAndAccountId(String vExternal, Long accountId) {
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
 
-        Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmResource where (deleted=0 or deleted is null) and externalResourceId=:vExternal ";
+            if (accountId != null) {
+                hql += "and accountId=:accountId";
+            } else {
+                hql += "and accountId is null";
+            }
+            Query query = session.createQuery(hql);
+            query.setParameter("vExternal", vExternal);
+            if (accountId != null) {
+                query.setParameter("accountId", accountId);
+            }
+            List<SmResource> result = query.getResultList();
 
-        String hql = "FROM SmResource where (deleted=0 or deleted is null) and externalResourceId=:vExternal ";
-        if (accountId != null) {
-            hql += "and accountId=:accountId";
-        } else {
-            hql += "and accountId is null";
+            return (result == null || result.isEmpty()) ? null : result.iterator().next();
         }
-        Query query = session.createQuery(hql);
-        query.setParameter("vExternal", vExternal);
-        if (accountId != null) {
-            query.setParameter("accountId", accountId);
-        }
-        List<SmResource> result = query.getResultList();
-
-        return (result == null || result.isEmpty()) ? null : result.iterator().next();
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmResource saveResource(SmResource smResource, Long accountId) {
         synchronized (Constants.class) {
@@ -71,7 +77,7 @@ public class ResourcesDaoImpl implements ResourcesDao {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public SmResource deleteResourceByIdAndAccountId(Long id, Long accountId) {
         synchronized (Constants.class) {
             //sessionFactory.getCurrentSession().update("UPDATE SmResource set SmResource.deleted");

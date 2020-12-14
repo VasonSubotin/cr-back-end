@@ -45,7 +45,7 @@ public class SmartCarCacheDaoImpl implements SmartCarCacheDao {
     @Override
     public void saveSmartCarCache(SmartCarCache smartCarCache) {
         synchronized (Constants.class) {
-             sessionFactory.getCurrentSession().save(smartCarCache);
+             sessionFactory.getCurrentSession().saveOrUpdate(smartCarCache);
         }
     }
 }

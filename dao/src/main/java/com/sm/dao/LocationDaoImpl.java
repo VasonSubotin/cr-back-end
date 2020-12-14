@@ -7,13 +7,14 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
 
 @Component
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
 public class LocationDaoImpl implements LocationDao {
 
     @Autowired
@@ -21,39 +22,47 @@ public class LocationDaoImpl implements LocationDao {
 
     @Override
     public List<SmLocation> getAllLocations() {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmLocation where deleted=0 or deleted is null";
-        return session.createQuery(hql).getResultList();
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmLocation where deleted=0 or deleted is null";
+            return session.createQuery(hql).getResultList();
+        }
     }
 
     @Override
     public List<SmLocation> getAllPersonalLocations(Long accountId) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmLocation where (deleted=0 or deleted is null) and accountId=:accountId";
-        Query query = session.createQuery(hql);
-        query.setParameter("accountId", accountId);
-        return query.getResultList();
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmLocation where (deleted=0 or deleted is null) and accountId=:accountId";
+            Query query = session.createQuery(hql);
+            query.setParameter("accountId", accountId);
+            return query.getResultList();
+        }
     }
 
     @Override
     public SmLocation getLocationByIdAndAccountId(Long id, Long accountId) {
-        return sessionFactory.getCurrentSession().get(SmLocation.class, id);
+        synchronized (Constants.class) {
+            return sessionFactory.getCurrentSession().get(SmLocation.class, id);
+        }
     }
 
     @Override
     public List<SmLocation> getLocationsInSmallRangeAndAccountId(Long accountId, double latitudeA, double longitudeA, double latitudeB, double longitudeB) {
-        Session session = sessionFactory.getCurrentSession();
-        String hql = "FROM SmLocation where (deleted=0 or deleted is null) AND (accountId=:accountId OR accountId is null) AND latitude between :latitudeA and :latitudeB AND longitude between :longitudeA and  :longitudeB";
-        Query query = session.createQuery(hql);
-        query.setParameter("accountId", accountId);
-        query.setParameter("latitudeA", latitudeA);
-        query.setParameter("latitudeB", latitudeB);
-        query.setParameter("longitudeA", longitudeA);
-        query.setParameter("longitudeB", longitudeB);
-        return query.getResultList();
+        synchronized (Constants.class) {
+            Session session = sessionFactory.getCurrentSession();
+            String hql = "FROM SmLocation where (deleted=0 or deleted is null) AND (accountId=:accountId OR accountId is null) AND latitude between :latitudeA and :latitudeB AND longitude between :longitudeA and  :longitudeB";
+            Query query = session.createQuery(hql);
+            query.setParameter("accountId", accountId);
+            query.setParameter("latitudeA", latitudeA);
+            query.setParameter("latitudeB", latitudeB);
+            query.setParameter("longitudeA", longitudeA);
+            query.setParameter("longitudeB", longitudeB);
+            return query.getResultList();
+        }
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmLocation saveLocation(SmLocation smLocation, Long accountId) {
         synchronized (Constants.class) {
@@ -75,3 +84,4 @@ public class LocationDaoImpl implements LocationDao {
         }
     }
 }
+//Unable to commit against JDBC Connection; nested exception is org.hibernate.TransactionException: Unable to commit against JDBC Connection

@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,6 +52,8 @@ public class SmartCarCacheService {
 
     @Autowired
     private ResourcesDao resourcesDao;
+
+    private Map<String, Boolean> locks = new ConcurrentHashMap<>();
 
     @Qualifier("commonThreadPool")
     @Autowired
@@ -75,39 +78,63 @@ public class SmartCarCacheService {
         });
     }
 
+//    public void refreshOnBackgroundAndAddToQueue(String login) {
+//        commonTaskExecutor.execute(() -> {
+//            try {
+//                refreshSmartCarCacheByLogin(login);
+//                addLoginForUpdate(login);
+//            } catch (SmException e) {
+//                logger.error("Failed to update cache for login " + login + ": " + e.getMessage(), e);
+//            }
+//        });
+//    }
+
     public void refreshSmartCarCacheByLogin(String login) throws SmException {
+        boolean isActivated = false;
         try {
-            synchronized (login.intern()) {
-                List<SmTiming> timers = new ArrayList();
-                List<SmUserSession> userSessions = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
-                if (userSessions == null || userSessions.isEmpty()) {
-                    logger.info("-- Nothing to update for user {} - user does not have resources --", login);
+            logger.info("Start update resource cache for login[{}]", login);
+            synchronized (login) {
+                if (locks.putIfAbsent(login, true)!=null){
+                    logger.info("Update resource cache for login[{}] is already in progress", login);
                     return;
                 }
-                Set<String> uniqSessions = new HashSet<>();
-                //for each session doing refresh
-                for (SmUserSession userSession : userSessions) {
-                    Pair<SmUserSession, SmartcarResponse<VehicleIds>> p = smartCarService.getVehicleIds(userSession);
-                    userSession = p.getKey();
-                    if (userSession == null) {
-                        //if no session we just ignore it with log, but if there is session and we failed to get data then we throw exception
-                        logger.error("No active smart car session found for login " + SecurityContextHolder.getContext().getAuthentication().getName());
-                        continue;
-                    }
-                    if (!uniqSessions.add(userSession.getToken())) {
-                        continue;
-                    }
-                    SmartcarResponse<VehicleIds> vehicleIdResponse = p.getValue();
-                    for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
-                        Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
-                        String vId = vehicle.vin();
-                        VehicleData vehicleData = smartCarService.getSingleDataBatch(vehicle, vId, timers);
-                        saveSmartCarCache(vehicleData, timers.isEmpty() ? null : timers.get(timers.size() - 1).getTime());
-                    }
+                isActivated = true;
+            }
+            List<SmTiming> timers = new ArrayList();
+            List<SmUserSession> userSessions = securityService.getActiveSessionByLogin(Constants.SMART_CAR_AUTH_TYPE, login);
+            if (userSessions == null || userSessions.isEmpty()) {
+                logger.info("-- Nothing to update for user {} - user does not have resources --", login);
+                return;
+            }
+            Set<String> uniqSessions = new HashSet<>();
+            //for each session doing refresh
+            for (SmUserSession userSession : userSessions) {
+                Pair<SmUserSession, SmartcarResponse<VehicleIds>> p = smartCarService.getVehicleIds(userSession);
+                userSession = p.getKey();
+                if (userSession == null) {
+                    //if no session we just ignore it with log, but if there is session and we failed to get data then we throw exception
+                    logger.error("No active smart car session found for login " + SecurityContextHolder.getContext().getAuthentication().getName());
+                    continue;
+                }
+                if (!uniqSessions.add(userSession.getToken())) {
+                    continue;
+                }
+                SmartcarResponse<VehicleIds> vehicleIdResponse = p.getValue();
+                for (String vehicleId : vehicleIdResponse.getData().getVehicleIds()) {
+                    Vehicle vehicle = new Vehicle(vehicleId, userSession.getToken());
+                    String vId = vehicle.vin();
+                    VehicleData vehicleData = smartCarService.getSingleDataBatch(vehicle, vId, timers);
+                    saveSmartCarCache(vehicleData, timers.isEmpty() ? null : timers.get(timers.size() - 1).getTime());
                 }
             }
+
         } catch (SmartcarException e) {
             throw new SmException(e.getMessage(), HttpStatus.SC_EXPECTATION_FAILED);
+        } finally {
+            if(isActivated){
+                locks.remove(login);
+                logger.info("Finished update resource cache for login[{}]", login);
+            }
         }
     }
 
@@ -150,7 +177,7 @@ public class SmartCarCacheService {
             SmartCarCache smartCarCache = smartCarCacheDao.getSmartCarCache(vehicleData.getVin());
             if (smartCarCache != null) {
                 smartCarCache.setDtCreated(new Date());
-                smartCarCache.setExternalResourceId(vehicleData.getVin());
+                //smartCarCache.setExternalResourceId(vehicleData.getVin());
                 smartCarCache.setData(objectMapper.writeValueAsBytes(vehicleData));
                 smartCarCache.setTiming(timing);
             } else {
@@ -254,10 +281,14 @@ public class SmartCarCacheService {
         Date exists = needUpdateCache.get(login);
         if (exists == null) {
             needUpdateCache.put(login, new Date());
+            logger.info("Adding login[{}] for resource cache update", login);
         } else {
             long factor = ((System.currentTimeMillis() - exists.getTime()) / 300_000L);
             if (factor > 0) {
                 needUpdateCache.put(login, new Date(exists.getTime() + factor * 300_000));
+                logger.info("Adding login[{}] for resource cache continues update", login);
+            } else {
+                logger.info("Don't need to add login[{}] for resource cache continues update", login);
             }
         }
 
@@ -278,6 +309,7 @@ public class SmartCarCacheService {
                 refreshOnBackground(login);
             }
             if (current - date.getTime() > 1800_000) {
+                logger.info("Removing login[{}] for resource cache update", login);
                 needUpdateCache.remove(login);
             }
         }

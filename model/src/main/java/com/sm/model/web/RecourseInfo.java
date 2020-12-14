@@ -3,6 +3,7 @@ package com.sm.model.web;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.persistence.Column;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -41,6 +42,9 @@ public class RecourseInfo implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss'Z'" , timezone = "UTC")
     @JsonProperty("dateCreated")
     private Date dtCreated;
+
+    @JsonProperty("chargeby_time")
+    private Long nChargeByTime;
 
     public Long getIdResource() {
         return idResource;
@@ -144,5 +148,13 @@ public class RecourseInfo implements Serializable {
 
     public void setDtCreated(Date dtCreated) {
         this.dtCreated = dtCreated;
+    }
+
+    public Long getnChargeByTime() {
+        return nChargeByTime;
+    }
+
+    public void setnChargeByTime(Long nChargeByTime) {
+        this.nChargeByTime = nChargeByTime;
     }
 }

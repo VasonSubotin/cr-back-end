@@ -28,6 +28,12 @@ public class SchedulerData implements Serializable {
     @JsonProperty("resource_id")
     private Long resourceId;
 
+    @JsonProperty("model")
+    private String model;
+
+    @JsonProperty("vendor")
+    private String vendor;
+
     @JsonProperty("location_id")
     private Long locationId;
 
@@ -85,6 +91,22 @@ public class SchedulerData implements Serializable {
 
     public void setResourceId(Long resourceId) {
         this.resourceId = resourceId;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getVendor() {
+        return vendor;
+    }
+
+    public void setVendor(String vendor) {
+        this.vendor = vendor;
     }
 
     public Long getSchedulerId() {
