@@ -2,6 +2,7 @@ package com.sm.client.services.optimization;
 
 import com.sm.client.model.eco.GridData;
 import com.sm.client.model.eco.GridDataAggregated;
+import com.sm.dao.LocationDao;
 import com.sm.model.Pair;
 import com.sm.model.SmResource;
 import com.sm.model.SmScheduleType;
@@ -255,7 +256,8 @@ public abstract class AbstractOptimizationService implements OptimizationService
             lastGridData = gridData;
         }
         result.setCo2Impact(coImpactSummary);
-
+        result.setTimeStop(lastGridData == null ? null : new Date(lastGridData.getStop()));
+        result.setTimeStart(optimizesDataList == null || optimizesDataList.isEmpty() ? null : new Date(optimizesDataList.iterator().next().getStart()));
         //calculating simple usage
         result.setCo2_savings(calcSimpleCO2Impact(originalDataList, chargeTimeInMins) - coImpactSummary);
         return result;

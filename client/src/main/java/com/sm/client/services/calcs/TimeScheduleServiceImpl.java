@@ -10,6 +10,7 @@ import com.sm.client.services.EcoService;
 import com.sm.client.services.ScheduleTransformService;
 import com.sm.client.services.SecurityService;
 import com.sm.client.services.optimization.OptimizationServiceFactory;
+import com.sm.dao.LocationDao;
 import com.sm.dao.ScheduleDao;
 import com.sm.model.*;
 import org.apache.http.HttpStatus;
@@ -43,6 +44,9 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
 
     @Autowired
     private ScheduleDao scheduleDao;
+
+    @Autowired
+    private LocationDao locationDao;
 
     @Override
     public SchedulerData calculateSchedule(VehicleData smData, SmResource smResource, Date starttime, Date endtime) throws Exception {

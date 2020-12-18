@@ -48,6 +48,22 @@ public class LocationDaoImpl implements LocationDao {
     }
 
     @Override
+    public SmLocation getLocationByExternalIdAndAccountId(String externalLocationId, Long accountId) {
+        synchronized (Constants.class) {
+            synchronized (Constants.class) {
+                Session session = sessionFactory.getCurrentSession();
+                String hql = "FROM SmLocation where (deleted=0 or deleted is null) and accountId=:accountId and externalLocationId=:externalLocationId";
+                Query query = session.createQuery(hql);
+                query.setParameter("accountId", accountId);
+                query.setParameter("externalLocationId", externalLocationId);
+                List<SmLocation> res = query.getResultList();
+                return res==null || res.isEmpty()?null:res.iterator().next();
+            }
+        }
+    }
+
+
+    @Override
     public List<SmLocation> getLocationsInSmallRangeAndAccountId(Long accountId, double latitudeA, double longitudeA, double latitudeB, double longitudeB) {
         synchronized (Constants.class) {
             Session session = sessionFactory.getCurrentSession();

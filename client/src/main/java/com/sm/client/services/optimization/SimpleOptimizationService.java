@@ -40,6 +40,7 @@ public class SimpleOptimizationService extends AbstractOptimizationService {
 
         SchedulerData schedulerData = calculateSchedulerData(co2DataList, optimizedDataList, rateInWt, timeInMinsNeed);
         schedulerData.setInitialEnergy(chargeLevelInWt);
+        schedulerData.setCapacity(capacityInWt);
         schedulerData.setMoers(aggregateGridData(schedulerData.getIntervals(), p.getKey()));
         return schedulerData;
     }

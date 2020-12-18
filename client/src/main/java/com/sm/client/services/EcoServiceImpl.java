@@ -282,7 +282,7 @@ public class EcoServiceImpl implements EcoService {
             }
             lastGridData = gridData;
         }
-        lastGridData.setStop(lastGridData.getPointTime().getTime() + lastGridData.getFrequence() * 1000);
+        lastGridData.setStop(lastGridData.getPointTime().getTime() + (lastGridData.getFrequence() == null ? 300 : lastGridData.getFrequence()) * 1000);
     }
 
 

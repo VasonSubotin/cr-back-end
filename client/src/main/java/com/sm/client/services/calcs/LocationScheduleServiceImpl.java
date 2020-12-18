@@ -350,6 +350,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
         ret.setTimeStart(schedulerInterval.getStartTime());
         ret.setCapacity(smResource.getCapacity());
         ret.setTimeStop(new Date(ret.getTimeStart().getTime() + schedulerInterval.getDuration()));
+        ret.setPolicyId(smResource.getPolicyId());
         // ret.setSessionType(SmSessionType);
         return ret;
     }
