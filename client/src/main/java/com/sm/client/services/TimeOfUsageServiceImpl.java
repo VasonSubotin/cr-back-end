@@ -107,9 +107,9 @@ public class TimeOfUsageServiceImpl implements TimeOfUsageService {
         if (smTimeOfUsage.getLocationId() != null) {
             existing.setLocationId(smTimeOfUsage.getLocationId());
         }
-//        if (smTimeOfUsage.getIdTou() != null) {
-//            existing.setIdTou(smTimeOfUsage.getIdTou());
-//        }
+        if (smTimeOfUsage.getActive() != null) {
+            existing.setActive(smTimeOfUsage.getActive());
+        }
         if (smTimeOfUsage.getStart() != null) {
             existing.setStart(smTimeOfUsage.getStart());
         }
