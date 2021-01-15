@@ -42,7 +42,9 @@ public class TimeOfUsageDaoImpl implements TimeOfUsageDao {
 
     @Override
     public SmTimeOfUsage getTimeOfUsageById(Long id) {
-        return sessionFactory.getCurrentSession().get(SmTimeOfUsage.class, id);
+        synchronized (Constants.class) {
+            return sessionFactory.getCurrentSession().get(SmTimeOfUsage.class, id);
+        }
     }
 
     @Override

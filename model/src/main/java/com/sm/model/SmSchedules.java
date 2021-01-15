@@ -63,7 +63,7 @@ public class SmSchedules {
     public SmSchedules() {
     }
 
-    public SmSchedules(Long idSchedule, Long accountId, Long locationId, Long resourceId, Double carbonImpact, Double carbonSavings, Long initEnergy, Double financeSavings, Long sessionId, Long policyId, Date dtCreated, Date dtStart, Date dtStop, SmScheduleType smScheduleType) {
+    public SmSchedules(Long idSchedule, Long accountId, Long locationId, Long resourceId, Double carbonImpact, Double carbonSavings, Long initEnergy, Double financeSavings, Long sessionId, Long policyId, Date dtCreated, Date dtStart, Date dtStop, SmScheduleType smScheduleType, Double endSoc, Long capacity) {
         this.idSchedule = idSchedule;
         this.accountId = accountId;
         this.locationId = locationId;
@@ -78,6 +78,8 @@ public class SmSchedules {
         this.dtStart = dtStart;
         this.dtStop = dtStop;
         this.scheduleType = smScheduleType;
+        this.capacity = capacity;
+        this.endSoc = endSoc;
     }
 
     public Long getIdSchedule() {

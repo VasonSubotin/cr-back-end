@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,17 +38,19 @@ public class GoogleAuthController {
 
     @RequestMapping(value = "/googleReLogin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> googleReLogin(HttpServletRequest request,
-                                           HttpServletResponse response) throws Exception {
+                                           HttpServletResponse response,
+                                           @RequestParam(name = "redirect", required = false) String redirect) throws Exception {
         logger.info("----------------------call/googleLogin -------------------");
-        return googleService.redirectToGoogleRenew();
+        return googleService.redirectToGoogleRenew(redirect);
     }
 
 
     @RequestMapping(value = "/googleLogin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> googleLogin(HttpServletRequest request,
-                                         HttpServletResponse response) throws Exception {
+                                         HttpServletResponse response,
+                                         @RequestParam(name = "redirect", required = false) String redirect) throws Exception {
         logger.info("----------------------call/googleLogin -------------------");
-        return googleService.redirectToGoogle();
+        return googleService.redirectToGoogle(redirect);
     }
 
     @RequestMapping(value = "/googleToken", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,12 +60,13 @@ public class GoogleAuthController {
     }
 
     @RequestMapping(value = "/googleAuthenticate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> googleSessionAuth(HttpServletRequest request, HttpServletResponse response, String code) throws Exception {
+    public ResponseEntity<?> googleSessionAuth(HttpServletRequest request, HttpServletResponse response, String code,
+                                               @RequestParam(name = "redirect", required = false) String redirect
+    ) throws Exception {
         try {
             String token = googleService.googleSessionAuth(code);
             if (token == null) {
-                return googleReLogin(request, response);
-                //return new ResponseEntity (response.get);
+                return googleReLogin(request, response, redirect);
             }
             return ResponseEntity.ok(new AuthResponse(token));
         } catch (SmException ex) {

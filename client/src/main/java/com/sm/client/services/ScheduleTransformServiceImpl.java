@@ -79,6 +79,7 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         schedulerData.setScheduleType(smSchedules.getScheduleType());
         schedulerData.setEndSoc(smSchedules.getEndSoc());
         schedulerData.setCapacity(smSchedules.getCapacity());
+        schedulerData.setTotalEnergy(schedulerData.getInitialEnergy() == null || schedulerData.getCapacity() == null ? null : schedulerData.getCapacity() - schedulerData.getInitialEnergy());
         if (smSchedules.getData() != null) {
             schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), new TypeReference<List<SchedulerInterval>>() {
             }));

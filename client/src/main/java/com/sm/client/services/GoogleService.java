@@ -93,7 +93,7 @@ public class GoogleService {
         return tokenResponse;
     }
 
-    public ResponseEntity<?> redirectToGoogleRenew() {
+    public ResponseEntity<?> redirectToGoogleRenew(String redirect) {
         AuthorizationCodeRequestUrl url = authorizationRefreshCodeFlow.newAuthorizationUrl();
         logger.debug("-- setting redirection for google to {}", urlRedirect);
         url.setRedirectUri(urlRedirect);
@@ -101,15 +101,16 @@ public class GoogleService {
 //        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 //        response.setHeader("Location", link);
         MultiValueMap header = new HttpHeaders();
+        //  header.add("Access-Control-Allow-Origin","*");
         header.add("Location", link);
         return new ResponseEntity(null, header, HttpStatus.MOVED_PERMANENTLY);
         // return link;
     }
 
-    public ResponseEntity<?> redirectToGoogle() {
+    public ResponseEntity<?> redirectToGoogle(String redirect) {
         AuthorizationCodeRequestUrl url = authorizationCodeFlow.newAuthorizationUrl();
-        logger.debug("-- setting redirection for google to {}", urlRedirect);
-        url.setRedirectUri(urlRedirect);
+        url.setRedirectUri(redirect == null ? urlRedirect : redirect);
+        logger.debug("-- setting redirection for google to {}", url.getRedirectUri());
         String link = url.build();
         //String link = client.getAuthUrl();
 //        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
@@ -177,6 +178,11 @@ public class GoogleService {
             return true;
         } catch (IOException ex) {
             throw new SmException(ex.getMessage(), 500);
+        } catch (SmException ex) {
+            if (ex.getCode() == org.apache.http.HttpStatus.SC_FORBIDDEN) {
+                return true;
+            }
+            throw ex;
         }
     }
 
@@ -190,7 +196,7 @@ public class GoogleService {
         } else {
             smUserSession = smUserSessions.get(0);
             smUserSession.setTtl(tokenResponse.getExpiresInSeconds() * 1000L);
-            smUserSession.setToken( tokenResponse.getAccessToken());
+            smUserSession.setToken(tokenResponse.getAccessToken());
             smUserSession.setRefreshToken(tokenResponse.getRefreshToken());
         }
         userSessionDao.saveSession(smUserSession);

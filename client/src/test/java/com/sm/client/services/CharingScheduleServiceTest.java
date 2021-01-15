@@ -155,7 +155,7 @@ public class CharingScheduleServiceTest {
 
     private VehicleData generateVehicleData() {
         VehicleData smData = new VehicleData();
-        smData.setBattery(new VehicleBattery(100, 50));
+        smData.setBattery(new VehicleBattery(100, 0.50));
         smData.setVin("testVin1");
         return smData;
     }
