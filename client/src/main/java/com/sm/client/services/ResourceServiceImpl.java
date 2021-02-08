@@ -14,7 +14,6 @@ import com.smartcar.sdk.data.SmartcarResponse;
 import com.smartcar.sdk.data.VehicleIds;
 import com.smartcar.sdk.data.VehicleInfo;
 import com.smartcar.sdk.data.VehicleLocation;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,17 +28,7 @@ import java.util.stream.Collectors;
 public class ResourceServiceImpl implements ResourceService {
     private static final Logger logger = LoggerFactory.getLogger(ResourceServiceImpl.class);
 
-    @Value("${smartcar.resources.imagesPath:/}")
-    private String pathPrefix = "/";
 
-    @Value("${smartcar.resources.imagesExt:.jpg}")
-    private String imagesExt = ".jpg";
-
-    @Value("${smartcar.resources.imagesUrl:}")
-    private String imagesUrl = "";
-
-    @Value("${smartcar.resources.imagesGeneral:general}")
-    private String imagesGeneral = "general";
 
     @Autowired
     private ResourcesDao resourcesDao;
@@ -127,15 +115,9 @@ public class ResourceServiceImpl implements ResourceService {
             return null;
         }
 
-        if (!new File(pathPrefix + "/" + smResource.getVendor() + "/" + smResource.getModel() + imagesExt).exists()) {
-            // looking for vendor
-            if (!new File(pathPrefix + "/" + smResource.getVendor() + "/" + imagesGeneral + imagesExt).exists()) {
-                return imagesUrl + imagesGeneral + imagesExt;
-            }
-            return imagesUrl + smResource.getVendor() + "/" + imagesGeneral + imagesExt;
-        }
-        return imagesUrl + smResource.getVendor() + "/" + smResource.getModel() + imagesExt;
+        return resourcesDao.getImageByResource(smResource);
     }
+
 
     @Override
     public void refreshCarData(SmUserSession smUserSession) throws SmException, SmartcarException {

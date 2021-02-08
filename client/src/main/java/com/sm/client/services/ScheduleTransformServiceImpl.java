@@ -3,6 +3,7 @@ package com.sm.client.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sm.client.model.eco.GridDataAggregated;
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.SchedulerInterval;
 import com.sm.dao.ResourcesDao;
@@ -53,9 +54,10 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         smSchedules.setScheduleType(schedulerData.getScheduleType());
         smSchedules.setEndSoc(schedulerData.getEndSoc());
         smSchedules.setCapacity(schedulerData.getCapacity());
-        smSchedules.setData(objectMapper.writeValueAsBytes(schedulerData.getIntervals()));
+        smSchedules.setData(objectMapper.writeValueAsBytes(new BBData(schedulerData.getIntervals(), schedulerData.getMoers())));
         return smSchedules;
     }
+
 
     @Override
     public SchedulerData smSchedulesToScheduleWeb(SmSchedules smSchedules) throws IOException {
@@ -81,8 +83,18 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
         schedulerData.setCapacity(smSchedules.getCapacity());
         schedulerData.setTotalEnergy(schedulerData.getInitialEnergy() == null || schedulerData.getCapacity() == null ? null : schedulerData.getCapacity() - schedulerData.getInitialEnergy());
         if (smSchedules.getData() != null) {
-            schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), new TypeReference<List<SchedulerInterval>>() {
-            }));
+            try {
+                BBData bbData = objectMapper.readValue(smSchedules.getData(), BBData.class);
+                if (bbData != null) {
+                    schedulerData.setIntervals(bbData.getIntervals());
+                    schedulerData.setMoers(bbData.getMoers());
+                }
+
+            } catch (Exception ex) {
+                // failed trying to deserialize in old way
+                schedulerData.setIntervals(objectMapper.readValue(smSchedules.getData(), new TypeReference<List<SchedulerInterval>>() {
+                }));
+            }
             double totalCost = 0;
             long totalEnergy = 0;
             for (SchedulerInterval schedulerInterval : schedulerData.getIntervals()) {
@@ -109,5 +121,34 @@ public class ScheduleTransformServiceImpl implements ScheduleTransformService {
             events.add(new OCPPScheduleEvent(new Date(schedulerInterval.getStartTime().getTime() + schedulerInterval.getDuration()), false));
         }
         return ocppScheduleData;
+    }
+
+    private static class BBData {
+        private List<SchedulerInterval> intervals;
+        private GridDataAggregated moers;
+
+        public BBData() {
+        }
+
+        public BBData(List<SchedulerInterval> intervals, GridDataAggregated moers) {
+            this.intervals = intervals;
+            this.moers = moers;
+        }
+
+        public List<SchedulerInterval> getIntervals() {
+            return intervals;
+        }
+
+        public void setIntervals(List<SchedulerInterval> intervals) {
+            this.intervals = intervals;
+        }
+
+        public GridDataAggregated getMoers() {
+            return moers;
+        }
+
+        public void setMoers(GridDataAggregated moers) {
+            this.moers = moers;
+        }
     }
 }

@@ -14,4 +14,6 @@ public interface ResourcesDao {
     SmResource saveResource(SmResource smResource, Long accountId);
 
     SmResource deleteResourceByIdAndAccountId(Long id, Long accountId);
+
+    String getImageByResource(SmResource smResource);
 }

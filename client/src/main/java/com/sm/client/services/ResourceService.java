@@ -2,6 +2,7 @@ package com.sm.client.services;
 
 import com.sm.client.model.smartcar.SmResourceState;
 import com.sm.model.SmException;
+import com.sm.model.SmResource;
 import com.sm.model.SmUserSession;
 import com.smartcar.sdk.SmartcarException;
 

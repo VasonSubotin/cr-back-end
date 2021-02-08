@@ -6,15 +6,30 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
 @Component
 public class ResourcesDaoImpl implements ResourcesDao {
+
+    @Value("${smartcar.resources.imagesPath:/}")
+    private String pathPrefix = "/";
+
+    @Value("${smartcar.resources.imagesExt:.jpg}")
+    private String imagesExt = ".jpg";
+
+    @Value("${smartcar.resources.imagesUrl:}")
+    private String imagesUrl = "";
+
+    @Value("${smartcar.resources.imagesGeneric:generic}")
+    private String imagesGeneric = "generic";
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -26,7 +41,7 @@ public class ResourcesDaoImpl implements ResourcesDao {
             String hql = "FROM SmResource where (deleted=0 or deleted is null) and accountId=:accountId";
             Query query = session.createQuery(hql);
             query.setParameter("accountId", accountId);
-            return query.getResultList();
+            return calcImage(query.getResultList());
         }
     }
 
@@ -40,7 +55,7 @@ public class ResourcesDaoImpl implements ResourcesDao {
             query.setParameter("idResource", id);
             List<SmResource> result = query.getResultList();
 
-            return (result == null || result.isEmpty()) ? null : result.iterator().next();
+            return (result == null || result.isEmpty()) ? null : calcImage(result.iterator().next());
         }
     }
 
@@ -62,7 +77,7 @@ public class ResourcesDaoImpl implements ResourcesDao {
             }
             List<SmResource> result = query.getResultList();
 
-            return (result == null || result.isEmpty()) ? null : result.iterator().next();
+            return (result == null || result.isEmpty()) ? null : calcImage(result.iterator().next());
         }
     }
 
@@ -72,7 +87,7 @@ public class ResourcesDaoImpl implements ResourcesDao {
         synchronized (Constants.class) {
             smResource.setAccountId(accountId);
             smResource.setIdResource((Long) sessionFactory.getCurrentSession().save(smResource));
-            return smResource;
+            return calcImage(smResource);
         }
     }
 
@@ -85,9 +100,38 @@ public class ResourcesDaoImpl implements ResourcesDao {
             query.setParameter("id", id);
             query.setParameter("accountId", accountId);
             query.executeUpdate();
-            return getResourceByIdAndAccountId(id, accountId);
+            return calcImage(getResourceByIdAndAccountId(id, accountId));
         }
     }
 
+    @Override
+    public String getImageByResource(SmResource smResource) {
+        String vendorModel = (smResource.getVendor() + "/" + smResource.getModel() + imagesExt).toLowerCase().replaceAll(" ", "");
+        if (!new File(pathPrefix + "/" + vendorModel).exists()) {
+            // looking for vendor
+            String vendor = (smResource.getVendor() + "/" + imagesGeneric + imagesExt).toLowerCase().replaceAll(" ", "");
+            if (!new File(pathPrefix + "/" + vendor).exists()) {
+                return imagesUrl + (imagesGeneric + imagesExt).toLowerCase().replaceAll(" ", "");
+            }
+            return imagesUrl + vendor;
+        }
+        return imagesUrl + vendorModel;
+    }
 
+    private SmResource calcImage(SmResource smResource) {
+        if (smResource != null) {
+            smResource.setImagePath(getImageByResource(smResource));
+        }
+        return smResource;
+    }
+
+    private List<SmResource> calcImage(List<SmResource> smResources) {
+        if (smResources != null) {
+            for (SmResource smResource : smResources) {
+                calcImage(smResource);
+            }
+        }
+        return smResources;
+    }
 }
+
