@@ -59,9 +59,14 @@ public class GoogleAuthController {
         return ResponseEntity.ok(code);
     }
 
+    @RequestMapping(value = "/googleAuthenticate", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> googleSessionAuthG(HttpServletRequest request, HttpServletResponse response, String code, @RequestParam(name = "redirect", required = false) String redirect
+    ) throws Exception {
+        return googleSessionAuth(request, response, code, redirect);
+    }
+
     @RequestMapping(value = "/googleAuthenticate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> googleSessionAuth(HttpServletRequest request, HttpServletResponse response, String code,
-                                               @RequestParam(name = "redirect", required = false) String redirect
+    public ResponseEntity<?> googleSessionAuth(HttpServletRequest request, HttpServletResponse response, String code, @RequestParam(name = "redirect", required = false) String redirect
     ) throws Exception {
         try {
             String token = googleService.googleSessionAuth(code);
