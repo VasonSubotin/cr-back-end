@@ -124,6 +124,7 @@ public class GoogleService {
     public TokenResponse getToken(String code) throws IOException {
         // request
         AuthorizationCodeTokenRequest authorizationCodeTokenRequest = authorizationCodeFlow.newTokenRequest(code);
+        //AuthorizationCodeTokenRequest authorizationCodeTokenRequest = authorizationRefreshCodeFlow.newTokenRequest(code);
         logger.debug("-- setting redirection for google to {}", urlRedirect);
         authorizationCodeTokenRequest.setRedirectUri(urlRedirect);
 
