@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+//@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
 @Component
 public class AccountsDaoImpl implements AccountsDao {
 

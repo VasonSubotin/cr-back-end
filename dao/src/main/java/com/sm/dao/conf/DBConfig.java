@@ -63,10 +63,10 @@ public class DBConfig {
         return sessionFactory;
     }
 
-//    @Bean
-//    public PlatformTransactionManager transactionManager() {
-//        HibernateTransactionManager transactionManager = new HibernateTransactionManager();
-//        transactionManager.setSessionFactory(sessionFactory().getObject());
-//        return transactionManager;
-//    }
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        HibernateTransactionManager transactionManager = new HibernateTransactionManager();
+        transactionManager.setSessionFactory(sessionFactory().getObject());
+        return transactionManager;
+    }
 }
