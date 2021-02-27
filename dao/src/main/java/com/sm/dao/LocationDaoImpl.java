@@ -88,6 +88,16 @@ public class LocationDaoImpl implements LocationDao {
         }
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public SmLocation updateLocation(SmLocation smLocation, Long accountId) {
+        synchronized (Constants.class) {
+            smLocation.setIdLocation((Long) sessionFactory.getCurrentSession().merge(smLocation));
+            smLocation.setAccountId(accountId);
+            return smLocation;
+        }
+    }
+
     @Override
     @Transactional(readOnly = false)
     public SmLocation deleteLocationById(Long id, Long accountId) {

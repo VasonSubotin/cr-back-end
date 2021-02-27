@@ -72,7 +72,7 @@ public class SecurityServiceImpl implements SecurityService {
             smUserSession.setToken(token);
             smUserSession.setRefreshToken(refreshToken);
             smUserSession.setTtl(ttl);
-            userSessionDao.saveSession(smUserSession);
+            userSessionDao.updateSession(smUserSession);
             ret = smUserSession;
         }
 

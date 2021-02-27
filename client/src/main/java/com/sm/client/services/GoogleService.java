@@ -194,13 +194,15 @@ public class GoogleService {
         SmUserSession smUserSession = null;
         if (smUserSessions == null || smUserSessions.isEmpty()) {
             smUserSession = securityService.createSmUserSession(Constants.GOOGLE_AUTH_TYPE, tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(), tokenResponse.getExpiresInSeconds() * 1000L, smAccount.getIdAccount());
+            userSessionDao.saveSession(smUserSession);
         } else {
             smUserSession = smUserSessions.get(0);
             smUserSession.setTtl(tokenResponse.getExpiresInSeconds() * 1000L);
             smUserSession.setToken(tokenResponse.getAccessToken());
             smUserSession.setRefreshToken(tokenResponse.getRefreshToken());
+            userSessionDao.updateSession(smUserSession);
         }
-        userSessionDao.saveSession(smUserSession);
+
     }
 
     public String googleSessionAuth(String code) throws SmException, GeneralSecurityException, IOException {

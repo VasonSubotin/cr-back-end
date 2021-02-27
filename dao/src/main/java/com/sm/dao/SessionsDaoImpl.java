@@ -57,4 +57,12 @@ public class SessionsDaoImpl implements SessionsDao {
             sessionFactory.getCurrentSession().save(session);
         }
     }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void updateSession(SmSession session) {
+        synchronized (Constants.class) {
+            sessionFactory.getCurrentSession().merge(session);
+        }
+    }
 }

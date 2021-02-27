@@ -91,12 +91,12 @@ public class TimeOfUsageServiceImpl implements TimeOfUsageService {
             throw new SmException("Can't find tou by resourceId=" + resourceId + ". Please call GET /touPersonalList to see all tous for current user or use POST /tous to add new one.", HttpStatus.SC_NOT_FOUND);
         }
 
-        return timeOfUsageDao.saveTimeOfUsage(applyExisting(existing, smTimeOfUsage));
+        return timeOfUsageDao.updateTimeOfUsage(applyExisting(existing, smTimeOfUsage));
     }
 
     @Override
     public SmTimeOfUsage updateTimeOfUsage(Long touId, SmTimeOfUsage smTimeOfUsage) throws SmException {
-        return timeOfUsageDao.saveTimeOfUsage(applyExisting(getTouForCurrentUserByTou(touId), smTimeOfUsage));
+        return timeOfUsageDao.updateTimeOfUsage(applyExisting(getTouForCurrentUserByTou(touId), smTimeOfUsage));
     }
 
     private SmTimeOfUsage applyExisting(SmTimeOfUsage existing, SmTimeOfUsage smTimeOfUsage) {

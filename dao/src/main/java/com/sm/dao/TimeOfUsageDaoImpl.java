@@ -70,6 +70,15 @@ public class TimeOfUsageDaoImpl implements TimeOfUsageDao {
         }
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public SmTimeOfUsage updateTimeOfUsage(SmTimeOfUsage smTimeOfUsage) {
+        synchronized (Constants.class) {
+            sessionFactory.getCurrentSession().merge(smTimeOfUsage);
+            return smTimeOfUsage;
+        }
+    }
+
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public SmTimeOfUsage deleteTimeOfUsageById(Long id) {

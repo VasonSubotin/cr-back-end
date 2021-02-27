@@ -102,7 +102,7 @@ public class ResourcesController {
             smResourceExists.setnChargeByTime(smResource.getnChargeByTime());
         }
         smResourceExists.setDtUpdated(new Date());
-        return resourcesDao.saveResource(smResourceExists, accountId);
+        return resourcesDao.updateResource(smResourceExists, accountId);
     }
 
 //

@@ -91,6 +91,17 @@ public class ResourcesDaoImpl implements ResourcesDao {
         }
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public SmResource updateResource(SmResource smResource, Long accountId) {
+        synchronized (Constants.class) {
+            smResource.setAccountId(accountId);
+            sessionFactory.getCurrentSession().merge(smResource);
+           // smResource.setIdResource((Long) sessionFactory.getCurrentSession().save(smResource));
+            return calcImage(smResource);
+        }
+    }
+
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public SmResource deleteResourceByIdAndAccountId(Long id, Long accountId) {

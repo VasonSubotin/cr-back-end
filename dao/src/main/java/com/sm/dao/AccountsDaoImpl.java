@@ -78,7 +78,7 @@ public class AccountsDaoImpl implements AccountsDao {
     @Override
     public SmAccount updateAccount(SmAccount smAccount) {
         synchronized (Constants.class) {
-            sessionFactory.getCurrentSession().update(smAccount);
+            sessionFactory.getCurrentSession().merge(smAccount);
             return smAccount;
         }
     }

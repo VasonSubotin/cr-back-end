@@ -93,6 +93,15 @@ public class UserSessionDaoImpl implements UserSessionDao {
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
+    public SmUserSession updateSession(SmUserSession smUserSession) {
+        synchronized (Constants.class) {
+            sessionFactory.getCurrentSession().merge(smUserSession);
+            return smUserSession;
+        }
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Override
     public void deleteSession(Long accountId, Long resourceId, String userSessionType) {
         synchronized (Constants.class) {
             Session session = sessionFactory.getCurrentSession();

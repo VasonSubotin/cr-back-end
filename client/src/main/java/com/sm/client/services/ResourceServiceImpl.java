@@ -29,7 +29,6 @@ public class ResourceServiceImpl implements ResourceService {
     private static final Logger logger = LoggerFactory.getLogger(ResourceServiceImpl.class);
 
 
-
     @Autowired
     private ResourcesDao resourcesDao;
 
@@ -184,7 +183,12 @@ public class ResourceServiceImpl implements ResourceService {
         for (SmResource smResource : needToSave.values()) {
             smResource.setDtUpdated(new Date());
             setBattery(smResource);
-            resourcesDao.saveResource(smResource, userSession.getAccountId());
+            if (smResource.getIdResource() == null) {
+                resourcesDao.saveResource(smResource, userSession.getAccountId());
+            }else {
+                resourcesDao.updateResource(smResource, userSession.getAccountId());
+            }
+
             SmUserSession userSessionClone = securityService.createSmUserSession(userSession.getSessionType(), userSession.getToken(), userSession.getRefreshToken(), userSession.getTtl(), userSession.getAccountId());
             userSessionClone.setResourceId(smResource.getIdResource());
             userSessionDao.deleteSession(smResource.getAccountId(), smResource.getIdResource(), userSession.getSessionType());

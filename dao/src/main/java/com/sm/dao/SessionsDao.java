@@ -2,6 +2,7 @@ package com.sm.dao;
 
 import com.sm.model.SmEvent;
 import com.sm.model.SmSession;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -15,4 +16,7 @@ public interface SessionsDao {
 
     @javax.transaction.Transactional
     void saveSession(SmSession session);
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    void updateSession(SmSession session);
 }

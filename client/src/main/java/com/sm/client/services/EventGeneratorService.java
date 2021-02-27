@@ -168,7 +168,7 @@ public class EventGeneratorService {
             smSession.setDtStop(new Date());
             smSession.setClosed(true);
             smSession.setDuration(smSession.getDtStop().getTime() - smSession.getDtStart().getTime());
-            sessionsDao.saveSession(smSession);
+            sessionsDao.updateSession(smSession);
         }
 
         //starting new session -
@@ -184,7 +184,7 @@ public class EventGeneratorService {
             smSession.setDtStop(new Date());
         }
         smSession.setClosed(true);
-        sessionsDao.saveSession(smSession);
+        sessionsDao.updateSession(smSession);
 
         smSession = createSession(eventData);
         // new non charge session
@@ -195,16 +195,22 @@ public class EventGeneratorService {
         SmSession smSession = sessionsDao.getActiveSessionByAccountIdAndResourceId(eventData.getSmResource().getAccountId(), eventData.getSmResource().getPolicyId());
         if (smSession == null) {
             smSession = createSession(eventData);
+            sessionsDao.saveSession(smSession);
+        }else{
+            sessionsDao.updateSession(smSession);
         }
-        sessionsDao.saveSession(smSession);
+
     }
 
     private void stopCharge(EventData eventData) {
         SmSession smSession = sessionsDao.getActiveSessionByAccountIdAndResourceId(eventData.getSmResource().getAccountId(), eventData.getSmResource().getPolicyId());
         if (smSession == null) {
             smSession = createSession(eventData);
+            sessionsDao.saveSession(smSession);
+        }else{
+            sessionsDao.updateSession(smSession);
         }
-        sessionsDao.saveSession(smSession);
+
     }
 
 

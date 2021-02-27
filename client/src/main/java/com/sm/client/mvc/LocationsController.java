@@ -62,7 +62,7 @@ public class LocationsController {
         }
 
         response.setStatus(HttpStatus.OK.value());
-        return locationDao.saveLocation(smLocationExists, accountId);
+        return locationDao.updateLocation(smLocationExists, accountId);
     }
 
 

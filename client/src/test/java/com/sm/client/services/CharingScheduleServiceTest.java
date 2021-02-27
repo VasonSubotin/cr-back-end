@@ -42,6 +42,8 @@ public class CharingScheduleServiceTest {
     OptimizationServiceFactory optimizationServiceFactory;
     TimeOfUsageServiceImpl timeOfUsageService;
 
+    EcoServiceImpl ecoService = new EcoServiceImpl();
+
     @Before
     public void init() throws ParseException, SmException {
         timeScheduleService = new TimeScheduleServiceImpl();
@@ -49,7 +51,7 @@ public class CharingScheduleServiceTest {
         timeScheduleService.setOptimizationServiceFactory(optimizationServiceFactory);
 
 
-        EcoServiceImpl ecoService = new EcoServiceImpl();
+
         RestTemplate ecoTemplate = Mockito.mock(RestTemplate.class);
         ResponseEntity responseEntity = Mockito.mock(ResponseEntity.class);
 
@@ -113,7 +115,16 @@ public class CharingScheduleServiceTest {
     public void testEco() throws Exception {
         timeScheduleService.setScheduleTransformService(new ScheduleTransformServiceImpl());
 
-        SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(), generateSmResource(PolicyType.ECO), sdf.parse("2020-09-02T00:00:00"), sdf.parse("2020-09-03T00:00:00"));
+
+        RestTemplate ecoTemplate = Mockito.mock(RestTemplate.class);
+        ResponseEntity responseEntity = Mockito.mock(ResponseEntity.class);
+
+        when(responseEntity.getBody()).thenReturn(generateListGrid2());
+        when(ecoTemplate.exchange(any(URI.class), Matchers.eq(HttpMethod.GET), any(HttpEntity.class), Matchers.eq(GridData[].class))).thenReturn(responseEntity);
+
+        ecoService.setEcoTemplate(ecoTemplate);
+
+        SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(.88), generateSmResource(PolicyType.ECO), sdf.parse("2020-09-02T05:03:00"), sdf.parse("2020-09-03T00:00:00"));
         System.out.println(schedulerData);
         System.out.println(schedulerData.getIntervals().get(0).getStartTime());
     }
@@ -144,6 +155,17 @@ public class CharingScheduleServiceTest {
         };
     }
 
+    private GridData[] generateListGrid2() throws ParseException {
+        return new GridData[]{
+                createGridData(sdf.parse("2020-09-02T00:00:00"), 300, 10D),
+                createGridData(sdf.parse("2020-09-02T01:00:00"), 300, 11D),
+                createGridData(sdf.parse("2020-09-02T02:00:00"), 300, 12D),
+                createGridData(sdf.parse("2020-09-02T03:00:00"), 300, 13D),
+                createGridData(sdf.parse("2020-09-02T04:00:00"), 300, 14D),
+                createGridData(sdf.parse("2020-09-02T05:00:00"), 300, 15D),
+        };
+    }
+
     private SmDREvent createDREvent(long start, long stop) {
         SmDREvent drEvent = new SmDREvent();
         drEvent.setIdDrEvent(getId());
@@ -154,8 +176,12 @@ public class CharingScheduleServiceTest {
     }
 
     private VehicleData generateVehicleData() {
+        return generateVehicleData(.5);
+    }
+
+    private VehicleData generateVehicleData(double proc_charge) {
         VehicleData smData = new VehicleData();
-        smData.setBattery(new VehicleBattery(100, 0.50));
+        smData.setBattery(new VehicleBattery(100, proc_charge));
         smData.setVin("testVin1");
         return smData;
     }
@@ -163,7 +189,7 @@ public class CharingScheduleServiceTest {
     private SmResource generateSmResource(PolicyType policyType) {
         SmResource smResource = new SmResource();
         smResource.setPolicyId(policyType.getId());
-        smResource.setCapacity(30000L);
+        smResource.setCapacity(60000L);
         smResource.setAccountId(1L);
         smResource.setIdResource(1L);
         smResource.setResourceTypeId(1L);
