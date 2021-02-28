@@ -144,7 +144,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
 //                System.out.println(last);
 //            last = cd.getStart();
 //        }
-        List<Double> lst = co2DataList.stream().filter(a -> (a.getStop() <= stop && a.getStart() >= start)).map(GridData::getValue).collect(Collectors.toList());
+        List<Double> lst = co2DataList.stream().filter(a -> ( (start<= a.getStop() && a.getStop() <= stop) || (start<= a.getStart() && a.getStart() <= stop) )).map(GridData::getValue).collect(Collectors.toList());
         gridDataAggregated.setValues(lst.toArray(new Double[lst.size()]));
 
         return gridDataAggregated;

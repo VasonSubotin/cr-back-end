@@ -22,71 +22,71 @@ public class TimeOfUsageDaoImpl implements TimeOfUsageDao {
 
     @Override
     public List<SmTimeOfUsage> getAllSmTimeOfUsages() {
-        synchronized (Constants.class) {
-            Session session = sessionFactory.getCurrentSession();
-            String hql = "FROM SmTimeOfUsage where deleted=0 or deleted is null";
-            return session.createQuery(hql).getResultList();
-        }
+
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmTimeOfUsage where deleted=0 or deleted is null";
+        return session.createQuery(hql).getResultList();
+
     }
 
     @Override
     public List<SmTimeOfUsage> getTimeOfUsagesByResourceIn(List<Long> resourceIds) {
-        synchronized (Constants.class) {
-            Session session = sessionFactory.getCurrentSession();
-            String hql = "FROM SmTimeOfUsage where (deleted=0 or deleted is null) and resourceId in :resourceIds";
-            Query query = session.createQuery(hql);
-            query.setParameter("resourceIds", resourceIds);
-            return query.getResultList();
-        }
+
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmTimeOfUsage where (deleted=0 or deleted is null) and resourceId in :resourceIds";
+        Query query = session.createQuery(hql);
+        query.setParameter("resourceIds", resourceIds);
+        return query.getResultList();
+
     }
 
     @Override
     public SmTimeOfUsage getTimeOfUsageById(Long id) {
-        synchronized (Constants.class) {
-            return sessionFactory.getCurrentSession().get(SmTimeOfUsage.class, id);
-        }
+
+        return sessionFactory.getCurrentSession().get(SmTimeOfUsage.class, id);
+
     }
 
     @Override
     public SmTimeOfUsage getTimeOfUsageByResourceId(Long resourceId) {
-        synchronized (Constants.class) {
-            Session session = sessionFactory.getCurrentSession();
-            String hql = "FROM SmTimeOfUsage where (deleted=0 or deleted is null) and resourceId=:resourceId";
-            Query query = session.createQuery(hql);
 
-            query.setParameter("resourceId", resourceId);
-            List results = query.getResultList();
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmTimeOfUsage where (deleted=0 or deleted is null) and resourceId=:resourceId";
+        Query query = session.createQuery(hql);
 
-            return results.isEmpty() ? null : (SmTimeOfUsage) results.get(0);
-        }
+        query.setParameter("resourceId", resourceId);
+        List results = query.getResultList();
+
+        return results.isEmpty() ? null : (SmTimeOfUsage) results.get(0);
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmTimeOfUsage saveTimeOfUsage(SmTimeOfUsage smTimeOfUsage) {
-        synchronized (Constants.class) {
-            smTimeOfUsage.setIdTou((Long) sessionFactory.getCurrentSession().save(smTimeOfUsage));
-            return smTimeOfUsage;
-        }
+
+        smTimeOfUsage.setIdTou((Long) sessionFactory.getCurrentSession().save(smTimeOfUsage));
+        return smTimeOfUsage;
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmTimeOfUsage updateTimeOfUsage(SmTimeOfUsage smTimeOfUsage) {
-        synchronized (Constants.class) {
-            sessionFactory.getCurrentSession().merge(smTimeOfUsage);
-            return smTimeOfUsage;
-        }
+
+        sessionFactory.getCurrentSession().merge(smTimeOfUsage);
+        return smTimeOfUsage;
+
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public SmTimeOfUsage deleteTimeOfUsageById(Long id) {
-        synchronized (Constants.class) {
-            Query query = sessionFactory.getCurrentSession().createQuery("update SmTimeOfUsage set deleted = 1 where idTou = :id");
-            query.setParameter("id", id);
-            query.executeUpdate();
-            return getTimeOfUsageById(id);
-        }
+
+        Query query = sessionFactory.getCurrentSession().createQuery("update SmTimeOfUsage set deleted = 1 where idTou = :id");
+        query.setParameter("id", id);
+        query.executeUpdate();
+        return getTimeOfUsageById(id);
+
     }
 }

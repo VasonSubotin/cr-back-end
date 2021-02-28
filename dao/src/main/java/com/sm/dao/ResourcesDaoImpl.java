@@ -84,35 +84,35 @@ public class ResourcesDaoImpl implements ResourcesDao {
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmResource saveResource(SmResource smResource, Long accountId) {
-        synchronized (Constants.class) {
+
             smResource.setAccountId(accountId);
             smResource.setIdResource((Long) sessionFactory.getCurrentSession().save(smResource));
             return calcImage(smResource);
-        }
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmResource updateResource(SmResource smResource, Long accountId) {
-        synchronized (Constants.class) {
-            smResource.setAccountId(accountId);
-            sessionFactory.getCurrentSession().merge(smResource);
-           // smResource.setIdResource((Long) sessionFactory.getCurrentSession().save(smResource));
-            return calcImage(smResource);
-        }
+
+        smResource.setAccountId(accountId);
+        sessionFactory.getCurrentSession().merge(smResource);
+        // smResource.setIdResource((Long) sessionFactory.getCurrentSession().save(smResource));
+        return calcImage(smResource);
+
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public SmResource deleteResourceByIdAndAccountId(Long id, Long accountId) {
-        synchronized (Constants.class) {
+
             //sessionFactory.getCurrentSession().update("UPDATE SmResource set SmResource.deleted");
             Query query = sessionFactory.getCurrentSession().createQuery("update SmResource set deleted = 1 where idResource = :id and accountId=:accountId");
             query.setParameter("id", id);
             query.setParameter("accountId", accountId);
             query.executeUpdate();
             return calcImage(getResourceByIdAndAccountId(id, accountId));
-        }
+
     }
 
     @Override

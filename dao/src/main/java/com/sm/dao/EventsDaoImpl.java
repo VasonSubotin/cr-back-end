@@ -23,20 +23,20 @@ public class EventsDaoImpl implements EventsDao {
 
     @Override
     public SmEvent getLastEventByAccountIdAndResourceId(Long accountId, Long resourceId) {
-        synchronized (Constants.class) {
+
             Session session = sessionFactory.getCurrentSession();
             String hql = "FROM SmEvent where accountId=:accountId and resourceId=:resourceId order by dtCreated limit 1";
             Query query = session.createQuery(hql);
             query.setParameter("accountId", accountId);
             query.setParameter("resourceId", resourceId);
             return (SmEvent) query.getSingleResult();
-        }
+
     }
 
 
     @Override
     public List<SmEvent> getAllEventsByAccountIdAndResourceIdAndTimeRange(Long accountId, Long resourceId, Date start, Date stop, Long limit) {
-        synchronized (Constants.class) {
+
             Session session = sessionFactory.getCurrentSession();
             String hql = "FROM SmEvent where (closed=0 or closed is null) and accountId=:accountId and resourceId=:resourceId and  dtCreated>:start and dtCreated<:stop limit :limit";
             Query query = session.createQuery(hql);
@@ -46,15 +46,15 @@ public class EventsDaoImpl implements EventsDao {
             query.setParameter("stop", stop);
             query.setParameter("limit", limit);
             return query.getResultList();
-        }
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmEvent saveEvent(SmEvent smEvent) {
-        synchronized (Constants.class) {
+
             smEvent.setIdEvent((Long) sessionFactory.getCurrentSession().save(smEvent));
             return smEvent;
-        }
+
     }
 }

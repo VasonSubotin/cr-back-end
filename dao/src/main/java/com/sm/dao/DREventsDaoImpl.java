@@ -23,23 +23,23 @@ public class DREventsDaoImpl implements DREventsDao {
 
     @Override
     public List<SmDREvent> getAllDREvents() {
-        synchronized (Constants.class) {
+
             Session session = sessionFactory.getCurrentSession();
             String hql = "FROM SmDREvent where deleted=0 or deleted is null";
             return session.createQuery(hql).getResultList();
-        }
+
     }
 
     @Override
     public List<SmDREvent> getDREventsByResourceId(Long resourceId) {
-        synchronized (Constants.class) {
+
             Session session = sessionFactory.getCurrentSession();
             String hql = "FROM SmDREvent where (deleted=0 or deleted is null) and resourceId=:resourceId";
             Query query = session.createQuery(hql);
             query.setParameter("resourceId", resourceId);
 
             return query.getResultList();
-        }
+
     }
 
 }

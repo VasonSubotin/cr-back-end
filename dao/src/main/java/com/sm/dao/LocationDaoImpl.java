@@ -57,7 +57,7 @@ public class LocationDaoImpl implements LocationDao {
                 query.setParameter("accountId", accountId);
                 query.setParameter("externalLocationId", externalLocationId);
                 List<SmLocation> res = query.getResultList();
-                return res==null || res.isEmpty()?null:res.iterator().next();
+                return res == null || res.isEmpty() ? null : res.iterator().next();
             }
         }
     }
@@ -91,23 +91,23 @@ public class LocationDaoImpl implements LocationDao {
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmLocation updateLocation(SmLocation smLocation, Long accountId) {
-        synchronized (Constants.class) {
-            smLocation.setIdLocation((Long) sessionFactory.getCurrentSession().merge(smLocation));
-            smLocation.setAccountId(accountId);
-            return smLocation;
-        }
+
+        smLocation.setIdLocation((Long) sessionFactory.getCurrentSession().merge(smLocation));
+        smLocation.setAccountId(accountId);
+        return smLocation;
+
     }
 
     @Override
     @Transactional(readOnly = false)
     public SmLocation deleteLocationById(Long id, Long accountId) {
-        synchronized (Constants.class) {
-            Query query = sessionFactory.getCurrentSession().createQuery("update SmLocation set deleted = 1 where idLocation = :id and accountId=:accountId");
-            query.setParameter("id", id);
-            query.setParameter("accountId", accountId);
-            query.executeUpdate();
-            return getLocationByIdAndAccountId(id, accountId);
-        }
+
+        Query query = sessionFactory.getCurrentSession().createQuery("update SmLocation set deleted = 1 where idLocation = :id and accountId=:accountId");
+        query.setParameter("id", id);
+        query.setParameter("accountId", accountId);
+        query.executeUpdate();
+        return getLocationByIdAndAccountId(id, accountId);
+
     }
 }
 //Unable to commit against JDBC Connection; nested exception is org.hibernate.TransactionException: Unable to commit against JDBC Connection

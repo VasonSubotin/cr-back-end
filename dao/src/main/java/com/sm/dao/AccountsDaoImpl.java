@@ -23,74 +23,66 @@ public class AccountsDaoImpl implements AccountsDao {
     @Override
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public List<SmAccount> getAllAccounts() {
-        synchronized (Constants.class) {
-            Session session = sessionFactory.getCurrentSession();
-            String hql = "FROM SmAccount where deleted=0 or deleted is null";
-            return session.createQuery(hql).getResultList();
-        }
+
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmAccount where deleted=0 or deleted is null";
+        return session.createQuery(hql).getResultList();
+
     }
 
     @Override
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public SmAccount getAccountByLogin(String login) {
-        synchronized (Constants.class) {
-            Session session = sessionFactory.getCurrentSession();
-            String hql = "FROM SmAccount where (deleted=0 or deleted is null) and login=:login";
-            Query query = session.createQuery(hql);
-            query.setParameter("login", login);
-            List ret = query.getResultList();
-            return ret.isEmpty() ? null : (SmAccount) ret.get(0);
-        }
+
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmAccount where (deleted=0 or deleted is null) and login=:login";
+        Query query = session.createQuery(hql);
+        query.setParameter("login", login);
+        List ret = query.getResultList();
+        return ret.isEmpty() ? null : (SmAccount) ret.get(0);
+
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public SmAccount getAccountByLoginByAuthorizationType(String login, String authorizationType) {
-        synchronized (Constants.class) {
-            Session session = sessionFactory.getCurrentSession();
-            String hql = "FROM SmAccount where (deleted=0 or deleted is null) and login=:login and accountType:accountType";
-            Query query = session.createQuery(hql);
-            query.setParameter("login", login);
-            query.setParameter("accountType", authorizationType);
-            List ret = query.getResultList();
-            return ret.isEmpty() ? null : (SmAccount) ret.get(0);
-        }
+
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM SmAccount where (deleted=0 or deleted is null) and login=:login and accountType:accountType";
+        Query query = session.createQuery(hql);
+        query.setParameter("login", login);
+        query.setParameter("accountType", authorizationType);
+        List ret = query.getResultList();
+        return ret.isEmpty() ? null : (SmAccount) ret.get(0);
+
     }
 
 
     @Override
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public SmAccount getAccountById(Long id) {
-        synchronized (Constants.class) {
-            return sessionFactory.getCurrentSession().get(SmAccount.class, id);
-        }
+        return sessionFactory.getCurrentSession().get(SmAccount.class, id);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmAccount saveAccount(SmAccount smAccount) {
-        synchronized (Constants.class) {
-            smAccount.setIdAccount((Long) sessionFactory.getCurrentSession().save(smAccount));
-            return smAccount;
-        }
+        smAccount.setIdAccount((Long) sessionFactory.getCurrentSession().save(smAccount));
+        return smAccount;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     @Override
     public SmAccount updateAccount(SmAccount smAccount) {
-        synchronized (Constants.class) {
-            sessionFactory.getCurrentSession().merge(smAccount);
-            return smAccount;
-        }
+        sessionFactory.getCurrentSession().merge(smAccount);
+        return smAccount;
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public SmAccount deleteAccountById(Long id) {
-        synchronized (Constants.class) {
-            Query query = sessionFactory.getCurrentSession().createQuery("update SmAccount set deleted = 1 where idAccount = :id");
-            query.setParameter("id", id);
-            query.executeUpdate();
-            return getAccountById(id);
-        }
+        Query query = sessionFactory.getCurrentSession().createQuery("update SmAccount set deleted = 1 where idAccount = :id");
+        query.setParameter("id", id);
+        query.executeUpdate();
+        return getAccountById(id);
     }
 }
