@@ -166,6 +166,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
     private List<IntervalOfLocation> prepareForCalculation(Long accountId, List<EventWrapper> eventsWrappers, List<SchedulerInterval> intervals) {
         List<IntervalOfLocation> listForOptimization = new ArrayList<>();
         Long needMinEnergy = minChargePerLocationInWatt;
+        Collections.sort(eventsWrappers, Comparator.comparing(EventWrapper::getStart));
         for (EventWrapper eventsWrapper : eventsWrappers) {
 
             double latitudes[] = GeoUtils.calculateLatRange(eventsWrapper.getCoordinates().getLatitude(), 1000);
