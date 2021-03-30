@@ -10,9 +10,10 @@ public class SimpleOptimizationService {
      * 2. till that location we are charging only if it is necessary
      * 3. on location with minimum price we are charging to max capacity
      * 4. after max charge we are repeating 1. for all location after this one (with minimum price)
-     * @param intervals  - intervals objects
-     * @param energy  - start energy
-     * @param capacity - capacity of resource
+     *
+     * @param intervals - intervals objects
+     * @param energy    - start energy
+     * @param capacity  - capacity of resource
      */
     public static void clculate(List<IntervalOfLocation> intervals, long energy, long capacity) {
         int curPos = -1;
@@ -32,7 +33,7 @@ public class SimpleOptimizationService {
         double minPrice = Double.MAX_VALUE;
         for (int i = from; i < intervals.size(); i++) {
             IntervalOfLocation intervalOfLocation = intervals.get(i);
-            if (minPrice > intervalOfLocation.getPrice()) {
+            if (minPrice > intervalOfLocation.getPrice() && intervalOfLocation.getPrice() > 0) {
                 minPrice = intervalOfLocation.getPrice();
                 ret = i;
             }
@@ -46,7 +47,7 @@ public class SimpleOptimizationService {
         for (int i = from; i < intervals.size() && i < index; i++) {
             IntervalOfLocation intervalOfLocation = intervals.get(i);
             energy = energy - intervalOfLocation.getNeedEnergy();
-            if (energy > intervalOfLocation.getMinEnergyLeft()) {
+            if (energy > intervalOfLocation.getMinEnergyLeft() || intervalOfLocation.getPrice() <= 0) {
                 continue;
             } else {
                 intervalOfLocation.setCharge((intervalOfLocation.getMinEnergyLeft() - energy));
@@ -55,7 +56,9 @@ public class SimpleOptimizationService {
             }
         }
         IntervalOfLocation intervalOfLocation = intervals.get(index);
-        intervalOfLocation.setCharge(capacity - energy);
+        if (intervalOfLocation.getPrice() > 0) {
+            intervalOfLocation.setCharge(capacity - energy);
+        }
         return capacity - intervalOfLocation.getNeedEnergy();
     }
 

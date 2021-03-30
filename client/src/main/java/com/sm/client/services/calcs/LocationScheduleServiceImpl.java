@@ -160,13 +160,13 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
                 logger.error("Failed to process event {} ", event.toPrettyString());
             }
         }
+        Collections.sort(eventsWrappers,(a, b) -> a.getStart() == b.getStart() ? 0 : a.getStart() == null ? -1 : a.getStart().compareTo(b.getStart()));
         return eventsWrappers;
     }
 
     private List<IntervalOfLocation> prepareForCalculation(Long accountId, List<EventWrapper> eventsWrappers, List<SchedulerInterval> intervals) {
         List<IntervalOfLocation> listForOptimization = new ArrayList<>();
         Long needMinEnergy = minChargePerLocationInWatt;
-        Collections.sort(eventsWrappers, Comparator.comparing(EventWrapper::getStart));
         for (EventWrapper eventsWrapper : eventsWrappers) {
 
             double latitudes[] = GeoUtils.calculateLatRange(eventsWrapper.getCoordinates().getLatitude(), 1000);
@@ -174,7 +174,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             List<SmLocation> locations = locationDao.getLocationsInSmallRangeAndAccountId(accountId, latitudes[0], longitude[0], latitudes[1], longitude[1]);
             if (locations == null || locations.isEmpty()) {
                 logger.debug("For account {} - No locations found for coordinates from {}, {}  to {}, {}", accountId, latitudes[0], longitude[0], latitudes[1], longitude[1]);
-                continue;
+               // continue;
             }
             if (eventsWrapper.getDistanceToTheNextEventLocation() != null) {
                 //for the next location we need at least
@@ -247,6 +247,10 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
                     }
                 }
             }
+            if(mpLocation.isEmpty()){
+                // no location found
+                listForOptimization.add(new IntervalOfLocation(0, needMinEnergy, -1, schedulerInterval));
+            }
         }
         return listForOptimization;
     }
@@ -269,7 +273,7 @@ public class LocationScheduleServiceImpl implements LocationScheduleService {
             throw new SmException("Can't find capacity for resourceId=" + smResource.getIdResource(), HttpStatus.SC_NOT_FOUND);
         }
 
-        if (smData.getBattery() == null ) {
+        if (smData.getBattery() == null) {
             throw new SmException("Can't find Battery status for resourceId=" + smResource.getIdResource(), HttpStatus.SC_NOT_FOUND);
         }
 

@@ -25,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -99,12 +100,16 @@ public class CharingScheduleServiceTest {
     public void testSimple() throws Exception {
         timeScheduleService.setScheduleTransformService(new ScheduleTransformServiceImpl());
         SmTimeOfUsage timeOfUsage = new SmTimeOfUsage();
-        timeOfUsage.setStart(5 * 60L);
-        timeOfUsage.setStop(10 * 60L);
+        timeOfUsage.setStart(894L);
+        timeOfUsage.setStop(1087L);
         timeOfUsage.setIdTou(1L);
         timeOfUsage.setLocationId(1L);
         timeOfUsage.setResourceId(1L);
         when(timeOfUsageService.getTimeOfUsageByResourceId(1L)).thenReturn(timeOfUsage);
+
+        DREventService drEventService = mock(DREventService.class);
+        when(drEventService.getDREventsByResourceId(1L)).thenReturn(new ArrayList<>());
+        ecoService.setDrEventService(drEventService);
 
         SchedulerData schedulerData = timeScheduleService.calculateSchedule(generateVehicleData(), generateSmResource(PolicyType.SIMPLE), sdf.parse("2020-09-02T05:00:00"), sdf.parse("2020-09-03T05:00:00"));
         System.out.println(schedulerData);
@@ -140,29 +145,30 @@ public class CharingScheduleServiceTest {
 
     private GridData[] generateListGrid() throws ParseException {
         return new GridData[]{
-                createGridData(sdf.parse("2020-09-02T00:00:00"), 3600, 10D),
-                createGridData(sdf.parse("2020-09-02T01:00:00"), 3600, 11D),
-                createGridData(sdf.parse("2020-09-02T02:00:00"), 3600, 12D),
-                createGridData(sdf.parse("2020-09-02T03:00:00"), 3600, 13D),
-                createGridData(sdf.parse("2020-09-02T04:00:00"), 3600, 14D),
-                createGridData(sdf.parse("2020-09-02T05:00:00"), 3600, 15D),
-                createGridData(sdf.parse("2020-09-02T06:00:00"), 3600, 16D),
-                createGridData(sdf.parse("2020-09-02T07:00:00"), 3600, 17D),
-                createGridData(sdf.parse("2020-09-02T08:00:00"), 3600, 10D),
-                createGridData(sdf.parse("2020-09-02T09:00:00"), 3600, 1D),
-                createGridData(sdf.parse("2020-09-02T10:00:00"), 3600, 2D),
-                createGridData(sdf.parse("2020-09-02T11:00:00"), 3600, 20D)
+                createGridData(sdf.parse("2020-08-26T00:00:00"), 3600, 10D),
+                createGridData(sdf.parse("2020-08-26T01:00:00"), 3600, 11D),
+                createGridData(sdf.parse("2020-08-26T02:00:00"), 3600, 12D),
+                createGridData(sdf.parse("2020-08-26T03:00:00"), 3600, 13D),
+                createGridData(sdf.parse("2020-08-26T04:00:00"), 3600, 14D),
+                createGridData(sdf.parse("2020-08-26T05:00:00"), 3600, 15D),
+                createGridData(sdf.parse("2020-08-26T06:00:00"), 3600, 16D),
+                createGridData(sdf.parse("2020-08-26T07:00:00"), 3600, 17D),
+                createGridData(sdf.parse("2020-08-26T08:00:00"), 3600, 10D),
+                createGridData(sdf.parse("2020-08-26T09:00:00"), 3600, 1D),
+                createGridData(sdf.parse("2020-08-26T10:00:00"), 3600, 2D),
+                createGridData(sdf.parse("2020-08-26T11:00:00"), 3600, 20D),
+                createGridData(sdf.parse("2020-08-26T12:00:00"), 3600*12, 16D)
         };
     }
 
     private GridData[] generateListGrid2() throws ParseException {
         return new GridData[]{
-                createGridData(sdf.parse("2020-09-02T00:00:00"), 300, 10D),
-                createGridData(sdf.parse("2020-09-02T01:00:00"), 300, 11D),
-                createGridData(sdf.parse("2020-09-02T02:00:00"), 300, 12D),
-                createGridData(sdf.parse("2020-09-02T03:00:00"), 300, 13D),
-                createGridData(sdf.parse("2020-09-02T04:00:00"), 300, 14D),
-                createGridData(sdf.parse("2020-09-02T05:00:00"), 300, 15D),
+                createGridData(sdf.parse("2020-08-27T00:00:00"), 300, 10D),
+                createGridData(sdf.parse("2020-08-27T01:00:00"), 300, 11D),
+                createGridData(sdf.parse("2020-08-27T02:00:00"), 300, 12D),
+                createGridData(sdf.parse("2020-08-27T03:00:00"), 300, 13D),
+                createGridData(sdf.parse("2020-08-27T04:00:00"), 300, 14D),
+                createGridData(sdf.parse("2020-08-27T05:00:00"), 300, 15D),
         };
     }
 

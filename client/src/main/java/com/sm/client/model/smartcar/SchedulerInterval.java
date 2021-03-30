@@ -55,6 +55,8 @@ public class SchedulerInterval implements Serializable {
     @JsonProperty("economic_savings")
     private double economicSavings;
 
+    private boolean unknownCO2Impact;
+
     public long getDuration() {
         return duration;
     }
@@ -159,4 +161,11 @@ public class SchedulerInterval implements Serializable {
         this.economicSavings = economicSavings;
     }
 
+    public boolean isUnknownCO2Impact() {
+        return unknownCO2Impact;
+    }
+
+    public void setUnknownCO2Impact(boolean unknownCO2Impact) {
+        this.unknownCO2Impact = unknownCO2Impact;
+    }
 }

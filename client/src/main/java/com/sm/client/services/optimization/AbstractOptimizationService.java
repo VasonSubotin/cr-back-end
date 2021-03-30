@@ -55,6 +55,8 @@ public abstract class AbstractOptimizationService implements OptimizationService
             logger.error("No grid data found for the specified time range {} - {} and location {}", start, stop, locationId);
             throw new Exception("No grid data found for the specified time range " + start + " - " + stop + " and location " + locationId);
         }
+        co2DataList = normalizeGrid(start, stop, co2DataList, locationId);
+
         List<GridData> co2DataListOriginal = cloneGridData(co2DataList);
         SmTimeOfUsage timeOfUsage = timeOfUsageService.getTimeOfUsageByResourceId(resourceId);
         if (timeOfUsage != null) {
@@ -69,6 +71,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
                     GridData cloned = IntervalTransformerUtils.cloneGridData(interval.getData());
                     cloned.setStart(interval.getStart());
                     cloned.setStop(interval.getStop());
+                    cloned.setPointTime(new Date(cloned.getStart()));
                     co2DataList.add(cloned);
                 }
             }
@@ -87,7 +90,10 @@ public abstract class AbstractOptimizationService implements OptimizationService
                     GridData cl = cloneGridData(cd);
                     cl.setStart(last.getStart() + i * 300_000);
                     cl.setStop(cl.getStart() + 300_000);
-                    cl.setValue(last.getValue() + (double) i * (cd.getValue() - last.getValue()) / (double) n);
+                    cl.setFrequence(300L);
+                    if (last.getValue() != null && cd.getValue() != null) {
+                        cl.setValue(last.getValue() + (double) i * (cd.getValue() - last.getValue()) / (double) n);
+                    }
                     ret.add(cl);
                 }
             }
@@ -144,7 +150,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
 //                System.out.println(last);
 //            last = cd.getStart();
 //        }
-        List<Double> lst = co2DataList.stream().filter(a -> ( (start<= a.getStop() && a.getStop() <= stop) || (start<= a.getStart() && a.getStart() <= stop) )).map(GridData::getValue).collect(Collectors.toList());
+        List<Double> lst = co2DataList.stream().filter(a -> ((start <= a.getStop() && a.getStop() <= stop) || (start <= a.getStart() && a.getStart() <= stop))).map(GridData::getValue).collect(Collectors.toList());
         gridDataAggregated.setValues(lst.toArray(new Double[lst.size()]));
 
         return gridDataAggregated;
@@ -213,6 +219,9 @@ public abstract class AbstractOptimizationService implements OptimizationService
         long timeInMins = timeInMinsNeed;
         for (GridData gridData : co2DataList) {
             timeInMins -= (gridData.getStop() - gridData.getStart()) / 60000;
+            if (gridData.getValue() == null) {
+                continue;
+            }
             if (timeInMins < 0) {
                 double curImpact = (gridData.getStop() - gridData.getStart() + timeInMins * 60000) / 3600000D * gridData.getValue();
                 coImpactSummary += curImpact;
@@ -248,11 +257,15 @@ public abstract class AbstractOptimizationService implements OptimizationService
             }
 
             current.setDuration(current.getDuration() + gridData.getStop() - gridData.getStart());
-            double curImpact = (gridData.getStop() - gridData.getStart()) / 3600000D * gridData.getValue();
-            current.setCo2Impact(current.getCo2Impact() + curImpact);
+            if (gridData.getValue() != null) {
+                double curImpact = (gridData.getStop() - gridData.getStart()) / 3600000D * gridData.getValue();
+                current.setCo2Impact(current.getCo2Impact() + curImpact);
+                coImpactSummary += curImpact;
+            } else {
+                current.setUnknownCO2Impact(true);
+            }
             current.setSmScheduleType(SmScheduleType.CHR);
             current.setEnergy(current.getEnergy() + current.getChargeRate() * (gridData.getStop() - gridData.getStart()) / 3600000);
-            coImpactSummary += curImpact;
             lastGridData = gridData;
         }
         result.setCo2Impact(coImpactSummary);
@@ -288,5 +301,45 @@ public abstract class AbstractOptimizationService implements OptimizationService
         this.timeOfUsageService = timeOfUsageService;
     }
 
+    protected List<GridData> normalizeGrid(Date sDate, Date eDate, List<GridData> gridDataList, String locationId) {
+        if (gridDataList == null || gridDataList.isEmpty()) {
+            GridData gridData = new GridData();
+            gridData.setStart(sDate.getTime());
+            gridData.setStop(eDate.getTime());
+            gridData.setFrequence(eDate.getTime() - sDate.getTime());
+            return new ArrayList<>(Arrays.asList(gridData));
+        }
+        long start = sDate.getTime();
+        long stop = eDate.getTime();
+        List<GridData> ret = new ArrayList<>();
+        //checking first element
+        for (GridData gridData : gridDataList) {
+            if (start < gridData.getStart()) {
+                GridData gridData1 = new GridData();
+                gridData1.setPointTime(new Date(start));
+                gridData1.setStart(start);
+                gridData1.setStop(gridData.getStart());
+                gridData1.setFrequence(gridData1.getStart() - gridData1.getStart());
+                gridData1.setLocationId(locationId);
+                gridData1.setMarket(gridData.getMarket());
+                gridData1.setVersion(gridData.getVersion());
+                ret.add(gridData1);
+            }
+            start = gridData.getStop();
+            ret.add(gridData);
+        }
+
+        if (start < stop) {
+            GridData gridData1 = new GridData();
+            gridData1.setPointTime(new Date(start));
+            gridData1.setStart(start);
+            gridData1.setStop(stop);
+            gridData1.setFrequence(gridData1.getStart() - gridData1.getStart());
+            gridData1.setLocationId(locationId);
+            ret.add(gridData1);
+        }
+
+        return ret;
+    }
 
 }
