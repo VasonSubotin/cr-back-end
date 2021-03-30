@@ -280,10 +280,10 @@ public abstract class AbstractOptimizationService implements OptimizationService
         if (a == b) {
             return 0;
         }
-        if (a == null) {
+        if (a == null || a.getValue() == null) {
             return -1;
         }
-        if (b == null) {
+        if (b == null || b.getValue() == null) {
             return 1;
         }
         if (a.getValue() == b.getValue()) {
