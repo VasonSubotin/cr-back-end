@@ -211,8 +211,8 @@ public class EcoServiceImpl implements EcoService {
         List<EventInterval> ret = new ArrayList<>();
         for (SmDREvent smDREvent : result) {
             EventInterval eventInterval = new EventInterval();
-            eventInterval.setStart(StringDateUtil.setTimeFromMinutesOfDay(new Date(), smDREvent.getStart()).getTime());
-            eventInterval.setStop(StringDateUtil.setTimeFromMinutesOfDay(new Date(), smDREvent.getStop()).getTime());
+            eventInterval.setStart(StringDateUtil.setTimeFromMinutesOfDay(new Date(), smDREvent.getStart(), smDREvent.getTimeZoneIndex()).getTime());
+            eventInterval.setStop(StringDateUtil.setTimeFromMinutesOfDay(new Date(), smDREvent.getStop(), smDREvent.getTimeZoneIndex()).getTime());
             eventInterval.setDuration(eventInterval.getStop() - eventInterval.getStart());
             ret.add(eventInterval);
         }
@@ -231,8 +231,8 @@ public class EcoServiceImpl implements EcoService {
                 //fixing date
                 for (EventInterval r : retA) {
                     EventInterval eventInterval = new EventInterval();
-                    eventInterval.setStart(StringDateUtil.setDateFrom(new Date(startTime), new Date(r.getStart())).getTime());
-                    eventInterval.setStop(StringDateUtil.setDateFrom(new Date(startTime), new Date(r.getStop())).getTime());
+                    eventInterval.setStart(StringDateUtil.setDateFrom(new Date(startTime), new Date(r.getStart()), null).getTime());
+                    eventInterval.setStop(StringDateUtil.setDateFrom(new Date(startTime), new Date(r.getStop()), null).getTime());
                     eventInterval.setDuration(r.getDuration());
                     ret.add(eventInterval);
                 }

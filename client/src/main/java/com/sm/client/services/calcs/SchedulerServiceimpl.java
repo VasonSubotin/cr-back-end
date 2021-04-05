@@ -139,7 +139,7 @@ public class SchedulerServiceimpl implements SchedulerService {
         Date endTime = null;
 
         if (smResource.getnChargeByTime() != null) {
-            endTime = StringDateUtil.setTimeFromMinutesOfDay(startTime, smResource.getnChargeByTime());
+            endTime = StringDateUtil.setTimeFromMinutesOfDay(startTime, smResource.getnChargeByTime(), smResource.getTimeZoneIndex());
             if (endTime.before(startTime)) {
                 endTime = new Date(endTime.getTime() + StringDateUtil.DAY_IN_MILLS);
             }
@@ -189,7 +189,7 @@ public class SchedulerServiceimpl implements SchedulerService {
         for (SmSchedules smSchedules : schedules) {
             SchedulerData schedulerData = scheduleTransformService.smSchedulesToScheduleWeb(smSchedules);
             SmResource smResource = resourceMap.get(smSchedules.getResourceId());
-            if(smResource!=null){
+            if (smResource != null) {
                 schedulerData.setModel(smResource.getModel());
                 schedulerData.setVendor(smResource.getVendor());
             }

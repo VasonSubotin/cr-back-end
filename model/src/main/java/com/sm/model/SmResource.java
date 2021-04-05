@@ -48,6 +48,9 @@ public class SmResource implements Serializable {
     @Column(name = "N_CHARGE_BY_TIME")
     private Long nChargeByTime;
 
+    @Column(name = "V_TZ_INDEX")
+    private String timeZoneIndex;
+
     @Column(name = "DT_UPDATED")
     private Date dtUpdated;
 
@@ -142,6 +145,14 @@ public class SmResource implements Serializable {
 
     public void setCapacity(Long capacity) {
         this.capacity = capacity;
+    }
+
+    public String getTimeZoneIndex() {
+        return timeZoneIndex;
+    }
+
+    public void setTimeZoneIndex(String timeZoneIndex) {
+        this.timeZoneIndex = timeZoneIndex;
     }
 
     public Date getDtUpdated() {

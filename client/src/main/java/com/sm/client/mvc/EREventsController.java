@@ -5,15 +5,13 @@ import com.sm.client.services.SecurityService;
 import com.sm.dao.DREventsDao;
 import com.sm.model.SmDREvent;
 import com.sm.model.SmException;
+import com.sm.model.SmResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -41,4 +39,15 @@ public class EREventsController {
         return drEventService.getDREventsByResourceId(resourceId);
     }
 
+    @RequestMapping(value = "/allDREvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public void saveDREvents(HttpServletRequest request, @RequestBody List<SmDREvent> smDREvents) throws Exception {
+        //return  drEventsDao.getDREventsByResourceId(securityService.getAccount().getIdAccount());
+        drEventsDao.saveOrUpdateDREvents(smDREvents);
+    }
+
+    @RequestMapping(value = "/DREvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public void saveDREvent(HttpServletRequest request, @RequestBody SmDREvent smDREvent) throws Exception {
+        //return  drEventsDao.getDREventsByResourceId(securityService.getAccount().getIdAccount());
+        drEventsDao.saveOrUpdateDREvent(smDREvent);
+    }
 }

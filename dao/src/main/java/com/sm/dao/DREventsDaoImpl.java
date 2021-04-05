@@ -1,6 +1,7 @@
 package com.sm.dao;
 
 import com.sm.model.Constants;
+import com.sm.model.SmAccount;
 import com.sm.model.SmDREvent;
 import com.sm.model.SmTimeOfUsage;
 import org.hibernate.Session;
@@ -42,4 +43,18 @@ public class DREventsDaoImpl implements DREventsDao {
 
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public SmDREvent saveOrUpdateDREvent(SmDREvent smDREvent) {
+        sessionFactory.getCurrentSession().saveOrUpdate(smDREvent);
+        return smDREvent;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void saveOrUpdateDREvents(List<SmDREvent> smDREvents) {
+        for(SmDREvent smDREvent:smDREvents){
+            sessionFactory.getCurrentSession().saveOrUpdate(smDREvent);
+        }
+    }
 }

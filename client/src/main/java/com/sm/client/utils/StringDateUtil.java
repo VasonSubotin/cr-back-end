@@ -1,5 +1,7 @@
 package com.sm.client.utils;
 
+import com.sm.model.TZone;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -48,20 +50,21 @@ public class StringDateUtil {
         return new Date(LocalDate.now().plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
     }
 
-    public static Date setDateFrom(Date daysFromDate, Date daysToDate) {
+    public static Date setDateFrom(Date daysFromDate, Date daysToDate, TimeZone timeZone) {
+        timeZone = timeZone != null ? timeZone : TimeZone.getDefault();
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(daysFromDate.getTime());
-
+        calendar.setTimeZone(timeZone);
         Calendar calendarTo = Calendar.getInstance();
         calendarTo.setTimeInMillis(daysToDate.getTime());
-
+        calendarTo.setTimeZone(timeZone);
         calendarTo.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
 
         return new Date(calendarTo.getTimeInMillis());
     }
 
-    public static Date setTimeFromMinutesOfDay(Date daysFromDate, long minutesFromTheBeginingOfDay) {
-        return setDateFrom(daysFromDate, new Date(minutesFromTheBeginingOfDay * 60000-TimeZone.getDefault().getRawOffset()));
+    public static Date setTimeFromMinutesOfDay(Date daysFromDate, long minutesFromTheBeginingOfDay, String timeZoneIndex) {
+        return setDateFrom(daysFromDate, new Date(minutesFromTheBeginingOfDay * 60000), TZone.getTimeZoneByIndex(timeZoneIndex));
     }
 }
 

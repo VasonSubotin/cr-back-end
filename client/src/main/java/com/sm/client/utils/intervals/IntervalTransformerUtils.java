@@ -19,7 +19,7 @@ public class IntervalTransformerUtils {
 
     public static List<Interval> drEventToIntervals(SmDREvent drEvent, Date relativeDate) {
         List<Interval> ret = new ArrayList<>();
-        long start = StringDateUtil.setTimeFromMinutesOfDay(relativeDate, drEvent.getStart()).getTime();
+        long start = StringDateUtil.setTimeFromMinutesOfDay(relativeDate, drEvent.getStart(), drEvent.getTimeZoneIndex()).getTime();
         long stop = 0;
         if (drEvent.getStart() > drEvent.getStop()) {
             stop = start + (24 * 60 + drEvent.getStop() - drEvent.getStart()) * 60_000;
@@ -46,7 +46,7 @@ public class IntervalTransformerUtils {
             return Arrays.asList();
         }
         List<Interval> ret = new ArrayList<>();
-        long start = StringDateUtil.setTimeFromMinutesOfDay(relativeDate, smTimeOfUsage.getStart()).getTime();
+        long start = StringDateUtil.setTimeFromMinutesOfDay(relativeDate, smTimeOfUsage.getStart(), smTimeOfUsage.getTimeZoneIndex()).getTime();
         long stop = 0;
         if (smTimeOfUsage.getStart() > smTimeOfUsage.getStop()) {
             stop = start + (24 * 60 + smTimeOfUsage.getStop() - smTimeOfUsage.getStart()) * 60_000;
