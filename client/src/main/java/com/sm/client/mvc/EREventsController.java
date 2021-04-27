@@ -50,4 +50,17 @@ public class EREventsController {
         //return  drEventsDao.getDREventsByResourceId(securityService.getAccount().getIdAccount());
         drEventsDao.saveOrUpdateDREvent(smDREvent);
     }
+
+
+    @RequestMapping(value = "/resources/{resource_id}/DREvents", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<SmDREvent> updateDREvents(HttpServletRequest request, @PathVariable("resource_id") Long resourceId, @RequestBody List<SmDREvent> smDREvents) throws Exception {
+        //return  drEventsDao.getDREventsByResourceId(securityService.getAccount().getIdAccount());
+       return drEventService.updateDREventsByResourceId(resourceId, smDREvents);
+    }
+
+    @RequestMapping(value = "/resources/{resource_id}/DREvents", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<SmDREvent> deleteDREvents(HttpServletRequest request, @PathVariable("resource_id") Long resourceId, @RequestBody List<SmDREvent> smDREvents) throws Exception {
+        //return  drEventsDao.getDREventsByResourceId(securityService.getAccount().getIdAccount());
+        return drEventService.updateDREventsByResourceId(resourceId, smDREvents);
+    }
 }
