@@ -16,4 +16,7 @@ public interface DREventsDao {
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     void saveOrUpdateDREvents(List<SmDREvent> smDREvents);
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    void deleteOrUpdateDREvents(Long resourceId);
 }

@@ -57,4 +57,16 @@ public class DREventsDaoImpl implements DREventsDao {
             sessionFactory.getCurrentSession().saveOrUpdate(smDREvent);
         }
     }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void deleteOrUpdateDREvents(Long resourceId) {
+
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "delete FROM SmDREvent where resourceId=:resourceId";
+        Query query = session.createQuery(hql);
+        query.setParameter("resourceId", resourceId);
+        query.executeUpdate();
+
+    }
 }
