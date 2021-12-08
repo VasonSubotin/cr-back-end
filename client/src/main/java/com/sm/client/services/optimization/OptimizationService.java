@@ -4,6 +4,7 @@ import com.sm.model.PolicyType;
 import com.sm.client.model.smartcar.SchedulerData;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 public interface OptimizationService {
 
@@ -13,6 +14,7 @@ public interface OptimizationService {
                            long chargeLevelInWt,
                            long rateInWt,
                            String locationId,
+                           TimeZone timeZone,
                            Long resourceId) throws Exception;
 
     PolicyType getPolicy();

@@ -4,4 +4,5 @@ include 'client'
 include 'model'
 include 'dao'
 include 'mavlink'
+include 'timezone'
 

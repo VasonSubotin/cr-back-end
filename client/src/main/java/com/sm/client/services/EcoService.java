@@ -10,6 +10,7 @@ import com.sm.model.SmException;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public interface EcoService {
     List<ForecastData> getEcoForecast(
@@ -25,7 +26,7 @@ public interface EcoService {
                               String moerversion,
                               String style) throws Exception;
 
-    List<EventInterval> getEventInterval(Long resourceId) throws SmException;
+    List<EventInterval> getEventInterval(Long resourceId, TimeZone timeZone) throws SmException;
 
     List<EventInterval> getEventIntervalMock(Date start, Date stop);
 

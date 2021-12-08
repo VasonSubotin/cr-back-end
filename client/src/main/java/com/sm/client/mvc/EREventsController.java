@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class EREventsController {
@@ -42,7 +43,14 @@ public class EREventsController {
     @RequestMapping(value = "/allDREvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public void saveDREvents(HttpServletRequest request, @RequestBody List<SmDREvent> smDREvents) throws Exception {
         //return  drEventsDao.getDREventsByResourceId(securityService.getAccount().getIdAccount());
-        drEventsDao.saveOrUpdateDREvents(smDREvents);
+        //removing all drEvents for that resources
+        smDREvents.stream().map(SmDREvent::getResourceId).forEach(a -> {
+            drEventsDao.deleteOrUpdateDREvents(a);
+        });
+        //hack for empty events
+        if (smDREvents.size() > 1 || (smDREvents.size() == 1 && !smDREvents.get(0).getStop().equals(smDREvents.get(0).getStart()))) {
+            drEventsDao.saveOrUpdateDREvents(smDREvents);
+        }
     }
 
     @RequestMapping(value = "/DREvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -55,7 +63,7 @@ public class EREventsController {
     @RequestMapping(value = "/resources/{resource_id}/DREvents", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<SmDREvent> updateDREvents(HttpServletRequest request, @PathVariable("resource_id") Long resourceId, @RequestBody List<SmDREvent> smDREvents) throws Exception {
         //return  drEventsDao.getDREventsByResourceId(securityService.getAccount().getIdAccount());
-       return drEventService.updateDREventsByResourceId(resourceId, smDREvents);
+        return drEventService.updateDREventsByResourceId(resourceId, smDREvents);
     }
 
     @RequestMapping(value = "/resources/{resource_id}/DREvents", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)

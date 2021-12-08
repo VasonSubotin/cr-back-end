@@ -24,8 +24,8 @@ public class SmDREvent {
     @Column(name = "N_STOP")
     private Long stop; // time im mins from the beginning of day
 
-    @Column(name = "V_TZ_INDEX")
-    private String timeZoneIndex;
+//    @Column(name = "V_TZ_INDEX")
+//    private String timeZoneIndex;
 
     @Column(name = "DT_CREATED")
     private Date dtCreated;
@@ -81,13 +81,13 @@ public class SmDREvent {
         this.dtCreated = dtCreated;
     }
 
-    public String getTimeZoneIndex() {
-        return timeZoneIndex;
-    }
-
-    public void setTimeZoneIndex(String timeZoneIndex) {
-        this.timeZoneIndex = timeZoneIndex;
-    }
+//    public String getTimeZoneIndex() {
+//        return timeZoneIndex;
+//    }
+//
+//    public void setTimeZoneIndex(String timeZoneIndex) {
+//        this.timeZoneIndex = timeZoneIndex;
+//    }
 
     public Boolean getDeleted() {
         return deleted;

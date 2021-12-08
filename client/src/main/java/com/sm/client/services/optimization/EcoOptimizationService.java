@@ -12,9 +12,9 @@ import java.util.*;
 public class EcoOptimizationService extends AbstractOptimizationService {
 
     @Override
-    public SchedulerData optimize(Date start, Date stop, long capacityInWt, long chargeLevelInWt, long rateInWt, String locationId, Long recourceId) throws Exception {
+    public SchedulerData optimize(Date start, Date stop, long capacityInWt, long chargeLevelInWt, long rateInWt, String locationId, TimeZone timeZone, Long recourceId) throws Exception {
 
-        Pair<List<GridData>, List<GridData>> p = getData(start, stop, locationId, recourceId);
+        Pair<List<GridData>, List<GridData>> p = getData(start, stop, locationId, recourceId, timeZone);
         List<GridData> co2DataList = p.getValue();
 
         List<GridData> co2DataListSorted = new ArrayList<>(co2DataList);

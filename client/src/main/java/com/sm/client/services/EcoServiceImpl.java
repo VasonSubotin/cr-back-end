@@ -177,7 +177,7 @@ public class EcoServiceImpl implements EcoService {
         }
         if (endTime != null) {
             // we will do request for the 7 days back
-            Date stop = new Date(endTime.getTime() - 7 * Constants.DAYS_LENGTH_IN_MILLS);
+            Date stop = new Date(endTime.getTime() - 7 * Constants.DAYS_LENGTH_IN_MILLS + 360_000L);
             builder.queryParam("endtime", sdf.format(stop));
         }
         if (moerversion != null) {
@@ -205,17 +205,23 @@ public class EcoServiceImpl implements EcoService {
     }
 
     @Override
-    public List<EventInterval> getEventInterval(Long resourceId) throws SmException {
+    public List<EventInterval> getEventInterval(Long resourceId, TimeZone timeZone) throws SmException {
         List<SmDREvent> result = drEventService.getDREventsByResourceId(resourceId);
 
         List<EventInterval> ret = new ArrayList<>();
         for (SmDREvent smDREvent : result) {
             EventInterval eventInterval = new EventInterval();
-            eventInterval.setStart(StringDateUtil.setTimeFromMinutesOfDay(new Date(), smDREvent.getStart(), smDREvent.getTimeZoneIndex()).getTime());
-            eventInterval.setStop(StringDateUtil.setTimeFromMinutesOfDay(new Date(), smDREvent.getStop(), smDREvent.getTimeZoneIndex()).getTime());
+            eventInterval.setStart(StringDateUtil.setTimeFromMinutesOfDay(new Date(), smDREvent.getStart(), timeZone).getTime());
+            eventInterval.setStop(StringDateUtil.setTimeFromMinutesOfDay(new Date(), smDREvent.getStop(), timeZone).getTime());
             eventInterval.setDuration(eventInterval.getStop() - eventInterval.getStart());
             ret.add(eventInterval);
         }
+        ret.sort(new Comparator<EventInterval>() {
+            @Override
+            public int compare(EventInterval o1, EventInterval o2) {
+                return o1.getStart() - o2.getStart() > 0 ? 1 : o1.getStart() - o2.getStart() == 0 ? 0 : -1;
+            }
+        });
         return ret;
     }
 

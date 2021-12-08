@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @Service("SimpleOptimizationService")
 public class SimpleOptimizationService extends AbstractOptimizationService {
@@ -20,8 +21,9 @@ public class SimpleOptimizationService extends AbstractOptimizationService {
                                   long chargeLevelInWt,
                                   long rateInWt,
                                   String locationId,
+                                  TimeZone timeZone,
                                   Long resourceId) throws Exception {
-        Pair<List<GridData>, List<GridData>> p = getData(start, stop, locationId, resourceId);
+        Pair<List<GridData>, List<GridData>> p = getData(start, stop, locationId, resourceId, timeZone);
         List<GridData> co2DataList = p.getValue();
         //calculating time
         long timeInMinsNeed = (60 * (capacityInWt - chargeLevelInWt)) / rateInWt;

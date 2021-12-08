@@ -9,17 +9,17 @@ import java.util.*;
 
 public class IntervalTransformerUtils {
 
-    public static List<Interval> drEventsToIntervals(List<SmDREvent> drEvents, Date relativeDate) {
-        List<Interval> ret = new ArrayList<>();
-        for (SmDREvent drEvent : drEvents) {
-            ret.addAll(drEventToIntervals(drEvent, relativeDate));
-        }
-        return ret;
-    }
+//    public static List<Interval> drEventsToIntervals(List<SmDREvent> drEvents, Date relativeDate) {
+//        List<Interval> ret = new ArrayList<>();
+//        for (SmDREvent drEvent : drEvents) {
+//            ret.addAll(drEventToIntervals(drEvent, relativeDate));
+//        }
+//        return ret;
+//    }
 
-    public static List<Interval> drEventToIntervals(SmDREvent drEvent, Date relativeDate) {
+    public static List<Interval> drEventToIntervals(SmDREvent drEvent, Date relativeDate, TimeZone timezone) {
         List<Interval> ret = new ArrayList<>();
-        long start = StringDateUtil.setTimeFromMinutesOfDay(relativeDate, drEvent.getStart(), drEvent.getTimeZoneIndex()).getTime();
+        long start = StringDateUtil.setTimeFromMinutesOfDay(relativeDate, drEvent.getStart(), timezone).getTime();
         long stop = 0;
         if (drEvent.getStart() > drEvent.getStop()) {
             stop = start + (24 * 60 + drEvent.getStop() - drEvent.getStart()) * 60_000;
@@ -33,20 +33,20 @@ public class IntervalTransformerUtils {
         return ret;
     }
 
-    public static List<Interval> tousToIntervals(List<SmTimeOfUsage> tous, Date relativeDate) {
-        List<Interval> ret = new ArrayList<>();
-        for (SmTimeOfUsage tou : tous) {
-            ret.addAll(touToIntervals(tou, relativeDate));
-        }
-        return ret;
-    }
+//    public static List<Interval> tousToIntervals(List<SmTimeOfUsage> tous, Date relativeDate) {
+//        List<Interval> ret = new ArrayList<>();
+//        for (SmTimeOfUsage tou : tous) {
+//            ret.addAll(touToIntervals(tou, relativeDate));
+//        }
+//        return ret;
+//    }
 
-    public static List<Interval> touToIntervals(SmTimeOfUsage smTimeOfUsage, Date relativeDate) {
+    public static List<Interval> touToIntervals(SmTimeOfUsage smTimeOfUsage, Date relativeDate, TimeZone timeZone) {
         if (smTimeOfUsage == null) {
             return Arrays.asList();
         }
         List<Interval> ret = new ArrayList<>();
-        long start = StringDateUtil.setTimeFromMinutesOfDay(relativeDate, smTimeOfUsage.getStart(), smTimeOfUsage.getTimeZoneIndex()).getTime();
+        long start = StringDateUtil.setTimeFromMinutesOfDay(relativeDate, smTimeOfUsage.getStart(), timeZone).getTime();
         long stop = 0;
         if (smTimeOfUsage.getStart() > smTimeOfUsage.getStop()) {
             stop = start + (24 * 60 + smTimeOfUsage.getStop() - smTimeOfUsage.getStart()) * 60_000;

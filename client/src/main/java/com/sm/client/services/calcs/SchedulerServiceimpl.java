@@ -2,10 +2,7 @@ package com.sm.client.services.calcs;
 
 import com.sm.client.model.smartcar.SchedulerData;
 import com.sm.client.model.smartcar.VehicleData;
-import com.sm.client.services.GoogleService;
-import com.sm.client.services.ScheduleTransformService;
-import com.sm.client.services.SecurityService;
-import com.sm.client.services.SmartCarService;
+import com.sm.client.services.*;
 import com.sm.client.services.cache.SmartCarCacheService;
 import com.sm.client.utils.StringDateUtil;
 import com.sm.dao.ResourcesDao;
@@ -19,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +26,9 @@ public class SchedulerServiceimpl implements SchedulerService {
 
 //    @Autowired
 //    private SmartCarService smartCarService;
+
+    @Autowired
+    private TimeZoneServiceImpl timeZoneService;
 
     @Autowired
     private SmartCarCacheService smartCarCacheService;
@@ -139,7 +136,7 @@ public class SchedulerServiceimpl implements SchedulerService {
         Date endTime = null;
 
         if (smResource.getnChargeByTime() != null) {
-            endTime = StringDateUtil.setTimeFromMinutesOfDay(startTime, smResource.getnChargeByTime(), smResource.getTimeZoneIndex());
+            endTime = StringDateUtil.setTimeFromMinutesOfDay(startTime, smResource.getnChargeByTime(), timeZoneService.getTimeZone(smData));
             if (endTime.before(startTime)) {
                 endTime = new Date(endTime.getTime() + StringDateUtil.DAY_IN_MILLS);
             }

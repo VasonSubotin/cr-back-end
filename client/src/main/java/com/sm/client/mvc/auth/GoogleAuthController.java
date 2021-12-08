@@ -50,7 +50,8 @@ public class GoogleAuthController {
                                          HttpServletResponse response,
                                          @RequestParam(name = "redirect", required = false) String redirect) throws Exception {
         logger.info("----------------------call/googleLogin -------------------");
-        return googleService.redirectToGoogle(redirect);
+        //return googleService.redirectToGoogle(redirect);
+        return googleService.redirectToGoogleRenew(redirect);
     }
 
     @RequestMapping(value = "/googleToken", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

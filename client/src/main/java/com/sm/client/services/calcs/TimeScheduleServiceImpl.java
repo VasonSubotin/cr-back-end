@@ -9,6 +9,7 @@ import com.sm.client.model.smartcar.VehicleData;
 import com.sm.client.services.EcoService;
 import com.sm.client.services.ScheduleTransformService;
 import com.sm.client.services.SecurityService;
+import com.sm.client.services.TimeZoneServiceImpl;
 import com.sm.client.services.optimization.OptimizationServiceFactory;
 import com.sm.dao.LocationDao;
 import com.sm.dao.ScheduleDao;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @Service
 public class TimeScheduleServiceImpl implements TimeScheduleService {
@@ -35,6 +37,8 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
     @Autowired
     private EcoService ecoService;
 
+    @Autowired
+    private TimeZoneServiceImpl timeZoneService;
 
     @Autowired
     private SecurityService securityService;
@@ -75,6 +79,7 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
                 (long) (smResource.getCapacity().doubleValue() * smData.getBattery().getPercentRemaining()),
                 rate,
                 locationAbrv,
+                timeZoneService.getTimeZone(smData),
                 smResource.getIdResource());
         schedulerData.setAccountId(smResource.getAccountId());
         schedulerData.setResourceId(smResource.getIdResource());
@@ -101,6 +106,10 @@ public class TimeScheduleServiceImpl implements TimeScheduleService {
 
     public void setOptimizationServiceFactory(OptimizationServiceFactory optimizationServiceFactory) {
         this.optimizationServiceFactory = optimizationServiceFactory;
+    }
+
+    public void setTimeZoneService(TimeZoneServiceImpl timeZoneService) {
+        this.timeZoneService = timeZoneService;
     }
 
     public void setEcoService(EcoService ecoService) {

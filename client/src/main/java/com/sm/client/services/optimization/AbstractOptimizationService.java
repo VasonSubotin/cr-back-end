@@ -48,19 +48,20 @@ public abstract class AbstractOptimizationService implements OptimizationService
     protected Pair<List<GridData>, List<GridData>> getData(Date start,
                                                            Date stop,
                                                            String locationId,
-                                                           Long resourceId) throws Exception {
-        List<GridData> co2DataList = ecoService.getEcoData(locationId, null, null, start, stop, null, STYLE);
+                                                           Long resourceId,
+                                                           TimeZone timeZone) throws Exception {
+        List<GridData> co2EcoDataList = ecoService.getEcoData(locationId, null, null, start, stop, null, STYLE);
 
-        if (co2DataList == null || co2DataList.isEmpty()) {
+        if (co2EcoDataList == null || co2EcoDataList.isEmpty()) {
             logger.error("No grid data found for the specified time range {} - {} and location {}", start, stop, locationId);
             throw new Exception("No grid data found for the specified time range " + start + " - " + stop + " and location " + locationId);
         }
-        co2DataList = normalizeGrid(start, stop, co2DataList, locationId);
+        List<GridData> co2DataList = normalizeGrid(start, stop, co2EcoDataList, locationId);
 
-        List<GridData> co2DataListOriginal = cloneGridData(co2DataList);
+        List<GridData> co2DataListOriginal = cloneGridData(co2EcoDataList);
         SmTimeOfUsage timeOfUsage = timeOfUsageService.getTimeOfUsageByResourceId(resourceId);
-        if (timeOfUsage != null) {
-            List<Interval> tousInterval = IntervalTransformerUtils.touToIntervals(timeOfUsage, start);
+        if (timeOfUsage != null && timeOfUsage.getActive() != null && timeOfUsage.getActive()) {
+            List<Interval> tousInterval = IntervalTransformerUtils.touToIntervals(timeOfUsage, start, timeZone);
             if (tousInterval != null && !tousInterval.isEmpty()) {
                 List<Interval> gridsInterval = IntervalTransformerUtils.gridDataListToIntervals(co2DataList);
                 // applying tous
@@ -174,27 +175,43 @@ public abstract class AbstractOptimizationService implements OptimizationService
         EventInterval eventInterval = events.get(currentEvent);
 
         //building tree for comparation;
-        for (GridData grd : gridDataList) {
+        for (int i = 0; i < gridDataList.size(); i++) {
+            GridData grd = gridDataList.get(i);
             if (events.size() > currentEvent) {
-                if (eventInterval.getStart() < grd.getStart() && grd.getStop() < eventInterval.getStop()) {
+                if (eventInterval.getStart() <= grd.getStart() && grd.getStop() <= eventInterval.getStop()) {
                     //ignoring elements inside of interval
                     continue;
                 }
+                if (grd.getStart() <= eventInterval.getStart() && eventInterval.getStop() <= grd.getStop()) {
+                    //we need to split interval into 2
+                    GridData first = cloneGridData(grd);
+                    first.setStop(eventInterval.getStart());
+                    gridDataListOut.add(first);
+                    grd.setStart(eventInterval.getStop());
+                    gridDataListOut.add(grd);
+                    currentEvent++;
+                    if (events.size() > currentEvent) {
+                        eventInterval = events.get(currentEvent);
+                        i--;
+                    }
+                    continue;
+                }
 
-                if (grd.getStart() < eventInterval.getStart() && eventInterval.getStart() < grd.getStop()) {
+                if (grd.getStart() <= eventInterval.getStart() && eventInterval.getStart() <= grd.getStop()) {
                     //cross beginning , need to split
                     grd.setStop(eventInterval.getStart());
                 }
 
-                if (grd.getStart() < eventInterval.getStop() && eventInterval.getStop() < grd.getStop()) {
+                if (grd.getStart() <= eventInterval.getStop() && eventInterval.getStop() <= grd.getStop()) {
                     //cross ending , need to split
-                    grd.setStart(eventInterval.getStart());
+                    grd.setStart(eventInterval.getStop());
                 }
 
-                if (eventInterval.getStop() < grd.getStop()) {
+                if (eventInterval.getStop() <= grd.getStop()) {
                     currentEvent++;
                     if (events.size() > currentEvent) {
                         eventInterval = events.get(currentEvent);
+                        i--;
                     }
                 }
 
@@ -312,8 +329,12 @@ public abstract class AbstractOptimizationService implements OptimizationService
         long start = sDate.getTime();
         long stop = eDate.getTime();
         List<GridData> ret = new ArrayList<>();
+        Double lastValue = null;
         //checking first element
         for (GridData gridData : gridDataList) {
+            if (gridData.getStart() > stop) {
+                continue;
+            }
             if (start < gridData.getStart()) {
                 GridData gridData1 = new GridData();
                 gridData1.setPointTime(new Date(start));
@@ -323,9 +344,12 @@ public abstract class AbstractOptimizationService implements OptimizationService
                 gridData1.setLocationId(locationId);
                 gridData1.setMarket(gridData.getMarket());
                 gridData1.setVersion(gridData.getVersion());
+                gridData1.setValue(gridData.getValue());
+                gridData1.setDatatype(gridData.getDatatype());
                 ret.add(gridData1);
             }
             start = gridData.getStop();
+            lastValue = gridData.getValue();
             ret.add(gridData);
         }
 
@@ -336,6 +360,7 @@ public abstract class AbstractOptimizationService implements OptimizationService
             gridData1.setStop(stop);
             gridData1.setFrequence(gridData1.getStart() - gridData1.getStart());
             gridData1.setLocationId(locationId);
+            gridData1.setValue(lastValue);
             ret.add(gridData1);
         }
 

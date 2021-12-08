@@ -25,9 +25,6 @@ public class SmTimeOfUsage implements Serializable {
     @Column(name = "N_STOP")
     private Long stop; // in minutes
 
-    @Column(name = "V_TZ_INDEX")
-    private String timeZoneIndex;
-
     @Column(name = "DT_CREATED")
     private Date dtCreated;
 
@@ -67,14 +64,6 @@ public class SmTimeOfUsage implements Serializable {
 
     public void setDtCreated(Date dtCreated) {
         this.dtCreated = dtCreated;
-    }
-
-    public String getTimeZoneIndex() {
-        return timeZoneIndex;
-    }
-
-    public void setTimeZoneIndex(String timeZoneIndex) {
-        this.timeZoneIndex = timeZoneIndex;
     }
 
     public Boolean getDeleted() {

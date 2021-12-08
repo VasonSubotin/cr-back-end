@@ -87,9 +87,9 @@ public class DREventServiceImpl implements DREventService {
         if (smDREventToUpdate.getLocationId() != null) {
             smDREventExists.setLocationId(smDREventToUpdate.getLocationId());
         }
-        if (smDREventToUpdate.getTimeZoneIndex() != null) {
-            smDREventExists.setTimeZoneIndex(smDREventToUpdate.getTimeZoneIndex());
-        }
+//        if (smDREventToUpdate.getTimeZoneIndex() != null) {
+//            smDREventExists.setTimeZoneIndex(smDREventToUpdate.getTimeZoneIndex());
+//        }
         return smDREventExists;
     }
 }

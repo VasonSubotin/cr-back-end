@@ -63,8 +63,8 @@ public class StringDateUtil {
         return new Date(calendarTo.getTimeInMillis());
     }
 
-    public static Date setTimeFromMinutesOfDay(Date daysFromDate, long minutesFromTheBeginingOfDay, String timeZoneIndex) {
-        return setDateFrom(daysFromDate, new Date(minutesFromTheBeginingOfDay * 60000), TZone.getTimeZoneByIndex(timeZoneIndex));
+    public static Date setTimeFromMinutesOfDay(Date daysFromDate, long minutesFromTheBeginingOfDay, TimeZone timeZone) {
+        return setDateFrom(daysFromDate, new Date(minutesFromTheBeginingOfDay * 60000), timeZone);
     }
 }
 

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @Service("PriceOptimizationService")
 public class PriceOptimizationService extends SimpleOptimizationService {
@@ -16,11 +17,12 @@ public class PriceOptimizationService extends SimpleOptimizationService {
     protected Pair<List<GridData>, List<GridData>> getData(Date start,
                                                            Date stop,
                                                            String locationId,
-                                                           Long resourceId) throws Exception {
-        Pair<List<GridData>, List<GridData>> p = super.getData(start, stop, locationId, resourceId);
+                                                           Long resourceId,
+                                                           TimeZone timeZone) throws Exception {
+        Pair<List<GridData>, List<GridData>> p = super.getData(start, stop, locationId, resourceId, timeZone);
 
         List<GridData> co2DataList = p.getValue();
-        co2DataList = applyEvents(ecoService.getEventInterval(resourceId), co2DataList);
+        co2DataList = applyEvents(ecoService.getEventInterval(resourceId, timeZone), co2DataList);
         return new Pair(p.getKey(), co2DataList);
     }
 

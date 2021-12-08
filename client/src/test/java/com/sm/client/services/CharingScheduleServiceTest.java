@@ -42,6 +42,7 @@ public class CharingScheduleServiceTest {
     TimeScheduleServiceImpl timeScheduleService;
     OptimizationServiceFactory optimizationServiceFactory;
     TimeOfUsageServiceImpl timeOfUsageService;
+    TimeZoneServiceImpl timeZoneService;
 
     EcoServiceImpl ecoService = new EcoServiceImpl();
 
@@ -50,9 +51,9 @@ public class CharingScheduleServiceTest {
         timeScheduleService = new TimeScheduleServiceImpl();
         optimizationServiceFactory = Mockito.mock(OptimizationServiceFactory.class);
         timeScheduleService.setOptimizationServiceFactory(optimizationServiceFactory);
+        timeZoneService = Mockito.mock(TimeZoneServiceImpl.class);
 
-
-
+        timeScheduleService.setTimeZoneService(timeZoneService);
         RestTemplate ecoTemplate = Mockito.mock(RestTemplate.class);
         ResponseEntity responseEntity = Mockito.mock(ResponseEntity.class);
 
@@ -157,7 +158,7 @@ public class CharingScheduleServiceTest {
                 createGridData(sdf.parse("2020-08-26T09:00:00"), 3600, 1D),
                 createGridData(sdf.parse("2020-08-26T10:00:00"), 3600, 2D),
                 createGridData(sdf.parse("2020-08-26T11:00:00"), 3600, 20D),
-                createGridData(sdf.parse("2020-08-26T12:00:00"), 3600*12, 16D)
+                createGridData(sdf.parse("2020-08-26T12:00:00"), 3600 * 12, 16D)
         };
     }
 
